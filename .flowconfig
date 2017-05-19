@@ -7,3 +7,4 @@
 
 [options]
 suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore
+experimental.strict_call_arity=true

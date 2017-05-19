@@ -40,7 +40,7 @@ export function evaluateEquation(
 
 		change *= dir === prevDir ? 1.5 : 1/4
 		params[variableName] += dir * change
-		values = equation.map(tree => evaluate(tree, params, false))
+		values = equation.map(tree => evaluate(tree, params))
 
 		// for irrational results for variableName the 20 digits precision wil cause infinte loop
 		// so the precision gets smaller for too many loops

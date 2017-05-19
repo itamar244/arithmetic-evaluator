@@ -15,3 +15,12 @@ export const max = <T>(arr: T[], method: (T, T) => mixed) => (
 		method(max, cur) ? cur : max
 	))
 )
+
+
+export const joinSets = <T>(...sets: Set<T>[]): Set<T> => {
+	const res = new Set()
+
+	sets.forEach(set => set.forEach(item => res.add(item)))
+
+	return res
+}
