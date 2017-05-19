@@ -1,0 +1,22 @@
+{
+  "name": "arithematic-evaluator",
+  "version": "1.0.0",
+  "description": "receices string and evaluates it for numerical value",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js",
+    "build": "babel src --out-dir=dist"
+  },
+  "author": "Itamar Yatom",
+  "license": "ISC",
+  "dependencies": {
+    "benchmark": "^2.1.4",
+    "flow-bin": "^0.43.1"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0"
+  }
+}
