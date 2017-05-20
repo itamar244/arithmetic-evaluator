@@ -1,6 +1,6 @@
 // @flow
 import type { Tree } from './../parser'
-import { operators } from './../operators'
+import { operators, isOperator } from './../operators'
 import { flatTree } from './helpers'
 import { Node, ArgumentNode }  from './../parser/node'
 
@@ -64,9 +64,10 @@ export function evaluateEquation(
 }
 
 const next = (value, operator, cur) => (
-	operator && operator.type === 'OPERATOR'
-		? operators[operator.value][0](value, cur)
-		: operators['*'][0](value || 1, cur) )
+	operator && operator.type === 'OPERATOR' && isOperator(operator.value)
+		? operators[operator.value](value, cur)
+		: operators['*'](value || 1, cur)
+)
 
 
 export const evaluate = (

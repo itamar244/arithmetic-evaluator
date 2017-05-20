@@ -1,24 +1,22 @@
 // @flow
 import type { Tree } from './../parser'
-import * as t from '../parser/types'
+import * as tt from '../parser/types'
 import { evaluate } from './'
 import { orderPosition } from './../operators'
-import { Node, ArgumentNode }  from './../parser/node'
+import { Node, ArgumentNode, OperatorNode }  from './../parser/node'
 import { max } from '../utils'
 
 const maxOperator = (tree) => {
 	const res = max(
 		tree,
 		(max, node) => (
-			!(max instanceof Node)
-			|| !max.is(t.OPERATOR)
-			|| (node instanceof Node
-				&& node.is(t.OPERATOR)
-				&& orderPosition(node.value) > orderPosition(max.value))
+			!(max instanceof OperatorNode)
+			|| (node instanceof OperatorNode
+				&& node.getOrder() > max.getOrder())
 		)
 	)
 
-	return res instanceof Node && res.is(t.OPERATOR) && res
+	return res instanceof OperatorNode && res
 }
 
 const reduceMatches = (tree) => {
@@ -27,11 +25,11 @@ const reduceMatches = (tree) => {
 	const notPureTree = []
 
 	for (let [i, part] of tree.entries()) {
-		if (part.type !== t.OPERATOR) {
+		if (part.type !== tt.OPERATOR) {
 			// thanks to the fact the tree is reduced already, arrays must contain params
 			const isPure =
 				!(part instanceof Array)
-				&& !part.is(t.PARAM)
+				&& !part.is(tt.PARAM)
 				&& !(part instanceof ArgumentNode && part.hasParams);
 
 			(isPure ?  pureTree : notPureTree)
@@ -45,9 +43,9 @@ const reduceMatches = (tree) => {
 	}
 
 	return (
-		firstNode instanceof Node && !firstNode.is(t.PARAM)
+		firstNode instanceof Node && !firstNode.is(tt.PARAM)
 		? [new Node('NUMBER', evaluate(pureTree)), ...notPureTree]
-		: [...notPureTree, pureTree[0], new Node(t.NUMBER, evaluate(pureTree.slice(1)))]
+		: [...notPureTree, pureTree[0], new Node(tt.NUMBER, evaluate(pureTree.slice(1)))]
 	)
 }
 
@@ -81,7 +79,7 @@ export function flatTree(tree: Tree) {
 			}
 
 		} else {
-			if (part.is('PARAM')) {
+			if (part.is(tt.PARAM)) {
 				hasParam = true
 			} else if (part instanceof ArgumentNode) {
 				if (!hasParam) hasParam = part.hasParams

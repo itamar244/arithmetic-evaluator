@@ -1,8 +1,7 @@
 // @flow
-import * as t from './types'
-import { Node } from './node'
+import * as tt from './types'
+import { Node, OperatorNode } from './node'
 import type { Tree } from './types'
-import { orderPosition } from './../operators'
 import { get } from '../utils'
 
 type ExprssionItem = Node|Expression
@@ -10,7 +9,7 @@ type ExprssionItem = Node|Expression
 export default class Expression {
 	// #private
 	items: ExprssionItem[] = []
-	operators: Node[] = []
+	operators: OperatorNode[] = []
 	lastWrap: number|null = null
 
 	// #public
@@ -24,6 +23,7 @@ export default class Expression {
 	}
 
 	/* checks if operators need to be wrapped by brackets because order of operators */
+	// #private
 	checkOperatorsOrder() {
 		/* if there less than two operators this check is useless
 		 * or if last item is the last operator,
@@ -44,15 +44,15 @@ export default class Expression {
 				const insideLastOp = insideTree.get(-2)
 
 				if (
-					insideLastOp instanceof Node // must be true also
-					&& orderPosition(insideLastOp.value) >= orderPosition(lastOp.value)
+					insideLastOp instanceof OperatorNode // must be true also
+					&& insideLastOp.getOrder() >= lastOp.getOrder()
 				) {
 					insideTree.add(...this.remove(2)[1])
 				}
 			}
 
 		// if needs to be wrapped with brackets
-		} else if (orderPosition(this.getOperator(-2).value) > orderPosition(lastOp.value)) {
+		} else if (this.getOperator(-2).getOrder() > lastOp.getOrder()) {
 			const [items, remove] = this.remove(3)
 
 			// setting lastwrap to current location
@@ -64,11 +64,11 @@ export default class Expression {
 	add(...vals: ExprssionItem[]) {
 		vals.forEach((val) => {
 			if (val instanceof Node) {
-				if (val.is(t.OPERATOR)) {
+				if (val instanceof OperatorNode) {
 					this.operators.push(val)
-				} else if (val.is(t.PARAM)) {
+				} else if (val.is(tt.PARAM)) {
 					this.params.add(val.value)
-				} else if (!this.hasError && val.is(t.ERROR)) {
+				} else if (!this.hasError && val.is(tt.ERROR)) {
 					this.hasError = true
 				}
 			}
@@ -100,7 +100,7 @@ export default class Expression {
 		return get(this.items, i)
 	}
 
-	getOperator(i: number): Node {
+	getOperator(i: number): OperatorNode {
 		return get(this.operators, i)
 	}
 }

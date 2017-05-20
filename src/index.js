@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 	output: process.stdout
 })
 
-async function benchmark<T: *[]>(func: (...T) => mixed, args: T, time = 1000) {
+async function benchmark<T: *[]>(func: (...T) => mixed, args: T = [], time = 1000) {
 	let times = 0
 	let timeSum = 0
 	let start, ret, end
@@ -44,14 +44,16 @@ main(process.argv)
 async function main(args) {
 	let answer = await question('please enter your arithematic expression: ')
 	if (answer) {
+		// console.log(await benchmark(parser.parse, [answer], 2000))
 		const parsedResult = parser.parse(answer)
 
+		console.log(parsedResult.body)
 		if (parsedResult.type === 'EXPRESSION') {
 			do {
 				console.log(evaluate(parsedResult.body, await getParams(parsedResult.params)))
-			} while (parsedResult.params.length > 0 && await question('try again? '))
+			} while (parsedResult.params.size > 0 && await question('try again? '))
 		} else if (parsedResult.type === 'EQUATION') {
-			console.log(evaluateEquation(parsedResult.body, parsedResult.params[0]))
+			console.log(evaluateEquation(parsedResult.body, [...parsedResult.params][0]))
 		} else {
 			console.error(parsedResult.body)
 		}

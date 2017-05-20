@@ -1,10 +1,14 @@
 // @flow
 import type { TreeItemType } from './types'
-import * as t from './types'
+import * as tt from './types'
 import UtilParser  from './util'
 import Expression from './expression'
 import { isNotValidFunction } from './../functions'
-import { Node, ArgumentNode } from './node'
+import {
+	Node,
+	ArgumentNode,
+	OperatorNode,
+} from './node'
 
 export default class Statement extends UtilParser {
 	tree: Expression
@@ -39,48 +43,60 @@ export default class Statement extends UtilParser {
 			return this.getMatch(blob.slice(pos), /^\s+/).length
 		}
 
-		const { type, match } = this.inferTypeAndMatch(blob.slice(pos))
+		const { type, match } = this.inferTypeAndMatch(pos, blob)
 
-		const node1 = tree.get(-1)
 		// if there now operator between two items, than a '*' operator will be added
-		if (type !== t.OPERATOR && node1 instanceof Node && !node1.is(t.OPERATOR)) {
-			tree.add(new Node(t.OPERATOR,'*'))
+		if (
+			type !== tt.OPERATOR
+			// could be bigger than 0, but it doesn't matter so this is faster
+			&& tree.length > 1
+			&& !(tree.get(-1) instanceof OperatorNode)
+		) {
+			tree.add(new OperatorNode(tt.OPERATOR,'*'))
 		}
 
-		tree.add(this.parseMatch(type, match, tree.params))
+		tree.add(this.parseToItem(pos, type, match, tree.params))
 
-		const node2 = tree.get(-2)
 		// if there are two operators near each other
-		if (type === t.OPERATOR && node2 instanceof Node && node2.is(t.OPERATOR)) {
-			tree.add(new Node(t.ERROR, 'two operators can not be near each other'))
-		} else if (type === t.PARAM && !tree.params.has(match)) {
+		if (type === tt.OPERATOR && tree.get(-2) instanceof OperatorNode) {
+			this.unexpected('two operators can not be near each other')
+		} else if (type === tt.PARAM && !tree.params.has(match)) {
 			tree.params.add(match)
 		}
 
-		return tree.get(-1).type === t.ERROR ? 1 : match.length
+		return type === tt.ERROR || tree.get(-1).type === tt.ERROR ? 1 : match.length
 	}
 
-	parseMatch(type: TreeItemType, match: string, params: Set<string>) {
+	parseToItem(pos: number, type: TreeItemType, match: string, params: Set<string>) {
 		switch (type) {
-			case t.OPERATOR:
-			case t.NUMBER:
-			case t.CONSTANT:
-			case t.PARAM:
-			case t.ERROR:
-				return this.parseNoramlNode(type, match)
-			case t.FUNCTION:
+			case tt.OPERATOR:
+				if (pos === 0) {
+					this.unexpected('operator can not be the first item')
+				}
+
+				return this.parseOperatorNode(type, match)
+			case tt.NUMBER:
+			case tt.CONSTANT:
+			case tt.PARAM:
+			case tt.ERROR:
+				return this.parseNode(type, match)
+			case tt.FUNCTION:
 				return this.parseFunction(type, match)
-			case t.ABS_BRACKETS:
+			case tt.ABS_BRACKETS:
 				return this.parseAbsBrackets(type, match)
-			case t.BRACKETS:
+			case tt.BRACKETS:
 				return this.parseBrackets(type, match)
 			default:
 				throw Error(`${type} is not a valid type`)
 		}
 	}
 
-	parseNoramlNode(type: TreeItemType, match: string): Node {
+	parseNode(type: TreeItemType, match: string): Node {
 		return new Node(type, match)
+	}
+
+	parseOperatorNode(type: TreeItemType, match: string) {
+		return new OperatorNode(type, match)
 	}
 
 	parseFunction(type: TreeItemType, match: string): Node {
@@ -94,14 +110,14 @@ export default class Statement extends UtilParser {
 
 		return (
 			isNotValid
-			? new Node(t.ERROR, isNotValid)
+			? new Node(tt.ERROR, isNotValid)
 			: new ArgumentNode(type, name, args)
 		)
 	}
 
 	parseAbsBrackets(type: TreeItemType, match: string): ArgumentNode {
 		return new ArgumentNode(
-			t.FUNCTION,
+			tt.FUNCTION,
 			'abs',
 			// this will auto set params thanks to mutable params usage
 			[this.parse(match.slice(1, match.length - 1), true).toArray()]

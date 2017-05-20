@@ -15,7 +15,7 @@ app.get('/', (req: express$Request, res) => {
 			res.end(result.body)
 			break
 		case 'EQUATION':
-			res.end(evaluateEquation(result.body, result.params[0]).toString())
+			res.end(evaluateEquation(result.body, [...result.params][0]).toString())
 			break
 		case 'EXPRESSION':
 			res.end(evaluate(result.body).toString())

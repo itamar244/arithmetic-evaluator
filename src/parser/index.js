@@ -17,7 +17,7 @@ type Result$Equation = {
 type Result$Expression = {
 	type: 'EXPRESSION',
 	body: Tree,
-	params: string[],
+	params: Set<string>,
 }
 
 type Result$Error = {

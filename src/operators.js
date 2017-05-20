@@ -3,29 +3,29 @@
 	supports functionional wrapper for basic operators of arithematic expressions.
 	@flow
 */
-
+import { has } from './utils'
 
 export const operators: {
-	[key: string]:
-		[(a: number, b?: number) => number, true]
-	    | [(a: number, b: number) => number, false]
+	[key: string]: (number, number) => number
 } = {
-	'+': [(a, b) => typeof b === 'number' ? a + b : +a, true],
-	'-': [(a, b) => typeof b === 'number' ? a - b : -a, true],
-	'*': [(a, b) => a * b, false],
-	'/': [(a, b) => a / b, false],
-	'^': [(a, b) => a ** b, false],
+	'+': (a, b) => typeof b === 'number' ? a + b : +a,
+	'-': (a, b) => typeof b === 'number' ? a - b : -a,
+	'*': (a, b) => a * b,
+	'/': (a, b) => a / b,
+	'^': (a, b) => a ** b,
+	'%': (a, b) => a % b,
 }
 
 // return is a string is one of the valid operators
-export const isOperator = (str: string) => operators.hasOwnProperty(str)
+export const isOperator = (str: string) => has(operators, str)
 
 const orderOfOperators = [
 	['^'],
-	['*', '/'],
+	['*', '/', '%'],
 	['+', '-']
 ]
+
 export const orderPosition = (str: string) => (
-	(orderOfOperators.findIndex(item => item.indexOf(str) > -1) + 1)
+	orderOfOperators.findIndex(item => item.indexOf(str) > -1) + 1
 	|| orderOfOperators.length + 1
 )

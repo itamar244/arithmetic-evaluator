@@ -24,3 +24,7 @@ export const joinSets = <T>(...sets: Set<T>[]): Set<T> => {
 
 	return res
 }
+
+export const has = (obj: mixed, key: string) => (
+	Object.prototype.hasOwnProperty.call(obj, key)
+)

@@ -4,6 +4,7 @@ import type {
 	TreeItemType,
 } from './types'
 import { PARAM } from './types'
+import { orderPosition } from '../operators'
 import typeof Expression from './expression'
 
 export class Node {
@@ -25,22 +26,13 @@ export class Node {
 
 	equals(node: Node|mixed): bool {
 		return (
-			node instanceof Node
-			&& this.type === node.type
-			&& this.value === node.value
-			&& this.args === node.args
+			this === node
+			|| (node instanceof Node
+				&& this.type === node.type
+				&& this.value === node.value
+				&& this.args === node.args)
 		)
 	}
-
-	// clone(): Node {
-	// 	return new Node(this.type, this.value)
-	// }
-	//
-	// set(key: 'type' | 'value' | 'args', val: *): Node {
-	// 	const clone = this.clone()
-	// 	clone[key] = val
-	// 	return clone
-	// }
 }
 
 const searchParam = arr => arr.some(item => (
@@ -69,4 +61,17 @@ export class ArgumentNode extends Node {
 	// clone() {
 	// 	return new ArgumentNode(this.type, this.value, this.args)
 	// }
+}
+
+export class OperatorNode extends Node {
+	+orderPosition: ?number = null
+
+	getOrder(): number {
+		if (!this.orderPosition) {
+			// $FlowIgnore
+			this.orderPosition = orderPosition(this.value)
+		}
+
+		return this.orderPosition
+	}
 }
