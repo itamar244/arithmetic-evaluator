@@ -1,8 +1,9 @@
 // @flow
 export const warning = (error: string) =>
+	// eslint-disable-next-line no-console
 	console.error(
-		'\nWe just had an error.\n' +
-		error.replace(/\t/g, '').trim())
+		`\nWe just had an error.\n ${error.replace(/\t/g, '').trim()}`,
+	)
 
 // a nice getter like python for arrays
 export const get = <T>(arr: T[], i: number): T => (
@@ -11,19 +12,18 @@ export const get = <T>(arr: T[], i: number): T => (
 
 // get the max value inside an array
 export const max = <T>(arr: T[], method: (T, T) => mixed) => (
-	arr.reduce((max, cur) => (
-		method(max, cur) ? cur : max
+	arr.reduce((maxItem, cur) => (
+		method(maxItem, cur) ? cur : maxItem
 	))
 )
 
 
-export const joinSets = <T>(...sets: Set<T>[]): Set<T> => {
-	const res = new Set()
-
-	sets.forEach(set => set.forEach(item => res.add(item)))
-
-	return res
-}
+export const joinSets = <T>(...sets: Set<T>[]): Set<T> => (
+	sets.reduce((val, set) => {
+		set.forEach(item => val.add(item))
+		return val
+	}, new Set())
+)
 
 export const has = (obj: mixed, key: string) => (
 	Object.prototype.hasOwnProperty.call(obj, key)

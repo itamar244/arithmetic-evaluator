@@ -7,14 +7,16 @@ const functions = new Map([
 	['log', 2],
 	['floor', 1],
 	['sqrt', 1],
-	['max', Infinity]
+	['max', Infinity],
 ])
 
-export function isNotValidFunction(name: string, args: any[]) {
-	let len = functions.get(name)
+export default function isNotValidFunction(name: string, args: any[]) {
+	const len = functions.get(name)
 	if (!len) {
 		return 'not a valid function'
 	} else if (args.length !== len && len !== 0 && len !== Infinity) {
 		return `${name}: needed ${len} arguments`
 	}
+
+	return false
 }

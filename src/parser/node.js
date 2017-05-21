@@ -5,14 +5,12 @@ import type {
 } from './types'
 import { PARAM } from './types'
 import { orderPosition } from '../operators'
-import typeof Expression from './expression'
 
 export class Node {
 	+type: TreeItemType
 	+value: string
-	+args: mixed
 
-	constructor(type: typeof self.type, value: mixed) {
+	constructor(type: TreeItemType, value: mixed) {
 		// $FlowIgnore
 		Object.assign(this, {
 			type,
@@ -21,17 +19,7 @@ export class Node {
 	}
 
 	is(type: TreeItemType): bool {
-		return this.type === type;
-	}
-
-	equals(node: Node|mixed): bool {
-		return (
-			this === node
-			|| (node instanceof Node
-				&& this.type === node.type
-				&& this.value === node.value
-				&& this.args === node.args)
-		)
+		return this.type === type
 	}
 }
 
@@ -40,35 +28,37 @@ const searchParam = arr => arr.some(item => (
 	? searchParam(item)
 	: item instanceof ArgumentNode
 	? item.hasParams
-	: item.is('PARAM')
+	: item.is(PARAM)
 ))
 
 
 export class ArgumentNode extends Node {
 	+args: Tree[]
-	+hasParams: bool
+	hasParamsVal: bool|null = null
 
-	constructor(type: typeof self.args, value: string, args: Tree[]) {
+	constructor(type: TreeItemType, value: string, args: Tree[]) {
 		super(type, value)
 
 		// $FlowIgnore
 		Object.assign(this, {
 			args,
-			hasParams: args.some(searchParam)
 		})
 	}
 
-	// clone() {
-	// 	return new ArgumentNode(this.type, this.value, this.args)
-	// }
+	hasParams(): bool {
+		if (this.hasParamsVal === null) {
+			this.hasParamsVal = this.args.some(searchParam)
+		}
+
+		return this.hasParamsVal
+	}
 }
 
 export class OperatorNode extends Node {
-	+orderPosition: ?number = null
+	orderPosition: number|null = null
 
 	getOrder(): number {
-		if (!this.orderPosition) {
-			// $FlowIgnore
+		if (this.orderPosition === null) {
 			this.orderPosition = orderPosition(this.value)
 		}
 

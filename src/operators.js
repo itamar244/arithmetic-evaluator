@@ -8,24 +8,23 @@ import { has } from './utils'
 export const operators: {
 	[key: string]: (number, number) => number
 } = {
-	'+': (a, b) => typeof b === 'number' ? a + b : +a,
-	'-': (a, b) => typeof b === 'number' ? a - b : -a,
+	'+': (a, b) => (typeof b === 'number' ? a + b : +a),
+	'-': (a, b) => (typeof b === 'number' ? a - b : -a),
 	'*': (a, b) => a * b,
 	'/': (a, b) => a / b,
 	'^': (a, b) => a ** b,
 	'%': (a, b) => a % b,
 }
 
-// return is a string is one of the valid operators
 export const isOperator = (str: string) => has(operators, str)
 
-const orderOfOperators = [
-	['^'],
+const ORDER = [
+	['+', '-'],
 	['*', '/', '%'],
-	['+', '-']
+	['^'],
 ]
 
 export const orderPosition = (str: string) => (
-	orderOfOperators.findIndex(item => item.indexOf(str) > -1) + 1
-	|| orderOfOperators.length + 1
+	ORDER.findIndex(item => item.indexOf(str) > -1) + 1
+	|| ORDER.length + 1
 )

@@ -1,7 +1,5 @@
 // @flow
-import type { TreeItemType } from './types'
 import Statement from './statement'
-import { joinSets } from '../utils'
 
 export default class Parser {
 	file: string
@@ -14,6 +12,6 @@ export default class Parser {
 		this.parts = file.split('=')
 
 		this.statements = this.parts.map(part => new Statement(part, this.params))
-		this.hasError = this.statements.some(({ tree }) => tree.hasError)
+		this.hasError = this.statements.some(statement => statement.tree.hasError)
 	}
 }

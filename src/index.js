@@ -1,48 +1,49 @@
 // @flow
+/* eslint no-console: 0, no-await-in-loop: 0 */
+import readline from 'readline'
 import * as parser from './parser'
 import { evaluate, evaluateEquation } from './evaluator'
-import readline from 'readline'
 
 const rl = readline.createInterface({
 	input: process.stdin,
-	output: process.stdout
+	output: process.stdout,
 })
 
-async function benchmark<T: *[]>(func: (...T) => mixed, args: T = [], time = 1000) {
-	let times = 0
-	let timeSum = 0
-	let start, ret, end
+// async function benchmark(func, args, time = 1000) {
+// 	let times = 0
+// 	let timeSum = 0
+// 	let start, ret, end
+//
+// 	while (timeSum < time) {
+// 		/* using array destruction because this is much
+// 		* faster than assigning values. and speed is
+// 		* what matter because it is a benchmark */
+// 		[start, ret, end] = [
+// 			Date.now(),
+// 			(await func(...args)),
+// 			Date.now(),
+// 		]
+//
+// 		timeSum += end - start
+// 		times += 1
+// 	}
+//
+// 	return Math.floor(times / (time / 1000))
+// }
 
-	while (timeSum < time) {
-		/* using array destruction because this is much
-		* faster than assigning values. and speed is
-		* what matter because it is a benchmark */
-		[start, ret, end] = [
-			Date.now(),
-			(await func(...args)),
-			Date.now(),
-		]
-
-		timeSum += end - start
-		times += 1
-	}
-
-	return Math.floor(times / (time / 1000))
-}
-
-const question = query => new Promise((res, rej) => rl.question(query, res))
+const question = query => new Promise(res => rl.question(query, res))
 
 async function getParams(params) {
 	const givenParams = {}
-	for (const param of params) {
+	params.forEach(async param => (
 		givenParams[param] = Number(await question(`enter value for param ${param}: `))
-	}
+	))
 	return givenParams
 }
 
 main(process.argv)
 async function main(args) {
-	let answer = await question('please enter your arithematic expression: ')
+	const answer = await question('please enter your arithematic expression: ')
 	if (answer) {
 		// console.log(await benchmark(parser.parse, [answer], 2000))
 		const parsedResult = parser.parse(answer)

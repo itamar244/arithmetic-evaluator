@@ -6,58 +6,74 @@ import { get } from '../utils'
 
 type ExprssionItem = Node|Expression
 
+type Options = {
+	parent?: Expression,
+	params?: Set<string>,
+}
+
 export default class Expression {
 	// #private
-	items: ExprssionItem[] = []
 	operators: OperatorNode[] = []
 	lastWrap: number|null = null
 
 	// #public
+	items: ExprssionItem[] = []
 	hasError: bool = false
 	params: Set<string>
+	parent: Expression|null
 
-	constructor(parentParams?: Set<string>, ...args: ExprssionItem[]) {
-		this.params = parentParams || new Set()
+	constructor(
+		{
+			parent,
+			params = parent ? parent.params : new Set(),
+		}: Options = {},
+
+		...args: ExprssionItem[]
+	) {
+		this.params = params
+		this.parent = parent || null
 
 		this.add(...args)
 	}
 
-	/* checks if operators need to be wrapped by brackets because order of operators */
 	// #private
+	/* checks if operators need to be wrapped by brackets because order of operators */
 	checkOperatorsOrder() {
 		/* if there less than two operators this check is useless
 		 * or if last item is the last operator,
 		 * than needs the next item to see what will be need to move into a smaller scope */
-		if (this.operators.length < 2 || this.getOperator(-1).equals(this.get(-1))) {
-			return
-		}
+		if (this.operators.length < 2 || this.get(-1) instanceof OperatorNode) return
 
-		const lastOp = this.getOperator(-1)
+		const lastOpOrder = this.getOperator(-1).getOrder()
 
-		// if there was a wrapping in the previous time, than it will check operation against the inside wrapper brackets
-		// this happend in the following scenarios: num + num * num ^ num
-		if (this.lastWrap === this.items.length - 3) {
-			const insideTree = this.get(-3)
+		// if needs to be wrapped with brackets
+		if (lastOpOrder > this.getOperator(-2).getOrder()) {
+			/* if there was a wrapping in the previous time,
+			 * than it will check operation against the inside wrapper brackets
+			 * this happend in the following scenarios: num + num * num ^ num */
+			if (this.lastWrap === this.items.length - 3) {
+				const insideTree = this.get(-3)
 
-			// actualy, it must be true because it was generated in this method earlier
-			if (insideTree instanceof Expression) {
-				const insideLastOp = insideTree.get(-2)
-
+				// actualy, it must be true because it was generated in this method earlier
 				if (
-					insideLastOp instanceof OperatorNode // must be true also
-					&& insideLastOp.getOrder() >= lastOp.getOrder()
+					insideTree instanceof Expression
+					&& insideTree.getOperator(-1).getOrder() < lastOpOrder
 				) {
 					insideTree.add(...this.remove(2)[1])
+					return
 				}
 			}
 
-		// if needs to be wrapped with brackets
-		} else if (this.getOperator(-2).getOrder() > lastOp.getOrder()) {
 			const [items, remove] = this.remove(3)
 
 			// setting lastwrap to current location
 			this.lastWrap = items.length
-			this.items = [...items, new Expression(this.params, ...remove)]
+			this.items = [
+				...items,
+				new Expression({
+					parent: this,
+				}, ...remove),
+			]
 		}
 	}
 
@@ -70,6 +86,7 @@ export default class Expression {
 					this.params.add(val.value)
 				} else if (!this.hasError && val.is(tt.ERROR)) {
 					this.hasError = true
+					if (this.parent) this.parent.hasError = true
 				}
 			}
 
@@ -82,10 +99,10 @@ export default class Expression {
 	remove(i: number = 1): [ExprssionItem[], ExprssionItem[]] {
 		const removePart = this.items.slice(-i)
 
-		this.operators = this.operators.filter(operator => (
-			!removePart.some(item => operator === item)
-		))
 		this.items = this.items.slice(0, -i)
+
+		// $FlowFixMe - flow can't tell that the filter method will return only OperatorNode[]
+		this.operators = (this.items.filter(item => item instanceof OperatorNode): OperatorNode[])
 
 		return [this.items, removePart]
 	}

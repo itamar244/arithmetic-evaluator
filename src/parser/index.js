@@ -6,6 +6,7 @@ import type {
 	TreeItem,
 	Tree,
 } from './types'
+
 export type { TreeItemType, TreeItem, Tree }
 
 type Result$Equation = {

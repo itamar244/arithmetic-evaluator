@@ -2,7 +2,6 @@
 import type { Tree } from './../parser'
 import * as tt from '../parser/types'
 import { evaluate } from './'
-import { orderPosition } from './../operators'
 import { Node, ArgumentNode, OperatorNode }  from './../parser/node'
 import { max } from '../utils'
 
@@ -24,17 +23,19 @@ const reduceMatches = (tree) => {
 	const pureTree = []
 	const notPureTree = []
 
-	for (let [i, part] of tree.entries()) {
-		if (part.type !== tt.OPERATOR) {
-			// thanks to the fact the tree is reduced already, arrays must contain params
-			const isPure =
-				!(part instanceof Array)
-				&& !part.is(tt.PARAM)
-				&& !(part instanceof ArgumentNode && part.hasParams);
+	/* because the tree is ordered in operator, regular node,
+	 * operator etc than skeeping one item each time is fine */
+	for (let i = tree[0].type === tt.OPERATOR ? 1 : 0; i < tree.length; i += 2) {
+		const part = tree[i]
 
-			(isPure ?  pureTree : notPureTree)
-				.push(...tree.slice(i > 0 ? i - 1 : 0, i + 1))
-		}
+		const isPure =
+			// thanks to the fact the tree is reduced already, arrays must contain params
+			!(part instanceof Array)
+			&& !part.is(tt.PARAM)
+			&& !(part instanceof ArgumentNode && part.hasParams());
+
+		(isPure ?  pureTree : notPureTree)
+			.push(...tree.slice(i > 0 ? i - 1 : 0, i + 1))
 	}
 
 	// it won't give any benefit if the pure tree is shorter, only causing weird bugs
@@ -68,7 +69,7 @@ export function flatTree(tree: Tree) {
 				if (
 					!heighestOp
 					|| innerHeighestOp
-					&& orderPosition(heighestOp.value) >= orderPosition(innerHeighestOp.value)
+					&& heighestOp.getOrder() <= innerHeighestOp.getOrder()
 				) {
 					newTree.push(...tmpTree)
 				} else {
@@ -82,7 +83,7 @@ export function flatTree(tree: Tree) {
 			if (part.is(tt.PARAM)) {
 				hasParam = true
 			} else if (part instanceof ArgumentNode) {
-				if (!hasParam) hasParam = part.hasParams
+				if (!hasParam) hasParam = part.hasParams()
 
 				if (hasParam) {
 					// nextPart = part.set('args', part.args.map(arg => flatTree(arg).tree))

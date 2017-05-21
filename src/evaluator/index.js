@@ -2,9 +2,9 @@
 import type { Tree } from './../parser'
 import { operators, isOperator } from './../operators'
 import { flatTree } from './helpers'
-import { Node, ArgumentNode }  from './../parser/node'
+import { Node, ArgumentNode } from './../parser/node'
 
-const toFixed = precision => num => {
+const toFixed = precision => (num) => {
 	if (!precision) {
 		return Number(num)
 	}
@@ -14,7 +14,7 @@ const toFixed = precision => num => {
 
 // using newton's binom for getting the correct value
 export function evaluateEquation(
-	equation: $ReadOnlyArray<Tree>,
+	startingEquation: Tree[],
 	variableName: string,
 	firstTime: bool = true,
 ) {
@@ -24,35 +24,34 @@ export function evaluateEquation(
 	let dir
 	let prevDir
 	// the change to each try, growing or shrinking each time
-	let change = 1/1.5
+	let change = 1 / 1.5
 	// values for each side of equation
-	let values: $ReadOnlyArray<number> = [0, 1]
+	let values: number[] = [0, 1]
 	let tmpToFixed = toFixed()
 
-	if (firstTime) {
-		equation = equation.map(item => flatTree(item).tree)
-	}
+	const equation = firstTime ? startingEquation.map(item => flatTree(item).tree) : startingEquation
 
 	// because NaN !== NaN the first run should work even if values is an empty array
-	for (let i = 1; tmpToFixed(values[0]) !== tmpToFixed(values[1]); i++) {
+	for (let i = 1; tmpToFixed(values[0]) !== tmpToFixed(values[1]); i += 1) {
 		prevDir = dir || 1
 		dir = values[0] < values[1] ? 1 : -1
 
-		change *= dir === prevDir ? 1.5 : 1/4
+		change *= dir === prevDir ? 1.5 : 1 / 4
 		params[variableName] += dir * change
 		values = equation.map(tree => evaluate(tree, params))
 
 		// for irrational results for variableName the 20 digits precision wil cause infinte loop
 		// so the precision gets smaller for too many loops
-		if (i % 1000 === 0) tmpToFixed = toFixed(16 - (i / 1000|0))
+		if (i % 1000 === 0) tmpToFixed = toFixed(16 - (Math.floor(i / 1000)))
 		// if one of the values is Infinity than it will return
 		if (values.some(n => Math.abs(n) === Infinity) && i > 100) {
 			return (
 				firstTime
 				// if it the first time it wil reRun with a revers equation
 				? evaluateEquation([...equation].reverse(), variableName, false)
-				: 'no value' )
-			}
+				: 'no value'
+			)
+		}
 	}
 	// there are some number anomalies at these ocations. the results supposed to be +-Infinity
 	// they are the limits of save numbers in js, so they have their issues
@@ -80,9 +79,9 @@ export const evaluate = (
 				? new Node('NUMBER', String(evaluate(item, params)))
 				: item
 		))
-		.reduce((value, node, i, tree) => {
+		.reduce((value, node, i, mapedTree) => {
 			// saving temporarly the next function
-			const tempNext = cur => next(value, tree[i-1], cur)
+			const tempNext = cur => next(value, mapedTree[i - 1], cur)
 
 			return (
 				node.is('PARAM')
@@ -92,8 +91,8 @@ export const evaluate = (
 				: node.is('CONSTANT')
 				? tempNext(Math[node.value] || 0)
 				: node instanceof ArgumentNode
-				? tempNext( Math[node.value](...node.args.map(t => evaluate(t, params))) )
+				? tempNext(Math[node.value](...node.args.map(t => evaluate(t, params))))
 				: value /* default */
 			)
 		}, 0)
-);
+)
