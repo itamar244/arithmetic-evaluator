@@ -28,3 +28,7 @@ export const joinSets = <T>(...sets: Set<T>[]): Set<T> => (
 export const has = (obj: mixed, key: string) => (
 	Object.prototype.hasOwnProperty.call(obj, key)
 )
+
+export const flat = <T>(arr: T[][]): T[] => (
+	arr.reduce((val, cur) => [...val, ...cur], [])
+)

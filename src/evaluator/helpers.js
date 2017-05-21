@@ -2,17 +2,17 @@
 import type { Tree } from './../parser'
 import * as tt from '../parser/types'
 import { evaluate } from './'
-import { Node, ArgumentNode, OperatorNode }  from './../parser/node'
-import { max } from '../utils'
+import { Node, ArgumentNode, OperatorNode } from './../parser/node'
+import { max, flat } from '../utils'
 
 const maxOperator = (tree) => {
 	const res = max(
 		tree,
-		(max, node) => (
-			!(max instanceof OperatorNode)
+		(prev, node) => (
+			!(prev instanceof OperatorNode)
 			|| (node instanceof OperatorNode
-				&& node.getOrder() > max.getOrder())
-		)
+				&& node.getOrder() > prev.getOrder())
+		),
 	)
 
 	return res instanceof OperatorNode && res
@@ -34,7 +34,7 @@ const reduceMatches = (tree) => {
 			&& !part.is(tt.PARAM)
 			&& !(part instanceof ArgumentNode && part.hasParams());
 
-		(isPure ?  pureTree : notPureTree)
+		(isPure ? pureTree : notPureTree)
 			.push(...tree.slice(i > 0 ? i - 1 : 0, i + 1))
 	}
 
@@ -51,12 +51,12 @@ const reduceMatches = (tree) => {
 }
 
 // makes the tree smaller, leaving only params not evaluated for faster evaluating after
-export function flatTree(tree: Tree) {
+export default function flatTree(tree: Tree) {
 	const heighestOp = maxOperator(tree)
-	const newTree = []
 	let hasParam = false
 
-	for (let part of tree) {
+	// be aware that this function has one side effect which is changing hasParam to true
+	const newTree = tree.map((part): Tree => {
 		if (Array.isArray(part)) {
 			const { tree: tmpTree, hasParam: innerrHasParams } = flatTree(part)
 
@@ -71,36 +71,34 @@ export function flatTree(tree: Tree) {
 					|| innerHeighestOp
 					&& heighestOp.getOrder() <= innerHeighestOp.getOrder()
 				) {
-					newTree.push(...tmpTree)
-				} else {
-					newTree.push(tmpTree)
+					return tmpTree
 				}
-			} else {
-				newTree.push(tmpTree[0])
+
+				return [tmpTree]
 			}
 
-		} else {
-			if (part.is(tt.PARAM)) {
-				hasParam = true
-			} else if (part instanceof ArgumentNode) {
-				if (!hasParam) hasParam = part.hasParams()
-
-				if (hasParam) {
-					// nextPart = part.set('args', part.args.map(arg => flatTree(arg).tree))
-					part = new ArgumentNode(
-						part.type,
-						part.value,
-						part.args.map(arg => flatTree(arg).tree)
-					)
-				}
-			}
-
-			newTree.push(part)
+			return [tmpTree[0]]
 		}
-	}
+
+		if (part.is(tt.PARAM)) {
+			hasParam = true
+		} else if (part instanceof ArgumentNode) {
+			if (!hasParam) hasParam = part.hasParams()
+
+			if (hasParam) {
+				return [new ArgumentNode(
+					part.type,
+					part.value,
+					part.args.map(arg => flatTree(arg).tree),
+				)]
+			}
+		}
+
+		return [part]
+	})
 
 	return {
-		tree: reduceMatches(newTree),
+		tree: reduceMatches(flat(newTree)),
 		hasParam,
 	}
 }

@@ -1,7 +1,7 @@
 // @flow
 import type { Tree } from './../parser'
 import { operators, isOperator } from './../operators'
-import { flatTree } from './helpers'
+import flatTree from './helpers'
 import { Node, ArgumentNode } from './../parser/node'
 
 const toFixed = precision => (num) => {
