@@ -59,17 +59,17 @@ export default class Expression {
 					insideTree instanceof Expression
 					&& insideTree.getOperator(-1).getOrder() < lastOpOrder
 				) {
-					insideTree.add(...this.remove(2)[1])
+					insideTree.add(...this.remove(2))
 					return
 				}
 			}
 
-			const [items, remove] = this.remove(3)
+			const remove = this.remove(3)
 
 			// setting lastwrap to current location
-			this.lastWrap = items.length
+			this.lastWrap = this.items.length
 			this.items = [
-				...items,
+				...this.items,
 				new Expression({
 					parent: this,
 					children: remove,
@@ -97,15 +97,12 @@ export default class Expression {
 		})
 	}
 
-	remove(i: number = 1): [ExprssionItem[], ExprssionItem[]] {
-		const removePart = this.items.slice(-i)
-
-		this.items = this.items.slice(0, -i)
-
+	remove(i: number = 1): ExprssionItem[] {
+		const ret = this.items.splice(-i)
 		// $FlowFixMe - flow can't tell that the filter method will return only OperatorNode[]
 		this.operators = (this.items.filter(item => item instanceof OperatorNode): OperatorNode[])
 
-		return [this.items, removePart]
+		return ret
 	}
 
 	toArray(): Tree {
