@@ -79,7 +79,7 @@ export default class Expression {
 	}
 
 	add(...vals: ExprssionItem[]) {
-		vals.forEach((val) => {
+		for (const val of vals) {
 			if (val instanceof Node) {
 				if (val instanceof OperatorNode) {
 					this.operators.push(val)
@@ -94,7 +94,7 @@ export default class Expression {
 			this.items.push(val)
 
 			this.checkOperatorsOrder()
-		})
+		}
 	}
 
 	remove(i: number = 1): ExprssionItem[] {
