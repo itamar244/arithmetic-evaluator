@@ -6,10 +6,11 @@ import { get } from '../utils'
 
 type ExprssionItem = Node|Expression
 
-type Options = {
+type Options = {|
 	parent?: Expression,
 	params?: Set<string>,
-}
+	children?: ExprssionItem[],
+|}
 
 export default class Expression {
 	// #private
@@ -22,18 +23,17 @@ export default class Expression {
 	params: Set<string>
 	parent: Expression|null
 
-	constructor(
-		{
-			parent,
-			params = parent ? parent.params : new Set(),
-		}: Options = {},
-
-		...args: ExprssionItem[]
-	) {
+	constructor({
+		parent,
+		params = parent ? parent.params : new Set(),
+		children,
+	}: Options = {}) {
 		this.params = params
 		this.parent = parent || null
 
-		this.add(...args)
+		if (children) {
+			this.add(...children)
+		}
 	}
 
 	// #private
@@ -72,7 +72,8 @@ export default class Expression {
 				...items,
 				new Expression({
 					parent: this,
-				}, ...remove),
+					children: remove,
+				}),
 			]
 		}
 	}
