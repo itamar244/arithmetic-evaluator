@@ -5,7 +5,7 @@ import { isOperator } from './../operators'
 
 const PATTERNS = {
 	number: /^(?:(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?|^Infinity)/,
-	function: /^[a-z][a-z]+\(.+\)/,
+	function: /^[a-z][a-z]+\(.*\)/,
 	constant: /^[A-Z][A-Z0-9]+|^[A-Z]/,
 }
 

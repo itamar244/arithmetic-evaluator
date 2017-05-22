@@ -1,12 +1,15 @@
-const parser = require('./dist/parser')
-const evaluator = require('./dist/evaluator')
+// @flow
+/* eslint no-console: 0, no-await-in-loop: 0 */
+const parser = require('./src/parser')
+const evaluator = require('./src/evaluator')
 const readline = require('readline')
+
 const rl = readline.createInterface({
 	input: process.stdin,
-	output: process.stdout
+	output: process.stdout,
 })
 
-const question = (query) => new Promise((res, rej) => rl.question(query, res))
+const question = query => new Promise(res => rl.question(query, res))
 
 async function getParams(params) {
 	const givenParams = {}
@@ -18,26 +21,19 @@ async function getParams(params) {
 
 main(process.argv)
 async function main(args) {
-	let answer = await question('please enter your arithematic expression: ')
+	const answer = await question('please enter your arithematic expression: ')
 	if (answer) {
 		const parsedResult = parser.parse(answer)
 
+		console.log(parsedResult.body)
 		if (parsedResult.type === 'EXPRESSION') {
-			console.log(parsedResult)
-			try {
-				do {
-					console.log(evaluator.evaluator(parsedResult.value, await getParams(parsedResult.params)))
-				} while (parsedResult.params.length > 0 && await question('try again? '))
-			} catch (e) {
-				console.error(e)
-			}
+			do {
+				console.log(evaluator.evaluate(parsedResult.body, await getParams(parsedResult.params)))
+			} while (parsedResult.params.size > 0 && await question('try again? '))
 		} else if (parsedResult.type === 'EQUATION') {
-			console.log(
-				parsedResult.params[0] + ' = ' +
-				evaluator.evaluateEquation(parsedResult, parsedResult.params[0])
-			)
+			console.log(evaluator.evaluateEquation(parsedResult.body, [...parsedResult.params][0]))
 		} else {
-			console.error(parsedResult.value)
+			console.error(parsedResult.body)
 		}
 		main(args)
 	} else {
