@@ -4,7 +4,7 @@
   "description": "receices string and evaluates it for numerical value",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --env=node",
     "build": "babel src --out-dir=dist"
   },
   "author": "Itamar Yatom",
@@ -21,6 +21,6 @@
     "eslint-plugin-flowtype": "^2.33.0",
     "eslint-plugin-import": "^2.2.0",
     "flow-bin": "^0.46.0",
-    "jest": "^20.0.3"
+		"jest-cli": "^20.0.3"
   }
 }
