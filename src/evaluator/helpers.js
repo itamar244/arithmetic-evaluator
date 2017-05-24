@@ -56,7 +56,7 @@ export default function flatTree(tree: Tree) {
 	let hasParam = false
 
 	// be aware that this function has one side effect which is changing hasParam to true
-	const newTree = tree.map((part): Tree => {
+	const newTree = tree.map((part) => {
 		if (Array.isArray(part)) {
 			const { tree: tmpTree, hasParam: innerrHasParams } = flatTree(part)
 
@@ -66,15 +66,12 @@ export default function flatTree(tree: Tree) {
 				const innerHeighestOp = maxOperator(tmpTree)
 
 				// if the brackets arent needed they will be removed
-				if (
+				return (
 					!heighestOp
 					|| innerHeighestOp
 					&& heighestOp.getOrder() <= innerHeighestOp.getOrder()
-				) {
-					return tmpTree
-				}
-
-				return [tmpTree]
+						? tmpTree : [tmpTree]
+				)
 			}
 
 			return [tmpTree[0]]
@@ -83,9 +80,9 @@ export default function flatTree(tree: Tree) {
 		if (part.is(tt.PARAM)) {
 			hasParam = true
 		} else if (part instanceof ArgumentNode) {
-			if (!hasParam) hasParam = part.hasParams()
+			if (part.hasParams()) {
+				if (!hasParam) hasParam = true
 
-			if (hasParam) {
 				return [new ArgumentNode(
 					part.type,
 					part.value,

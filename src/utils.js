@@ -23,7 +23,7 @@ export const has = (obj: mixed, key: string) => (
 )
 
 export const flat = <T>(arr: T[][]): T[] => (
-	arr.reduce((val, cur) => [...val, ...cur], [])
+	arr.reduce((val, cur) => val.concat(cur), [])
 )
 
 export async function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: number = 1000) {
@@ -52,4 +52,3 @@ export async function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: nu
 export const pluralize = (num: number, item: string, items: string) => (
 	num === 1 ? item : items
 )
-
