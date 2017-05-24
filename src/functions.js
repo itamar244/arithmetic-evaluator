@@ -4,15 +4,13 @@
  *
  * handles the checks around the functions for the parser.
  *
-<<<<<<< HEAD
  * the main function checks if there is such a function
-=======
- * the main function checks if there is such a function 
->>>>>>> c86e64b79a120ea9a77a0e377cb913d915d96ced
  * and if there are execatly enough arguments to the fitting function
  *
  * @flow
  */
+
+import { pluralize } from './utils'
 
 /* Map<string presesting the name, length: the needed length arguments>
  * Infinity means any length of arguments */
@@ -27,12 +25,12 @@ const functions = new Map([
 	['max', Infinity],
 ])
 
-export default function isNotValidFunction(name: string, args: any[]) {
+export default function isNotValidFunction(name: string, { length: argsLen }: any[]) {
 	const len = functions.get(name)
 	if (!len) {
 		return 'not a valid function'
-	} else if (args.length !== len && len !== 0 && len !== Infinity) {
-		return `${name}: needed ${len} arguments`
+	} else if (argsLen !== len && len !== 0 && len !== Infinity) {
+		return ` ${name}: needed ${len} arguments, while ${argsLen} ${pluralize(argsLen, 'was', 'where')} given`
 	}
 
 	return false
