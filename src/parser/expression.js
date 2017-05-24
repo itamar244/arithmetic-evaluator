@@ -15,7 +15,7 @@ type Options = {|
 export default class Expression {
 	// #private
 	operators: OperatorNode[] = []
-	lastWrap: number|null = null
+	lastWrap: Expression|null = null
 
 	// #public
 	items: ExprssionItem[] = []
@@ -37,44 +37,31 @@ export default class Expression {
 	}
 
 	// #private
-	/* checks if operators need to be wrapped by brackets because order of operators */
-	checkOperatorsOrder() {
+	/* checks if operators need to be wrapped by brackets because order of operators
+	 * and wraps them out if needed */
+	wrapItemsIfNeeded() {
 		/* if there less than two operators this check is useless
 		 * or if last item is the last operator,
 		 * than needs the next item to see what will be need to move into a smaller scope */
 		if (this.operators.length < 2 || this.get(-1) instanceof OperatorNode) return
 
-		const lastOpOrder = this.getOperator(-1).getOrder()
-
 		// if needs to be wrapped with brackets
-		if (lastOpOrder > this.getOperator(-2).getOrder()) {
-			/* if there was a wrapping in the previous time,
-			 * than it will check operation against the inside wrapper brackets
-			 * this happend in the following scenarios: num + num * num ^ num */
-			if (this.lastWrap === this.items.length - 3) {
-				const insideTree = this.get(-3)
+		if (this.getOperator(-1).getOrder() > this.getOperator(-2).getOrder()) {
+			/* if the last item which is not operator is the last wrap,
+			 * the new items will go to the last wrap.
+			 * this happend in the following scenarios: (num + num * num ^ num). */
+			if (this.lastWrap && this.lastWrap === this.get(-3)) {
+				this.lastWrap.add(...this.remove(2))
+			} else {
+				const remove = this.remove(3)
 
-				// actualy, it must be true because it was generated in this method earlier
-				if (
-					insideTree instanceof Expression
-					&& insideTree.getOperator(-1).getOrder() < lastOpOrder
-				) {
-					insideTree.add(...this.remove(2))
-					return
-				}
-			}
-
-			const remove = this.remove(3)
-
-			// setting lastwrap to current location
-			this.lastWrap = this.items.length
-			this.items = [
-				...this.items,
-				new Expression({
+				this.lastWrap = new Expression({
 					parent: this,
 					children: remove,
-				}),
-			]
+				})
+
+				this.items.push(this.lastWrap)
+			}
 		}
 	}
 
@@ -93,7 +80,7 @@ export default class Expression {
 
 			this.items.push(val)
 
-			this.checkOperatorsOrder()
+			this.wrapItemsIfNeeded()
 		}
 	}
 
