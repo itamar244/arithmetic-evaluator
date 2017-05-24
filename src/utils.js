@@ -52,3 +52,4 @@ export async function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: nu
 export const pluralize = (num: number, item: string, items: string) => (
 	num === 1 ? item : items
 )
+
