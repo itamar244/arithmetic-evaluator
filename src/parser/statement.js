@@ -121,7 +121,11 @@ export default class Statement extends UtilParser {
 
 		const isNotValid = isNotValidFunction(name, args)
 
-		return isNotValid ? new Node(tt.ERROR, isNotValid) : new ArgumentNode(type, name, args)
+		if (isNotValid) {
+			this.unexpected(isNotValid)
+		}
+
+		return new ArgumentNode(type, name, args)
 	}
 
 	parseAbsBrackets(type: TreeItemType, match: string, pos: number): ArgumentNode {

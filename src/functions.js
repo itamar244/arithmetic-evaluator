@@ -10,6 +10,8 @@
  * @flow
  */
 
+import { pluralize } from './utils'
+
 /* Map<string presesting the name, length: the needed length arguments>
  * Infinity means any length of arguments */
 const functions = new Map([
@@ -23,12 +25,12 @@ const functions = new Map([
 	['max', Infinity],
 ])
 
-export default function isNotValidFunction(name: string, args: any[]) {
+export default function isNotValidFunction(name: string, { length: argsLen }: any[]) {
 	const len = functions.get(name)
 	if (!len) {
 		return 'not a valid function'
-	} else if (args.length !== len && len !== 0 && len !== Infinity) {
-		return `${name}: needed ${len} arguments`
+	} else if (argsLen !== len && len !== 0 && len !== Infinity) {
+		return ` ${name}: needed ${len} arguments, while ${argsLen} ${pluralize(argsLen, 'was', 'where')} given`
 	}
 
 	return false

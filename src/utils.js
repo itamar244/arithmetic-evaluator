@@ -48,3 +48,8 @@ export async function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: nu
 
 	return Math.floor(times / (time / 1000))
 }
+
+export const pluralize = (num: number, item: string, items: string) => (
+	num === 1 ? item : items
+)
+
