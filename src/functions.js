@@ -14,7 +14,7 @@ import { pluralize } from './utils'
 
 /* Map<string presesting the name, length: the needed length arguments>
  * Infinity means any length of arguments */
-const functions = new Map([
+export const functions = new Map([
 	['cos', 1],
 	['sin', 1],
 	['tan', 1],
@@ -30,7 +30,7 @@ export default function isNotValidFunction(name: string, { length: argsLen }: an
 	if (!len) {
 		return 'not a valid function'
 	} else if (argsLen !== len && len !== 0 && len !== Infinity) {
-		return ` ${name}: needed ${len} arguments, while ${argsLen} ${pluralize(argsLen, 'was', 'where')} given`
+		return `${name}: needed ${len} arguments, while ${argsLen} ${pluralize(argsLen, 'was', 'where')} given`
 	}
 
 	return false
