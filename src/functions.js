@@ -4,7 +4,11 @@
  *
  * handles the checks around the functions for the parser.
  *
+<<<<<<< HEAD
  * the main function checks if there is such a function
+=======
+ * the main function checks if there is such a function 
+>>>>>>> c86e64b79a120ea9a77a0e377cb913d915d96ced
  * and if there are execatly enough arguments to the fitting function
  *
  * @flow
