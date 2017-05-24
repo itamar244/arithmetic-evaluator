@@ -4,7 +4,7 @@
  *
  * handles the checks around the functions for the parser.
  *
- * the main function checks if there is such a function 
+ * the main function checks if there is such a function
  * and if there are execatly enough arguments to the fitting function
  *
  * @flow

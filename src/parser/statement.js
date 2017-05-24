@@ -106,7 +106,7 @@ export default class Statement extends UtilParser {
 
 		// + and - can be in pos 0
 		if (firstItem && op.getOrder() !== 1) {
-			this.unexpected('operator can not be the first item')
+			this.unexpected(`${match} can't be the first operator`)
 		}
 
 		return op

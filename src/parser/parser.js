@@ -2,10 +2,9 @@
 import Statement from './statement'
 
 export default class Parser {
-	file: string
 	parts: string[]
-	statements: Statement[] = []
-	hasError: bool = false
+	statements: Statement[]
+	hasError: bool
 	params: Set<string> = new Set()
 
 	constructor(file: string) {
