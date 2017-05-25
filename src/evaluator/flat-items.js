@@ -1,22 +1,11 @@
 // @flow
-import type { Tree } from './../parser'
+import type { Tree } from '../parser'
 import * as tt from '../parser/types'
 import { evaluate } from './'
-import { Node, ArgumentNode, OperatorNode } from './../parser/node'
-import { max, flat } from '../utils'
+import { Node, ArgumentNode } from '../parser/node'
+import { maxOperator } from './utils'
+import { flat } from '../utils'
 
-const maxOperator = (tree) => {
-	const res = max(
-		tree,
-		(prev, node) => (
-			!(prev instanceof OperatorNode)
-			|| (node instanceof OperatorNode
-				&& node.getOrder() > prev.getOrder())
-		),
-	)
-
-	return res instanceof OperatorNode && res
-}
 
 const reduceMatches = (tree) => {
 	const firstNode = tree.find(item => item instanceof Node)
@@ -51,7 +40,7 @@ const reduceMatches = (tree) => {
 }
 
 // makes the tree smaller, leaving only params not evaluated for faster evaluating after
-export default function flatTree(tree: Tree) {
+const flatTree = (tree: Tree) => {
 	const heighestOp = maxOperator(tree)
 	let hasParam = false
 
@@ -99,3 +88,9 @@ export default function flatTree(tree: Tree) {
 		hasParam,
 	}
 }
+
+export function flatEquation(equation: Tree[]) {
+	return equation.map(e => flatTree(e).tree)
+}
+
+export default flatEquation

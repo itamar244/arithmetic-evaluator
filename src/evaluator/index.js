@@ -1,7 +1,7 @@
 // @flow
 import type { Tree } from './../parser'
 import { operators, isOperator } from './../operators'
-import flatTree from './helpers'
+import flatEquation from './flat-items'
 import { Node, ArgumentNode } from './../parser/node'
 
 const toFixed = precision => (num) => {
@@ -29,7 +29,7 @@ export function evaluateEquation(
 	let values: number[] = [0, 1]
 	let tmpToFixed = toFixed()
 
-	const equation = firstTime ? startingEquation.map(item => flatTree(item).tree) : startingEquation
+	const equation = firstTime ? flatEquation(startingEquation) : startingEquation
 
 	// because NaN !== NaN the first run should work even if values is an empty array
 	for (let i = 1; tmpToFixed(values[0]) !== tmpToFixed(values[1]); i += 1) {
