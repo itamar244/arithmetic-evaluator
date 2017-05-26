@@ -89,8 +89,6 @@ const flatTree = (tree: Tree) => {
 	}
 }
 
-export function flatEquation(equation: Tree[]) {
+export default function flatEquation(equation: Tree[]) {
 	return equation.map(e => flatTree(e).tree)
 }
-
-export default flatEquation

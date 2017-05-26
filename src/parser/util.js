@@ -81,7 +81,7 @@ export default class UtilParser {
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	unexpected(error: string) {
+	unexpected(error: string): void {
 		throw error
 	}
 }

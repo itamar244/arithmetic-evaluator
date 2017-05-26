@@ -1,7 +1,7 @@
 // @flow
+import type { Tree } from './types'
 import * as tt from './types'
 import { Node, OperatorNode } from './node'
-import type { Tree } from './types'
 import { get } from '../utils'
 
 type ExprssionItem = Node|Expression
@@ -50,7 +50,7 @@ export default class Expression {
 			/* if the last item which is not operator is the last wrap,
 			 * the new items will go to the last wrap.
 			 * this happend in the following scenarios: (num + num * num ^ num). */
-			if (this.lastWrap && this.lastWrap === this.get(-3)) {
+			if (this.lastWrap !== null && this.lastWrap === this.get(-3)) {
 				this.lastWrap.add(...this.remove(2))
 			} else {
 				const remove = this.remove(3)
