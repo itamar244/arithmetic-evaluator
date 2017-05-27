@@ -11,7 +11,13 @@ export interface NodeBase {
 	raw: string,
 }
 
-export type Node = NodeBase & { [string]: any }
+export type Node =
+	Expression
+	| BinOperator
+	| Literal
+	| FunctionNode
+	| NamedNode
+
 
 export type Expression = NodeBase & {
 	type: 'EXPRESSION',
@@ -30,13 +36,23 @@ export type Literal = NodeBase & {
 	value: number
 }
 
-export type Function = NodeBase & {
+type FunctionNode = NodeBase & {
 	type: 'FUNCTION',
 	name: string,
 	arguments: Node[],
 }
+// there is some problem with built-in Function class, so this fixes it
+// eslint-disable-next-line import/prefer-default-export
+export type { FunctionNode as Function }
 
 export type Constant = NodeBase & {
 	type: 'CONSTANT',
 	name: string,
 }
+
+export type Parameter = NodeBase & {
+	type: 'PARAM',
+	name: string,
+}
+
+export type NamedNode = Constant | Parameter

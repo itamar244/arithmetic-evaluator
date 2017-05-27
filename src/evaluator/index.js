@@ -3,20 +3,22 @@ import typeof Node from '../parser/node'
 import { operators } from '../operators'
 import * as tt from '../tokenizer/types'
 
-const evaluateExpression = (node: Node) => (
-	node.is('EXPRESSION')
-	? evaluateExpression(node.body)
-	: node.is(tt.LITERAL)
+const evaluateExpression = (node: Node, params: { [string]: number }) => (
+	node.type === 'EXPRESSION'
+	? evaluateExpression(node.body, params)
+	: node.type === tt.LITERAL
 	?	node.value
-	: node.is(tt.CONSTANT)
+	: node.type === tt.CONSTANT
 	? Math[node.name]
-	: node.is(tt.BIN_OPERATOR) && operators[node.operator]
+	: node.type === tt.BIN_OPERATOR
 	? operators[node.operator](
-		node.left ? evaluateExpression(node.left) : 0,
-		evaluateExpression(node.right),
+		node.left && evaluateExpression(node.left, params),
+		evaluateExpression(node.right, params),
 	)
-	: node.is(tt.FUNCTION)
-	? Math[node.name](...node.arguments.map(evaluateExpression))
+	: node.type === tt.FUNCTION
+	? Math[node.name](...node.arguments.map(arg => evaluateExpression(arg, params)))
+	: node.type === tt.PARAM
+	? params[node.name]
 	: 0
 )
 
