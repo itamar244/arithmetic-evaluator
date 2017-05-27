@@ -23,6 +23,7 @@ const isSameTrees = (a: Tree, b: Tree) => (
 
 export const isSameTreeItem = (a: TreeItem, b: TreeItem) => (
 	a instanceof Node
-	? a.equals(b)
+	// ? a.equals(b) - add equals function
+	? a === b
 	: Array.isArray(b) && isSameTrees(a, b)
 )

@@ -12,9 +12,9 @@ export const get = <T>(arr: T[], i: number): T => (
 )
 
 // get the max value inside an array
-export const max = <T>(arr: T[], method: (T, T) => bool): T => (
-	arr.reduce((maxItem, cur) => (
-		method(maxItem, cur) ? cur : maxItem
+export const max = <T>(arr: T[], method: (T, T, number, T[]) => bool): T => (
+	arr.reduce((maxItem, cur, i) => (
+		method(maxItem, cur, i, arr) ? cur : maxItem
 	))
 )
 
