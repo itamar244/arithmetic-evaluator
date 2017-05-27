@@ -12,13 +12,13 @@ const rl = readline.createInterface({
 
 const question = query => new Promise(res => rl.question(query, res))
 
-// async function getParams(params) {
-// 	const givenParams = {}
-// 	for (const param of params) {
-// 		givenParams[param] = Number(await question(`enter value for param ${param}: `))
-// 	}
-// 	return givenParams
-// }
+async function getParams(params) {
+	const givenParams = {}
+	for (const param of params) {
+		givenParams[param] = Number(await question(`enter value for param ${param}: `))
+	}
+	return givenParams
+}
 
 main(process.argv)
 async function main(args) {
@@ -28,19 +28,11 @@ async function main(args) {
 		const parsedResult = parse(answer)
 
 		console.log(parsedResult)
-		global.p = parsedResult
 		if (parsedResult.state.errors.length === 0) {
-			console.log(evaluator(parsedResult.tree))
+			console.log(evaluator(parsedResult.tree, await getParams(parsedResult.state.params)))
+		} else {
+			console.error(parsedResult.state.errors[0])
 		}
-		// if (parsedResult.type === 'EXPRESSION') {
-		// 	do {
-		// 		console.log(evaluator.evaluate(parsedResult.body, await getParams(parsedResult.params)))
-		// 	} while (parsedResult.params.size > 0 && await question('try again? '))
-		// } else if (parsedResult.type === 'EQUATION') {
-		// 	console.log(evaluator.evaluateEquation(parsedResult.body, [...parsedResult.params][0]))
-		// } else {
-		// 	console.error(parsedResult.body)
-		// }
 		main(args)
 	} else {
 		rl.close()
