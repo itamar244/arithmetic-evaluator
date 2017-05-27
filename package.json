@@ -4,8 +4,9 @@
   "description": "receices string and evaluates it for numerical value",
   "main": "index.js",
   "scripts": {
+		"start": "babel-node index",
     "test": "jest --env=node",
-    "build": "babel src --out-dir=dist"
+    "build": "babel src --out-dir=\"dist/src\" && babel index.js -o \"dist/index.js\""
   },
   "author": "Itamar Yatom",
   "license": "MIT",
