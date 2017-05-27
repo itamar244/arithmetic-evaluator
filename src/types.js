@@ -27,8 +27,7 @@ export type BinOperator = NodeBase & {
 
 export type Literal = NodeBase & {
 	type: 'LITERAL',
-	value: number,
-	raw: string,
+	value: number
 }
 
 export type Function = NodeBase & {
@@ -39,4 +38,5 @@ export type Function = NodeBase & {
 
 export type Constant = NodeBase & {
 	type: 'CONSTANT',
+	name: string,
 }

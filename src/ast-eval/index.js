@@ -8,6 +8,8 @@ const evaluateExpression = (node: Node) => (
 	? evaluateExpression(node.body)
 	: node.is(tt.LITERAL)
 	?	node.value
+	: node.is(tt.CONSTANT)
+	? Math[node.name]
 	: node.is(tt.BIN_OPERATOR) && operators[node.operator]
 	? operators[node.operator](
 		node.left ? evaluateExpression(node.left) : 0,

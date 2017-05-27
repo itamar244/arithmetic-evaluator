@@ -57,7 +57,7 @@ export default class StatementParser {
 	parseToken(token: Token): N.Node {
 		switch (token.type) {
 			case tt.LITERAL:
-				return this.parseItem(token)
+				return this.parseLiteral(token)
 			case tt.BIN_OPERATOR:
 				return this.parseBinOperator(token)
 			case tt.BRACKETS:
@@ -66,6 +66,8 @@ export default class StatementParser {
 				return this.parseAbsBrackets(token)
 			case tt.FUNCTION:
 				return this.parseFunction(token.match)
+			case tt.CONSTANT:
+				return this.parseConstant(token)
 			default:
 				this.state.errors.push({
 					error: `${token.type}: wrong type`,
@@ -75,7 +77,7 @@ export default class StatementParser {
 		}
 	}
 
-	parseItem(token: Token): N.Literal {
+	parseLiteral(token: Token): N.Literal {
 		const node: N.Literal = new Node(token.type, token.match, this.state.pos)
 		node.value = Number(node.raw)
 		return node
@@ -110,6 +112,12 @@ export default class StatementParser {
 			.split(',')
 			.map(str => this.parseBrackets(str))
 
+		return node
+	}
+
+	parseConstant(token: Token): N.Constant {
+		const node: N.Constant = new Node(token.type, token.match, this.state.pos)
+		node.name = token.match
 		return node
 	}
 }
