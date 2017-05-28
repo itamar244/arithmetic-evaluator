@@ -18,5 +18,7 @@ module.exports = {
 		/* only because it used as if else with a clear syntax I created it's been silenced */
 		'no-nested-ternary': [0],
 		'no-mixed-operators': [0],
+		// flow does this for me
+		'no-undef': 0,
 	}
 }
