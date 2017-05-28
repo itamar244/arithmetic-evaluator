@@ -19,9 +19,9 @@ export const operators: {
 export const isOperator = (str: string) => has(operators, str)
 
 const ORDER = [
-	['+', '-'],
-	['*', '/', '%'],
-	['^'],
+	'+-',
+	'*/%',
+	'^',
 ]
 
 export const orderPosition = (str: string) => (

@@ -6,13 +6,12 @@ import type {
 } from '../types'
 import { orderPosition } from '../operators'
 import * as tt from '../tokenizer/types'
-import { has } from '../utils'
 
 export default class Node implements NodeBase {
 	type: string
 	loc: Location
 	raw: string
-	orderPosition: number | null = null
+	orderPosition: number | void
 
 	constructor(type: string, raw: string, start: number): NodeType {
 		this.type = type
@@ -27,34 +26,11 @@ export default class Node implements NodeBase {
 		if (this.type !== tt.BIN_OPERATOR) {
 			throw Error('can\'t get order on non operator item')
 		}
-		if (this.orderPosition === null) {
+		if (this.orderPosition === undefined) {
 			this.orderPosition = orderPosition(this.raw)
 		}
 
 		return this.orderPosition
-	}
-
-	is(type: string) {
-		return type === this.type
-	}
-
-	clone(): Node {
-		const node = new Node(this.type, this.raw, this.loc.start)
-
-		for (const key in this) {
-			if (has(this, key)) {
-				// $FlowIgnore
-				node[key] = this[key]
-			}
-		}
-
-		return node
-	}
-
-	set(key: string, val: *) {
-		// $FlowIgnore
-		this[key] = val
-		return this
 	}
 }
 
