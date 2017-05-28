@@ -1,15 +1,14 @@
 // @flow
-type BinOperatorName = string
-
 export type Location = {
 	start: number,
 	end: number,
 }
 
-export interface NodeBase {
+export type NodeBase = {
 	loc: Location,
 	raw: string,
 }
+
 
 export type Node =
 	Expression
@@ -19,16 +18,20 @@ export type Node =
 	| NamedNode
 
 
+export type BinNode = NodeBase & {
+	left: Node,
+	right: Node,
+}
+
+export type BinOperator = BinNode & {
+	type: 'BIN_OPERATOR',
+	operator: string,
+}
+
+
 export type Expression = NodeBase & {
 	type: 'EXPRESSION',
 	body: Node,
-}
-
-export type BinOperator = NodeBase & {
-	type: 'BIN_OPERATOR',
-	operator: BinOperatorName,
-	left: Node,
-	right: Node,
 }
 
 export type Literal = NodeBase & {
@@ -45,6 +48,8 @@ type FunctionNode = NodeBase & {
 // eslint-disable-next-line import/prefer-default-export
 export type { FunctionNode as Function }
 
+export type NamedNode = Constant | Parameter
+
 export type Constant = NodeBase & {
 	type: 'CONSTANT',
 	name: string,
@@ -54,5 +59,3 @@ export type Parameter = NodeBase & {
 	type: 'PARAM',
 	name: string,
 }
-
-export type NamedNode = Constant | Parameter
