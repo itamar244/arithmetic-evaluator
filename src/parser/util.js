@@ -1,8 +1,8 @@
 // @flow
 /* eslint-disable no-param-reassign */
-import * as tt from '../tokenizer/types'
-import Node from './node'
 import * as N from '../types'
+import * as tt from '../tokenizer/types'
+import typeof Node from './node'
 
 type Item = N.Node & Node
 

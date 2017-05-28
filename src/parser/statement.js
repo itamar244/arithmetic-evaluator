@@ -82,7 +82,7 @@ export default class StatementParser {
 			case tt.BIN_OPERATOR:
 				return this.parseBinOperator(token)
 			case tt.BRACKETS:
-				return this.parseBrackets(token.match)
+				return this.parseBrackets(token.match.slice(1, -1))
 			case tt.ABS_BRACKETS:
 				return this.parseAbsBrackets(token)
 			case tt.FUNCTION:
@@ -118,13 +118,13 @@ export default class StatementParser {
 	}
 
 	parseBrackets(match: string): N.Expression {
-		return this.parse(toTokens(match.slice(1, -1)), match)
+		return this.parse(toTokens(match), match)
 	}
 
 	parseAbsBrackets(token: Token): N.Function {
 		const node: N.Function = new Node(tt.FUNCTION, token.match, this.state.pos)
 		node.name = 'abs'
-		node.arguments = [this.parseBrackets(token.match)]
+		node.arguments = [this.parseBrackets(token.match.slice(1, -1))]
 
 		return node
 	}

@@ -9,17 +9,19 @@ logger.ifHasArgs(['-h', '--help'], () => logger.rulesOfExpression()).then((neede
 	if (neededHelp) {
 		cli.close()
 	} else {
-		main()
+		main(process.argv)
 	}
 })
 
-async function main() {
+async function main(args) {
 	const answer = await cli.question(' > ')
 
 	if (answer) {
 		const parsedResult = parse(answer)
 
-		logger.ifHasArgs(['--benchmark'], () => benchmark(parse, [answer], 5000))
+		logger.ifHasArgs(['--benchmark'], () =>
+			benchmark(parse, [answer], Number(args[args.indexOf('--benchmark') + 1]) || undefined),
+		)
 		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(parsedResult, null, 4))
 
 		if (parsedResult.state.errors.length === 0) {
@@ -41,7 +43,7 @@ async function main() {
 		} else {
 			logger.log(parsedResult.state.errors.map(error => error.raw).join('\n'), true)
 		}
-		main()
+		main(args)
 	} else {
 		cli.close()
 	}
