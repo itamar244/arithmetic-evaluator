@@ -1,29 +1,11 @@
 // @flow
-export const warning = (error: string) => (
-	// eslint-disable-next-line no-console
-	console.error(
-		`\nWe just had an error.\n ${error.replace(/\t/g, '').trim()}`,
-	)
-)
-
 // a nice getter like python for arrays
 export const get = <T>(arr: T[], i: number): T => (
 	arr[i < 0 ? arr.length + i : i]
 )
 
-// get the max value inside an array
-export const max = <T>(arr: T[], method: (T, T, number, T[]) => bool): T => (
-	arr.reduce((maxItem, cur, i) => (
-		method(maxItem, cur, i, arr) ? cur : maxItem
-	))
-)
-
 export const has = (obj: mixed, key: string) => (
 	Object.prototype.hasOwnProperty.call(obj, key)
-)
-
-export const flat = <T>(arr: T[][]): T[] => (
-	arr.reduce((val, cur) => val.concat(cur), [])
 )
 
 export async function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: number = 1000) {
@@ -53,4 +35,6 @@ export const pluralize = (num: number, item: string, items: string) => (
 	num === 1 ? item : items
 )
 
-export const getMatch = (str: string, regexp: RegExp) => (str.match(regexp) || [''])[0]
+export const getMatch = (str: string, regexp: RegExp) => (
+	(str.match(regexp) || [''])[0]
+)
