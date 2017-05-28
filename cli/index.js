@@ -2,8 +2,7 @@
 /* eslint no-await-in-loop: 0 */
 import {
 	parse,
-	evaluate,
-	evaluateEquation,
+	evaluateExpression,
 } from '../src'
 import * as logger from './logger'
 import * as cli from './interface'
@@ -22,14 +21,13 @@ async function main(args) {
 		logger.ifHasArgs(['--benchmark'], () => benchmark(parse, [answer], 5000))
 		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(parsedResult, null, 4))
 
-		if (parsedResult.type === 'EXPRESSION') {
-			do {
-				logger.result(evaluate(parsedResult.body, await cli.getParams(parsedResult.params)))
-			} while (parsedResult.params.size > 0 && await cli.question('try again? '))
-		} else if (parsedResult.type === 'EQUATION') {
-			logger.result(evaluateEquation(parsedResult.body, [...parsedResult.params][0]))
-		} else {
-			logger.log(parsedResult.body, true)
+		if (parsedResult.state.errors.length === 0) {
+			logger.result(
+				evaluateExpression(
+					parsedResult.tree,
+					await cli.getParams(parsedResult.state.params),
+				),
+			)
 		}
 		main(args)
 	} else {
