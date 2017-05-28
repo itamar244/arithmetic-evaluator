@@ -1,18 +1,19 @@
 // @flow
-/* eslint no-await-in-loop: 0 */
-import {
-	parse,
-	evaluateExpression,
-} from '../src'
-import * as logger from './logger'
+import { parse, evaluateExpression } from '../src'
 import * as cli from './interface'
+import * as logger from './logger'
 import { benchmark } from '../src/utils'
 
 logger.infoOfProgram()
-logger.ifHasArgs(['-h', '--help'], () => logger.rulesOfExpression())
+logger.ifHasArgs(['-h', '--help'], () => logger.rulesOfExpression()).then((neededHelp) => {
+	if (neededHelp) {
+		cli.close()
+	} else {
+		main()
+	}
+})
 
-main(process.argv)
-async function main(args) {
+async function main() {
 	const answer = await cli.question(' > ')
 
 	if (answer) {
@@ -29,7 +30,7 @@ async function main(args) {
 				),
 			)
 		}
-		main(args)
+		main()
 	} else {
 		cli.close()
 	}
