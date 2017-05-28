@@ -4,7 +4,7 @@
   "description": "receices string and evaluates it for numerical value",
   "main": "index.js",
   "scripts": {
-		"start": "babel-node index",
+		"start": "babel-node cli/index",
     "test": "jest --env=node",
     "build": "babel src --out-dir=\"dist/src\" && babel index.js -o \"dist/index.js\""
   },
