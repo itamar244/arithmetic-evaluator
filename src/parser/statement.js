@@ -16,7 +16,7 @@ type StatementState = {
 export default class StatementParser {
 	blob: string
 	tokens: Token[]
-	tree: N.Expression
+	trees: N.Expression[]
 	state: StatementState = {
 		pos: 0,
 		errors: [],
@@ -26,13 +26,25 @@ export default class StatementParser {
 	constructor(blob: string) {
 		this.blob = blob
 
-		this.tree = new Node('EXPRESSION', blob, this.state.pos)
+		const parts = blob.split('=')
 
-		this.parse(toTokens(blob))
+		if (parts.length > 2) {
+			this.state.errors.push(
+				new Node(tt.ERROR, 'to many equal signs. need max of one sign', this.state.pos),
+			)
+		} else {
+			this.trees = parts.map(part => (
+				this.parse(
+					toTokens(part),
+					part,
+				)
+			))
+		}
 	}
 
-	parse(tokens: Token[], tree: N.Expression = this.tree) {
+	parse(tokens: Token[], blob: string) {
 		const start = this.state.pos
+		const tree = new Node('EXPRESSION', blob, this.state.pos)
 		for (const token of tokens) {
 			this.state.pos += this.nextToken(token, tree)
 		}
@@ -79,12 +91,18 @@ export default class StatementParser {
 				return this.parseNamedNode(token)
 			case tt.PARAM:
 				return this.parseParam(token)
+			case tt.ERROR:
+				this.state.errors.push(
+					new Node(token.type, `${token.match}: not a valid token`, this.state.pos),
+				)
+				break
 			default:
 				this.state.errors.push(
 					new Node(tt.ERROR, `${token.type}: wrong type`, this.state.pos),
 				)
-				return get(this.state.errors, -1)
 		}
+
+		return get(this.state.errors, -1)
 	}
 
 	parseLiteral(token: Token): N.Literal {
@@ -100,10 +118,7 @@ export default class StatementParser {
 	}
 
 	parseBrackets(match: string): N.Expression {
-		return this.parse(
-			toTokens(match.slice(1, -1)),
-			new Node('EXPRESSION', match, this.state.pos),
-		)
+		return this.parse(toTokens(match.slice(1, -1)), match)
 	}
 
 	parseAbsBrackets(token: Token): N.Function {

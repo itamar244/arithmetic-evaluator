@@ -1,5 +1,5 @@
 // @flow
-import { parse, evaluateExpression } from '../src'
+import { parse, evaluateExpression, evaluateEquation } from '../src'
 import * as cli from './interface'
 import * as logger from './logger'
 import { benchmark } from '../src/utils'
@@ -23,12 +23,23 @@ async function main() {
 		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(parsedResult, null, 4))
 
 		if (parsedResult.state.errors.length === 0) {
-			logger.result(
-				evaluateExpression(
-					parsedResult.tree,
-					await cli.getParams(parsedResult.state.params),
-				),
-			)
+			if (parsedResult.trees.length === 1) {
+				logger.result(
+					evaluateExpression(
+						parsedResult.trees[0],
+						await cli.getParams(parsedResult.state.params),
+					),
+				)
+			} else {
+				logger.result(
+					evaluateEquation(
+						parsedResult.trees,
+						[...parsedResult.state.params][0],
+					),
+				)
+			}
+		} else {
+			logger.log(parsedResult.state.errors.map(error => error.raw).join('\n'), true)
 		}
 		main()
 	} else {

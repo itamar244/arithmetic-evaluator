@@ -9,4 +9,4 @@
  */
 
 export { default as parse } from './parser'
-export { default as evaluateExpression } from './evaluator'
+export { evaluateExpression, evaluateEquation } from './evaluator'
