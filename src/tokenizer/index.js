@@ -1,6 +1,6 @@
 // @flow
 import type { Token } from './types'
-import { toToken } from './util'
+import toToken from './util'
 import { getMatch } from '../utils'
 
 export type { Token }

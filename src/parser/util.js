@@ -2,15 +2,15 @@
 /* eslint-disable no-param-reassign */
 import * as N from '../types'
 import * as tt from '../tokenizer/types'
-import typeof Node from './node'
+import { getNodeOrder } from './node'
 
-type Item = N.Node & Node
+export default function pushItemToNode(node: N.Node, target: N.Node): N.Node {
+	if (!target) return node
 
-export default function pushItemToNode(node: Item, target: Item): Item {
 	if (node.type === tt.BIN_OPERATOR) {
 		if (
 			target.type === tt.BIN_OPERATOR
-			&& node.getOrder() > target.getOrder()
+			&& getNodeOrder(node) > getNodeOrder(target)
 		) {
 			target.right = pushItemToNode(node, target.right)
 			return target
@@ -20,6 +20,8 @@ export default function pushItemToNode(node: Item, target: Item): Item {
 		return node
 	}
 
-	target.right = target.right	? pushItemToNode(node, target.right) : node
+	if (target.type === tt.BIN_OPERATOR) {
+		target.right = target.right	? pushItemToNode(node, target.right) : node
+	}
 	return target
 }

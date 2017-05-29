@@ -44,7 +44,7 @@ export default class StatementParser {
 
 	parse(tokens: Token[], blob: string) {
 		const start = this.state.pos
-		const tree = new Node('EXPRESSION', blob, this.state.pos)
+		const tree: N.Expression = new Node('EXPRESSION', blob, this.state.pos)
 		for (const token of tokens) {
 			this.state.pos += this.nextToken(token, tree)
 		}
@@ -63,14 +63,17 @@ export default class StatementParser {
 			node.type !== tt.BIN_OPERATOR
 			&& tree.body && tree.body.type !== tt.BIN_OPERATOR
 		) {
-			this.nextToken({
+			const multi = this.parseToken({
 				type: tt.BIN_OPERATOR,
 				match: '*',
-			}, tree)
+			})
+
+			// eslint-disable-next-line no-param-reassign
+			tree.body = pushItemToNode(multi, tree.body)
 		}
 
 		// eslint-disable-next-line no-param-reassign
-		tree.body = tree.body != null ? pushItemToNode(node, tree.body) : node
+		tree.body = pushItemToNode(node, tree.body)
 
 		return token.match.length
 	}
@@ -91,37 +94,34 @@ export default class StatementParser {
 				return this.parseNamedNode(token)
 			case tt.PARAM:
 				return this.parseParam(token)
-			case tt.ERROR:
-				this.state.errors.push(
-					new Node(token.type, `${token.match}: not a valid token`, this.state.pos),
-				)
-				break
 			default:
 				this.state.errors.push(
-					new Node(tt.ERROR, `${token.type}: wrong type`, this.state.pos),
+					token.type === tt.ERROR
+					? new Node(token.type, `${token.match}: not a valid token`, this.state.pos)
+					: new Node(tt.ERROR, `${token.type}: wrong type`, this.state.pos),
 				)
 		}
 
 		return get(this.state.errors, -1)
 	}
 
-	parseLiteral(token: Token): N.Literal {
+	parseLiteral(token: Token) {
 		const node: N.Literal = new Node(token.type, token.match, this.state.pos)
 		node.value = Number(node.raw)
 		return node
 	}
 
-	parseBinOperator(token: Token): N.BinOperator {
+	parseBinOperator(token: Token) {
 		const node: N.BinOperator = new Node(token.type, token.match, this.state.pos)
 		node.operator = node.raw
 		return node
 	}
 
-	parseBrackets(match: string): N.Expression {
+	parseBrackets(match: string) {
 		return this.parse(toTokens(match), match)
 	}
 
-	parseAbsBrackets(token: Token): N.Function {
+	parseAbsBrackets(token: Token) {
 		const node: N.Function = new Node(tt.FUNCTION, token.match, this.state.pos)
 		node.name = 'abs'
 		node.arguments = [this.parseBrackets(token.match.slice(1, -1))]
@@ -129,7 +129,7 @@ export default class StatementParser {
 		return node
 	}
 
-	parseFunction(match: string): N.Function {
+	parseFunction(match: string) {
 		const node: N.Function = new Node(tt.FUNCTION, match, this.state.pos)
 
 		node.name = getMatch(match, /[a-z]+/)
@@ -141,13 +141,13 @@ export default class StatementParser {
 		return node
 	}
 
-	parseNamedNode(token: Token): N.NamedNode {
+	parseNamedNode(token: Token) {
 		const node: N.NamedNode = new Node(token.type, token.match, this.state.pos)
 		node.name = token.match
 		return node
 	}
 
-	parseParam(token: Token): N.NamedNode {
+	parseParam(token: Token) {
 		const node = this.parseNamedNode(token)
 		this.state.params.add(node.name)
 		return node

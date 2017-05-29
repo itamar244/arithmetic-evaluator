@@ -29,7 +29,7 @@ const matchingBracket = (str: string, index: number, start: string, end: string)
 	return 0
 }
 
-export function toToken(pos: number, blob: string) {
+export default function toToken(pos: number, blob: string) {
 	const char = blob.charAt(pos)
 
 	if (isOperator(char)) {

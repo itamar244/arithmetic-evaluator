@@ -4,11 +4,10 @@ export type Location = {
 	end: number,
 }
 
-export type NodeBase = {
+export interface NodeBase {
 	loc: Location,
 	raw: string,
 }
-
 
 export type Node =
 	Expression
@@ -21,13 +20,13 @@ export type Node =
 export type BinNode = NodeBase & {
 	left: Node,
 	right: Node,
+	__orderPosition?: number,
 }
 
 export type BinOperator = BinNode & {
 	type: 'BIN_OPERATOR',
 	operator: string,
 }
-
 
 export type Expression = NodeBase & {
 	type: 'EXPRESSION',

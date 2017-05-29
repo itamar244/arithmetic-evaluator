@@ -1,19 +1,17 @@
+// @flow
 import type {
 	Location,
 	NodeBase,
-	BinOperator,
-	Node as NodeType,
+	BinNode,
 } from '../types'
 import { orderPosition } from '../operators'
-import * as tt from '../tokenizer/types'
 
 export default class Node implements NodeBase {
-	type: string
+	type: any
 	loc: Location
 	raw: string
-	orderPosition: number | void
 
-	constructor(type: string, raw: string, start: number): NodeType {
+	constructor(type: string, raw: string, start: number): * {
 		this.type = type
 		this.raw = raw
 		this.loc = {
@@ -21,21 +19,14 @@ export default class Node implements NodeBase {
 			end: start + raw.length,
 		}
 	}
+}
 
-	getOrder(): number {
-		if (this.type !== tt.BIN_OPERATOR) {
-			throw Error('can\'t get order on non operator item')
-		}
-		if (this.orderPosition === undefined) {
-			this.orderPosition = orderPosition(this.raw)
-		}
-
-		return this.orderPosition
+/* eslint-disable no-underscore-dangle, no-param-reassign */
+export const getNodeOrder = (node: BinNode): number => {
+	if (node.__orderPosition === undefined) {
+		node.__orderPosition = orderPosition(node.raw)
 	}
-}
 
-
-export class BinOperatorNode extends Node implements BinOperator {
-	right: Node
-	left: Node
+	return node.__orderPosition
 }
+/* eslint-enable no-underscore-dangle, no-param-reassign */
