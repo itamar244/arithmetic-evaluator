@@ -1,12 +1,10 @@
 // @flow
-import type { Token } from './types'
 import toToken from './util'
 import { getMatch } from '../utils'
 
-export type { Token }
-export { toToken }
+export type { Token } from './types'
 
-export default function toTokens(str: string): Token[] {
+export default function toTokens(str: string) {
 	const tokens = []
 	let pos = 0
 
