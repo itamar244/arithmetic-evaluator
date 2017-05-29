@@ -14,7 +14,7 @@ some scripts are added for convenience
 ```
 $ npm start
 $ npm test
-$ npm build
+$ npm run build
 ```
 
 get `master` branch for better supports or get `ast-parser` for faster and revisted parser ad evaluator.
@@ -41,4 +41,4 @@ get `master` branch for better supports or get `ast-parser` for faster and revis
 
 - parameters can be used too. just use lower-cased chars and for each char the program will ask for its value.
 
-- the `master` branch supports equations. just put one parameter in the equation and add `=` sign.
+- also supports equations. just put one parameter in the equation and add `=` sign.

@@ -6,7 +6,7 @@
   "scripts": {
 		"start": "babel-node cli/index",
     "test": "jest --env=node",
-    "build": "babel src --out-dir=\"dist/src\" && babel index.js -o \"dist/index.js\""
+    "build": "babel src --out-dir=\"dist/src\" && babel cli --out-dir \"dist/cli\""
   },
   "author": "Itamar Yatom",
   "license": "MIT",
