@@ -1,8 +1,9 @@
 // @flow
 /* eslint no-console: 0, no-await-in-loop: 0 */
-const parser = require('./src/parser')
-const evaluator = require('./src/evaluator')
+const parse = require('./src/parser').default
+const evaluator = require('./src/evaluator').default
 const readline = require('readline')
+// const { benchmark } = require('./src/utils')
 
 const rl = readline.createInterface({
 	input: process.stdin,
@@ -23,17 +24,14 @@ main(process.argv)
 async function main(args) {
 	const answer = await question('please enter your arithematic expression: ')
 	if (answer) {
-		const parsedResult = parser.parse(answer)
+		// console.log(await benchmark(parse, [answer], 5000))
+		const parsedResult = parse(answer)
 
-		console.log(parsedResult.body)
-		if (parsedResult.type === 'EXPRESSION') {
-			do {
-				console.log(evaluator.evaluate(parsedResult.body, await getParams(parsedResult.params)))
-			} while (parsedResult.params.size > 0 && await question('try again? '))
-		} else if (parsedResult.type === 'EQUATION') {
-			console.log(evaluator.evaluateEquation(parsedResult.body, [...parsedResult.params][0]))
+		console.log(parsedResult)
+		if (parsedResult.state.errors.length === 0) {
+			console.log(evaluator(parsedResult.tree, await getParams(parsedResult.state.params)))
 		} else {
-			console.error(parsedResult.body)
+			console.error(parsedResult.state.errors[0])
 		}
 		main(args)
 	} else {

@@ -8,8 +8,8 @@ import { has } from './utils'
 export const operators: {
 	[key: string]: (number, number) => number
 } = {
-	'+': (a, b) => (typeof b === 'number' ? a + b : +a),
-	'-': (a, b) => (typeof b === 'number' ? a - b : -a),
+	'+': (a, b) => (typeof a === 'number' ? a + b : +b),
+	'-': (a, b) => (typeof a === 'number' ? a - b : -b),
 	'*': (a, b) => a * b,
 	'/': (a, b) => a / b,
 	'^': (a, b) => a ** b,

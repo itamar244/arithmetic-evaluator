@@ -8,5 +8,5 @@
  * @flow
  */
 
-export { parse } from './parser'
-export { evaluateEquation, evaluate } from './evaluator'
+export { default as parse } from './parser'
+export { default as evaluateExpression } from './evaluator'

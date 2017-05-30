@@ -1,67 +1,65 @@
-// @flow
 import type {
-	Tree,
-	TreeItemType,
-} from './types'
-import { PARAM } from './types'
+	Location,
+	NodeBase,
+	BinOperator,
+	Node as NodeType,
+} from '../types'
 import { orderPosition } from '../operators'
+import * as tt from '../tokenizer/types'
+import { has } from '../utils'
 
-export class Node {
-	+type: TreeItemType
-	+value: string
+export default class Node implements NodeBase {
+	type: string
+	loc: Location
+	raw: string
+	orderPosition: number | null = null
 
-	constructor(type: TreeItemType, value: mixed) {
-		// $FlowIgnore
-		Object.assign(this, {
-			type,
-			value: String(value),
-		})
-	}
-
-	is(type: TreeItemType): bool {
-		return this.type === type
-	}
-}
-
-const searchParam = arr => arr.some(item => (
-	item instanceof Array
-	? searchParam(item)
-	: item instanceof ArgumentNode
-	? item.hasParams
-	: item.is(PARAM)
-))
-
-
-export class ArgumentNode extends Node {
-	+args: Tree[]
-	hasParamsVal: bool|null = null
-
-	constructor(type: TreeItemType, value: string, args: Tree[]) {
-		super(type, value)
-
-		// $FlowIgnore
-		Object.assign(this, {
-			args,
-		})
-	}
-
-	hasParams(): bool {
-		if (this.hasParamsVal === null) {
-			this.hasParamsVal = this.args.some(searchParam)
+	constructor(type: string, raw: string, start: number): NodeType {
+		this.type = type
+		this.raw = raw
+		this.loc = {
+			start,
+			end: start + raw.length,
 		}
-
-		return this.hasParamsVal
 	}
-}
-
-export class OperatorNode extends Node {
-	orderPosition: number|null = null
 
 	getOrder(): number {
+		if (this.type !== tt.BIN_OPERATOR) {
+			throw Error('can\'t get order on non operator item')
+		}
 		if (this.orderPosition === null) {
-			this.orderPosition = orderPosition(this.value)
+			this.orderPosition = orderPosition(this.raw)
 		}
 
 		return this.orderPosition
 	}
+
+	is(type: string) {
+		return type === this.type
+	}
+
+	clone(): Node {
+		const node = new Node(this.type, this.raw, this.loc.start)
+
+		for (const key in this) {
+			if (has(this, key)) {
+				// $FlowIgnore
+				node[key] = this[key]
+			}
+		}
+
+		return node
+	}
+
+	set(key: string, val: *) {
+		// $FlowIgnore
+		this[key] = val
+		return this
+	}
+}
+
+
+export class BinOperatorNode extends Node implements BinOperator {
+	right: Node
+	left: Node
 }

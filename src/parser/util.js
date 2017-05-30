@@ -1,87 +1,25 @@
 // @flow
-import type { TreeItemType } from './'
-import * as tt from './types'
-import { isOperator } from './../operators'
+/* eslint-disable no-param-reassign */
+import * as tt from '../tokenizer/types'
+import Node from './node'
+import * as N from '../types'
 
-const PATTERNS = {
-	number: /^(?:(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?|^Infinity)/,
-	function: /^[a-z][a-z]+\(.*\)/,
-	constant: /^[A-Z][A-Z0-9]+|^[A-Z]/,
-}
+type Item = N.Node & Node
 
-const match = (type: TreeItemType, m: string) => ({ type, match: m })
-
-export const getMatch = (str: string, regexp: RegExp) => (str.match(regexp) || [''])[0]
-
-export default class UtilParser {
-	matchingBracket(str: string, index: number, start: string, end: string) {
-		let amountOfOpenBrackets = 0
-		for (let i = index + 1, len = str.length; i < len; i += 1) {
-			if (start.indexOf(str[i]) >= 0) {
-				amountOfOpenBrackets += 1
-			} else if (end.indexOf(str[i]) >= 0) {
-				amountOfOpenBrackets -= 1
-
-				if (amountOfOpenBrackets === -1) {
-					return i
-				}
-			}
+export default function pushItemToNode(node: Item, target: Item): Item {
+	if (node.type === tt.BIN_OPERATOR) {
+		if (
+			target.type === tt.BIN_OPERATOR
+			&& node.getOrder() > target.getOrder()
+		) {
+			target.right = pushItemToNode(node, target.right)
+			return target
 		}
-		return this.unexpected('wrong brackets amount')
+
+		node.left = target
+		return node
 	}
 
-	inferTypeAndMatch(pos: number, blob: string) {
-		const char = blob.charAt(pos)
-
-		if (isOperator(char)) {
-			return match(tt.OPERATOR, char)
-		}
-
-		if (char === '(') {
-			return match(
-				tt.BRACKETS,
-				blob.slice(pos, this.matchingBracket(blob, pos, '(', ')') + 1),
-			)
-		}
-
-		if (char === '|') {
-			return match(
-				tt.ABS_BRACKETS,
-				blob.slice(pos, this.matchingBracket(blob, pos, '(', '|)') + 1),
-			)
-		}
-
-		const str = blob.slice(pos)
-
-		const num = getMatch(str, PATTERNS.number)
-		if (num) {
-			return match(tt.NUMBER, num)
-		}
-
-
-		const func = getMatch(str, PATTERNS.function)
-		// if there is the following case <func>(<str>)...() the last bracket will fit,
-		// so this manually fix it
-		if (func) {
-			const matchedBracketIndex = this.matchingBracket(func, func.indexOf('('), '(', ')')
-			return match(tt.FUNCTION, func.slice(0, matchedBracketIndex + 1))
-		}
-
-		// needs to be after function because they both start with a char
-		if (char.match(/[a-z]/)) {
-			return match(tt.PARAM, char)
-		}
-
-		const constant = getMatch(str, PATTERNS.constant)
-		if (constant && typeof Math[constant] === 'number') {
-			return match(tt.CONSTANT, constant)
-		}
-
-		return match(tt.ERROR, str[0])
-	}
-
-	// eslint-disable-next-line class-methods-use-this
-	unexpected(error: string): void {
-		throw error
-	}
+	target.right = target.right	? pushItemToNode(node, target.right) : node
+	return target
 }
