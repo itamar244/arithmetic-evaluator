@@ -1,32 +1,36 @@
 // @flow
-/* eslint-env jest */
-import { evaluate, parse } from '../'
-import { Node } from '../parser/node'
-import * as tt from '../parser/types'
+import { parse, evaluateExpression, evaluateEquation } from '../'
 
-it("'3+3*3^3' should be equal 84", () => {
-	const res = parse('3+3*3^3')
+const expressions: [string, number, { [string]: number }][] = [
+	['3-3+ (3+3*3^3)( 2 - 1 ) + cos(PI)', 83, {}],
+	['cos(PI)', -1, {}],
+	['3 / 2', 3 / 2, {}],
+	['13.3 % 4', 13.3 % 4, {}],
+	['x - y', 10 - 5, { x: 10, y: 5 }],
+]
 
-	expect(res.type).toBe('EXPRESSION')
+it('should expression work', () => {
+	for (const [expr, val, params = {}] of expressions) {
+		const parsed = parse(expr)
 
-	expect(res).toMatchObject({
-		type: 'EXPRESSION',
-		body: [
-			new Node(tt.NUMBER, '3'),
-			new Node(tt.OPERATOR, '+'),
-			[
-				new Node(tt.NUMBER, '3'),
-				new Node(tt.OPERATOR, '*'),
-				[
-					new Node(tt.NUMBER, '3'),
-					new Node(tt.OPERATOR, '^'),
-					new Node(tt.NUMBER, '3'),
-				],
-			],
-		],
-	})
+		expect(evaluateExpression(parsed.trees[0].body, params)).toBe(val)
+	}
+})
 
-	if (res.type === 'EXPRESSION') {
-		expect(evaluate(res.body)).toBe(84)
+const equations = [
+	['2x=x+2', 2],
+	['x=sqrt(2)', Math.sqrt(2)],
+]
+
+it('should equations work', () => {
+	for (const [expr, val] of equations) {
+		const parsed = parse(expr)
+
+		expect(
+			evaluateEquation(
+				parsed.trees,
+				[...parsed.state.params][0],
+			),
+		).toBe(val)
 	}
 })

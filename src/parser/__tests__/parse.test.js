@@ -1,0 +1,68 @@
+// @flow
+import parse from '../'
+import * as tt from '../../tokenizer/types'
+import { op, expr, item, func } from './utils'
+
+const expressions = [
+	['3+3', op('+', item(tt.LITERAL, '3'), item(tt.LITERAL, '3'))],
+
+	['x+x*x^x',
+		op('+',
+			item(tt.PARAM, 'x'),
+			op('*',
+				item(tt.PARAM, 'x'),
+				op('^',
+					item(tt.PARAM, 'x'),
+					item(tt.PARAM, 'x'),
+				),
+			),
+		),
+	],
+
+	['y (( y + y ))',
+		op('*',
+			item(tt.PARAM, 'y'),
+			expr(
+				expr(
+					op('+',
+						item(tt.PARAM, 'y'),
+						item(tt.PARAM, 'y'),
+					),
+				),
+			),
+		),
+	],
+
+	['max(3, PI)',
+		func('max',
+			item(tt.LITERAL, '3'),
+			item(tt.CONSTANT, 'PI'),
+		),
+	],
+
+	['| - 3 |',
+		func('cos',
+			op('-',	undefined, item(tt.LITERAL, '3')),
+		),
+	],
+
+	['#',	item(tt.ERROR, '#: not a valid token')],
+	['(',	item('EXPRESSION', '')],
+]
+
+describe('parse method', () => {
+	for (const [blob, trees] of expressions) {
+		const statement = parse(blob)
+
+		// eslint-disable-next-line no-loop-func
+		it(`${blob} should be the correct tree`, () => {
+			if (trees instanceof Array) {
+				for (let i = 0; i < trees.length; i += 1) {
+					expect(statement.trees[i].body).toMatchObject(trees[i])
+				}
+			} else {
+				expect(statement.trees[0].body).toMatchObject(trees)
+			}
+		})
+	}
+})

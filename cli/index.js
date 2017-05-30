@@ -1,35 +1,47 @@
 // @flow
-/* eslint no-await-in-loop: 0 */
-import {
-	parse,
-	evaluate,
-	evaluateEquation,
-} from '../src'
-import * as logger from './logger'
+import { parse, evaluateExpression, evaluateEquation } from '../src'
 import * as cli from './interface'
+import * as logger from './logger'
 import { benchmark } from '../src/utils'
 
 logger.infoOfProgram()
-logger.ifHasArgs(['-h', '--help'], () => logger.rulesOfExpression())
+logger.ifHasArgs(['-h', '--help'], () => logger.rulesOfExpression()).then((neededHelp) => {
+	if (neededHelp) {
+		cli.close()
+	} else {
+		main(process.argv)
+	}
+})
 
-main(process.argv)
 async function main(args) {
 	const answer = await cli.question(' > ')
 
 	if (answer) {
 		const parsedResult = parse(answer)
 
-		logger.ifHasArgs(['--benchmark'], () => benchmark(parse, [answer], 5000))
+		logger.ifHasArgs(['--benchmark'], () =>
+			benchmark(parse, [answer], Number(args[args.indexOf('--benchmark') + 1]) || undefined),
+		)
 		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(parsedResult, null, 4))
 
-		if (parsedResult.type === 'EXPRESSION') {
-			do {
-				logger.result(evaluate(parsedResult.body, await cli.getParams(parsedResult.params)))
-			} while (parsedResult.params.size > 0 && await cli.question('try again? '))
-		} else if (parsedResult.type === 'EQUATION') {
-			logger.result(evaluateEquation(parsedResult.body, [...parsedResult.params][0]))
+		if (parsedResult.state.errors.length === 0) {
+			if (parsedResult.trees.length === 1) {
+				logger.result(
+					evaluateExpression(
+						parsedResult.trees[0],
+						await cli.getParams(parsedResult.state.params),
+					),
+				)
+			} else {
+				logger.result(
+					evaluateEquation(
+						parsedResult.trees,
+						[...parsedResult.state.params][0],
+					),
+				)
+			}
 		} else {
-			logger.log(parsedResult.body, true)
+			logger.log(parsedResult.state.errors.map(error => error.raw).join('\n'), true)
 		}
 		main(args)
 	} else {

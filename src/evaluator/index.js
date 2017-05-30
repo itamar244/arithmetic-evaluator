@@ -1,8 +1,7 @@
 // @flow
-import type { Tree } from './../parser'
-import { operators, isOperator } from './../operators'
-import flatEquation from './flat-items'
-import { Node, ArgumentNode } from './../parser/node'
+import * as tt from '../tokenizer/types'
+import * as N from '../types'
+import { operators } from '../operators'
 
 const toFixed = precision => (num) => {
 	if (!precision) {
@@ -14,7 +13,7 @@ const toFixed = precision => (num) => {
 
 // using newton's binom for getting the correct value
 export function evaluateEquation(
-	startingEquation: Tree[],
+	startingEquation: N.Expression[],
 	variableName: string,
 	firstTime: bool = true,
 ) {
@@ -29,7 +28,7 @@ export function evaluateEquation(
 	let values: number[] = [0, 1]
 	let tmpToFixed = toFixed()
 
-	const equation = firstTime ? flatEquation(startingEquation) : startingEquation
+	const equation = startingEquation
 
 	// because NaN !== NaN the first run should work even if values is an empty array
 	for (let i = 1; tmpToFixed(values[0]) !== tmpToFixed(values[1]); i += 1) {
@@ -38,10 +37,10 @@ export function evaluateEquation(
 
 		change *= dir === prevDir ? 1.5 : 1 / 4
 		params[variableName] += dir * change
-		values = equation.map(tree => evaluate(tree, params))
+		values = equation.map(tree => evaluateExpression(tree, params))
 
-		// for irrational results for variableName the 20 digits precision wil cause infinte loop
-		// so the precision gets smaller for too many loops
+		/* for irrational results for variableName the 20 digits precision wil cause infinte loop
+		 * so the precision gets smaller for too many loops */
 		if (i % 1000 === 0) tmpToFixed = toFixed(16 - (Math.floor(i / 1000)))
 		// if one of the values is Infinity than it will return
 		if (values.some(n => Math.abs(n) === Infinity) && i > 100) {
@@ -62,37 +61,21 @@ export function evaluateEquation(
 	)
 }
 
-const next = (value, operator, cur) => (
-	operator && operator.type === 'OPERATOR' && isOperator(operator.value)
-		? operators[operator.value](value, cur)
-		: operators['*'](value || 1, cur)
-)
-
-
-export const evaluate = (
-	tree: Tree,
-	params: { [key: string]: number } = {},
-) => (
-	tree
-		.map(item => (
-			Array.isArray(item)
-				? new Node('NUMBER', String(evaluate(item, params)))
-				: item
-		))
-		.reduce((value, node, i, mapedTree) => {
-			// saving temporarly the next function
-			const tempNext = cur => next(value, mapedTree[i - 1], cur)
-
-			return (
-				node.is('PARAM')
-				? tempNext(Number(params[node.value]))
-				: node.is('NUMBER')
-				? tempNext(Number(node.value))
-				: node.is('CONSTANT')
-				? tempNext(Math[node.value] || 0)
-				: node instanceof ArgumentNode
-				? tempNext(Math[node.value](...node.args.map(t => evaluate(t, params))))
-				: value /* default */
-			)
-		}, 0)
+export const evaluateExpression = (node: N.Node, params: { [string]: number }) => (
+	node.type === 'EXPRESSION'
+	? evaluateExpression(node.body, params)
+	: node.type === tt.LITERAL
+	?	node.value
+	: node.type === tt.CONSTANT
+	? Math[node.name]
+	: node.type === tt.BIN_OPERATOR
+	? operators[node.operator](
+		node.left ? evaluateExpression(node.left, params) : 0,
+		evaluateExpression(node.right, params),
+	)
+	: node.type === tt.FUNCTION
+	? Math[node.name](...node.arguments.map(arg => evaluateExpression(arg, params)))
+	: node.type === tt.PARAM
+	? params[node.name]
+	: 0
 )

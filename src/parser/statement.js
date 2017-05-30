@@ -1,141 +1,155 @@
 // @flow
-import type { TreeItemType } from './types'
-import * as tt from './types'
-import UtilParser, { getMatch } from './util'
-import Expression from './expression'
-import isNotValidFunction from './../functions'
-import { Node, ArgumentNode, OperatorNode } from './node'
+import * as N from '../types'
+import * as tt from '../tokenizer/types'
+import toTokens from '../tokenizer'
+import type { Token } from '../tokenizer'
+import { getMatch, get } from '../utils'
+import Node from './node'
+import pushItemToNode from './util'
 
-type Options = {
-	blob?: string,
-	isNewTree?: bool,
-	start?: number,
-	end?: number
+type StatementState = {
+	pos: number,
+	errors: N.Node[],
+	params: Set<string>,
 }
 
-export default class Statement extends UtilParser {
-	tree: Expression
+export default class StatementParser {
 	blob: string
-
-	constructor(blob: string, params?: Set<string>) {
-		super()
-
-		this.tree = new Expression({ params })
-		this.blob = blob
-
-		this.parse()
+	tokens: Token[]
+	trees: N.Expression[]
+	state: StatementState = {
+		pos: 0,
+		errors: [],
+		params: new Set(),
 	}
 
-	parse({
-		blob = this.blob,
-		isNewTree = false,
-		start = 0,
-		end = blob.length - 1,
-	}: Options = {}): Expression {
-		const tree = isNewTree ? new Expression({ parent: this.tree }) : this.tree
-		let pos = start
+	constructor(blob: string) {
+		this.blob = blob
 
-		while (pos <= end) {
-			pos += this.nextNode(pos, blob, tree, pos === start)
+		const parts = blob.split('=')
+
+		if (parts.length > 2) {
+			this.state.errors.push(
+				new Node(tt.ERROR, 'to many equal signs. need max of one sign', this.state.pos),
+			)
+		} else {
+			this.trees = parts.map(part => (
+				this.parse(
+					toTokens(part),
+					part,
+				)
+			))
 		}
+	}
+
+	parse(tokens: Token[], blob: string) {
+		const start = this.state.pos
+		const tree: N.Expression = new Node('EXPRESSION', blob, this.state.pos)
+		for (const token of tokens) {
+			this.state.pos += this.nextToken(token, tree)
+		}
+
+		this.state.pos = start
 
 		return tree
 	}
 
-	nextNode(pos: number, blob: string, tree: Expression, firstItem: bool): number {
-		if (blob[pos] === ' ') return getMatch(blob, /\s+/).length
+	nextToken(token: Token, tree: N.Expression) {
+		if (this.state.pos >= this.blob.length) return 0
 
-		const { type, match } = this.inferTypeAndMatch(pos, blob)
+		const node = this.parseToken(token)
 
-		// if there now operator between two items, than a '*' operator will be added
 		if (
-			type !== tt.OPERATOR
-			// could be bigger than 0, but it doesn't matter so this is faster
-			&& tree.items.length > 1
-			&& !(tree.get(-1) instanceof OperatorNode)
+			node.type !== tt.BIN_OPERATOR
+			&& tree.body && tree.body.type !== tt.BIN_OPERATOR
 		) {
-			tree.add(new OperatorNode(tt.OPERATOR, '*'))
+			const multi = this.parseToken({
+				type: tt.BIN_OPERATOR,
+				match: '*',
+			})
+
+			// eslint-disable-next-line no-param-reassign
+			tree.body = pushItemToNode(multi, tree.body)
 		}
 
-		tree.add(this.parseToItem(pos, type, match, tree.params, firstItem))
+		// eslint-disable-next-line no-param-reassign
+		tree.body = pushItemToNode(node, tree.body)
 
-		// if there are two operators near each other
-		if (type === tt.OPERATOR && tree.get(-2) instanceof OperatorNode) {
-			this.unexpected('two operators can not be near each other')
-		} else if (type === tt.PARAM && !tree.params.has(match)) {
-			tree.params.add(match)
-		}
-
-		return type === tt.ERROR || tree.get(-1).type === tt.ERROR ? 1 : match.length
+		return token.match.length
 	}
 
-	parseToItem(
-		pos: number,
-		type: TreeItemType,
-		match: string,
-		params: Set<string>,
-		firstItem: bool,
-	) {
-		switch (type) {
-			case tt.OPERATOR:
-				return this.parseOperatorNode(type, match, pos, firstItem)
-			case tt.NUMBER:
-			case tt.CONSTANT:
-			case tt.PARAM:
-			case tt.ERROR:
-				return new Node(type, match)
-			case tt.FUNCTION:
-				return this.parseFunction(type, match)
-			case tt.ABS_BRACKETS:
-				return this.parseAbsBrackets(type, match, pos)
+	parseToken(token: Token) {
+		switch (token.type) {
+			case tt.LITERAL:
+				return this.parseLiteral(token)
+			case tt.BIN_OPERATOR:
+				return this.parseBinOperator(token)
 			case tt.BRACKETS:
-				return this.parseBrackets(type, match, pos)
+				return this.parseBrackets(token.match.slice(1, -1))
+			case tt.ABS_BRACKETS:
+				return this.parseAbsBrackets(token)
+			case tt.FUNCTION:
+				return this.parseFunction(token.match)
+			case tt.CONSTANT:
+				return this.parseNamedNode(token)
+			case tt.PARAM:
+				return this.parseParam(token)
 			default:
-				throw new Error(`${type} is not a valid type`)
-		}
-	}
-
-	parseOperatorNode(type: TreeItemType, match: string, pos: number, firstItem: bool) {
-		const op: OperatorNode = new OperatorNode(type, match)
-
-		// + and - can be in pos 0
-		if (firstItem && op.getOrder() !== 1) {
-			this.unexpected(`${match} can't be the first operator`)
+				this.state.errors.push(
+					token.type === tt.ERROR
+					? new Node(token.type, `${token.match}: not a valid token`, this.state.pos)
+					: new Node(tt.ERROR, `${token.type}: wrong type`, this.state.pos),
+				)
 		}
 
-		return op
+		return get(this.state.errors, -1)
 	}
 
-	parseFunction(type: TreeItemType, match: string): Node {
-		const name = getMatch(match, /^[a-z]+/)
-		const args = getMatch(match, /\(.+\)/)
+	parseLiteral(token: Token) {
+		const node: N.Literal = new Node(token.type, token.match, this.state.pos)
+		node.value = Number(node.raw)
+		return node
+	}
+
+	parseBinOperator(token: Token) {
+		const node: N.BinOperator = new Node(token.type, token.match, this.state.pos)
+		node.operator = node.raw
+		return node
+	}
+
+	parseBrackets(match: string) {
+		return this.parse(toTokens(match), match)
+	}
+
+	parseAbsBrackets(token: Token) {
+		const node: N.Function = new Node(tt.FUNCTION, token.match, this.state.pos)
+		node.name = 'abs'
+		node.arguments = [this.parseBrackets(token.match.slice(1, -1))]
+
+		return node
+	}
+
+	parseFunction(match: string) {
+		const node: N.Function = new Node(tt.FUNCTION, match, this.state.pos)
+
+		node.name = getMatch(match, /[a-z]+/)
+		node.arguments = getMatch(match, /\(.+\)/)
 			.slice(1, -1)
 			.split(',')
-			.map(blob => this.parse({ blob, isNewTree: true }).toArray())
+			.map(str => this.parseBrackets(str))
 
-		const isNotValid = isNotValidFunction(name, args)
-
-		if (isNotValid) {
-			this.unexpected(isNotValid)
-		}
-
-		return new ArgumentNode(type, name, args)
+		return node
 	}
 
-	parseAbsBrackets(type: TreeItemType, match: string, pos: number): ArgumentNode {
-		return new ArgumentNode(
-			tt.FUNCTION,
-			'abs',
-			[this.parse({ start: pos + 1, end: pos + match.length - 2, isNewTree: true }).toArray()],
-		)
+	parseNamedNode(token: Token) {
+		const node: N.NamedNode = new Node(token.type, token.match, this.state.pos)
+		node.name = token.match
+		return node
 	}
 
-	parseBrackets(type: TreeItemType, match: string, pos: number): Expression {
-		// slicing for removing the breckets from the string
-		return this.parse({
-			isNewTree: true,
-			start: pos + 1,
-			end: pos + match.length - 2,
-		})
+	parseParam(token: Token) {
+		const node = this.parseNamedNode(token)
+		this.state.params.add(node.name)
+		return node
 	}
 }
