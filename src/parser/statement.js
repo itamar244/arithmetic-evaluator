@@ -112,14 +112,14 @@ export default class StatementParser {
 		return new Node(token.type, token.match, this.state.pos)
 	}
 
-	parseLiteral(token: Token) {
-		const node: N.Literal = this.createNode(token)
+	parseLiteral(token: Token): N.Literal {
+		const node = this.createNode(token)
 		node.value = Number(node.raw)
 		return node
 	}
 
-	parseBinOperator(token: Token) {
-		const node: N.BinOperator = this.createNode(token)
+	parseBinOperator(token: Token): N.BinOperator {
+		const node = this.createNode(token)
 		node.operator = node.raw
 		// NOTE: because both are initialized to null this is faster
 		// eslint-disable-next-line no-multi-assign
@@ -131,8 +131,8 @@ export default class StatementParser {
 		return this.parse(toTokens(match), match)
 	}
 
-	parseAbsBrackets(token: Token) {
-		const node: N.Function = this.createNode({
+	parseAbsBrackets(token: Token): N.Function {
+		const node = this.createNode({
 			type: tt.FUNCTION,
 			match: token.match,
 		})
@@ -142,8 +142,8 @@ export default class StatementParser {
 		return node
 	}
 
-	parseFunction(token: Token) {
-		const node: N.Function = this.createNode(token)
+	parseFunction(token: Token): N.Function {
+		const node = this.createNode(token)
 
 		node.name = getMatch(token.match, /[a-z]+/)
 		node.arguments =
@@ -164,8 +164,8 @@ export default class StatementParser {
 		return node
 	}
 
-	parseNamedNode(token: Token) {
-		const node: N.NamedNode = this.createNode(token)
+	parseNamedNode(token: Token): N.NamedNode {
+		const node = this.createNode(token)
 		node.name = token.match
 		return node
 	}
