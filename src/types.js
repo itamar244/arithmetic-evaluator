@@ -30,7 +30,7 @@ export type BinOperator = BinNode & {
 
 export type Expression = NodeBase & {
 	type: 'EXPRESSION',
-	body: Node,
+	body?: Node,
 }
 
 export type Literal = NodeBase & {

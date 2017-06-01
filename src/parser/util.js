@@ -4,7 +4,7 @@ import * as N from '../types'
 import * as tt from '../tokenizer/types'
 import { getNodeOrder } from './node'
 
-export default function pushItemToNode(node: N.Node, target: N.Node): N.Node {
+export default function pushItemToNode(node: N.Node, target?: N.Node): N.Node {
 	if (!target) return node
 
 	if (node.type === tt.BIN_OPERATOR) {

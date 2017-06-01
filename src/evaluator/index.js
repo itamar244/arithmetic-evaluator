@@ -65,8 +65,10 @@ export function evaluateEquation(
 	)
 }
 
-export const evaluateExpression = (node: N.Node, params: { [string]: number }) => (
-	node.type === tt.LITERAL
+export const evaluateExpression = (node?: N.Node, params?: { [string]: number } = {}) => (
+	!node
+	? 0
+	: node.type === tt.LITERAL
 	?	node.value
 	: node.type === tt.BIN_OPERATOR
 	? operators[node.operator](
@@ -74,7 +76,7 @@ export const evaluateExpression = (node: N.Node, params: { [string]: number }) =
 		node.right ? evaluateExpression(node.right, params) : 0,
 	)
 	: node.type === 'EXPRESSION'
-	? evaluateExpression(node.body, params)
+	? (node.body ? evaluateExpression(node.body, params) : 0)
 	: node.type === tt.CONSTANT
 	? Math[node.name]
 	: node.type === tt.FUNCTION

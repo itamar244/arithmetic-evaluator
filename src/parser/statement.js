@@ -6,6 +6,7 @@ import type { Token } from '../tokenizer'
 import { getMatch, get } from '../utils'
 import Node from './node'
 import pushItemToNode from './util'
+import isNotValidFunction from '../functions'
 
 type StatementState = {
 	pos: number,
@@ -105,7 +106,7 @@ export default class StatementParser {
 		return get(this.state.errors, -1)
 	}
 
-	createNode(token: Token) {
+	createNode(token: Token): N.Node & { [string]: any } {
 		return new Node(token.type, token.match, this.state.pos)
 	}
 
@@ -129,7 +130,10 @@ export default class StatementParser {
 	}
 
 	parseAbsBrackets(token: Token) {
-		const node: N.Function = new Node(tt.FUNCTION, token.match, this.state.pos)
+		const node: N.Function = this.createNode({
+			type: tt.FUNCTION,
+			match: token.match,
+		})
 		node.name = 'abs'
 		node.arguments = [this.parseBrackets(token.match.slice(1, -1))]
 
@@ -140,10 +144,20 @@ export default class StatementParser {
 		const node: N.Function = this.createNode(token)
 
 		node.name = getMatch(token.match, /[a-z]+/)
-		node.arguments = getMatch(token.match, /\(.+\)/)
+		node.arguments =
+			token.match.replace(node.name, '')
 			.slice(1, -1)
 			.split(',')
 			.map(str => this.parseBrackets(str))
+
+		const isNotValid = isNotValidFunction(node.name, node.arguments)
+
+		if (isNotValid) {
+			this.state.errors.push(this.createNode({
+				type: tt.ERROR,
+				match: isNotValid,
+			}))
+		}
 
 		return node
 	}

@@ -27,10 +27,13 @@ export const functions = new Map([
 
 export default function isNotValidFunction(name: string, { length: argsLen }: any[]) {
 	const len = functions.get(name)
-	if (!len) {
-		return 'not a valid function'
-	} else if (argsLen !== len && len !== 0 && len !== Infinity) {
-		return `${name}: needed ${len} arguments, while ${argsLen} ${pluralize(argsLen, 'was', 'where')} given`
+	if (len == null) {
+		return `'${name}' is not a valid function`
+	} else if (argsLen !== len && len !== Infinity) {
+		return (
+			`'${name}' needed ${len} ${pluralize(len, 'argument', 'arguments')},` +
+			`while ${argsLen} ${pluralize(argsLen, 'was', 'where')} given`
+		)
 	}
 
 	return false
