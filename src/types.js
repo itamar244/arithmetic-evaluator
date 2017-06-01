@@ -41,7 +41,7 @@ export type Literal = NodeBase & {
 type FunctionNode = NodeBase & {
 	type: 'FUNCTION',
 	name: string,
-	arguments: Node[],
+	args: Node[],
 }
 // there is some problem with built-in Function class, so this fixes it
 // eslint-disable-next-line import/prefer-default-export

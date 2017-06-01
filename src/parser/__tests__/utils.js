@@ -29,7 +29,7 @@ export const expr = (body: Item): Item => ({
 })
 
 export const func = (name: string, ...args: Item[]) => ({
-	arguments: args.map(expr),
+	args: args.map(expr),
 	type: tt.FUNCTION,
 })
 

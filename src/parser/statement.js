@@ -137,7 +137,7 @@ export default class StatementParser {
 			match: token.match,
 		})
 		node.name = 'abs'
-		node.arguments = [this.parseBrackets(token.match.slice(1, -1))]
+		node.args = [this.parseBrackets(token.match.slice(1, -1))]
 
 		return node
 	}
@@ -146,13 +146,13 @@ export default class StatementParser {
 		const node = this.createNode(token)
 
 		node.name = getMatch(token.match, /[a-z]+/)
-		node.arguments =
+		node.args =
 			token.match.replace(node.name, '')
 			.slice(1, -1)
 			.split(',')
 			.map(str => this.parseBrackets(str))
 
-		const isNotValid = isNotValidFunction(node.name, node.arguments)
+		const isNotValid = isNotValidFunction(node.name, node.args)
 
 		if (isNotValid) {
 			this.state.errors.push(this.createNode({
