@@ -3,7 +3,9 @@ import type {
 	Location,
 	NodeBase,
 	BinNode,
+	Node as NodeType,
 } from '../types'
+import * as tt from '../tokenizer/types'
 import { orderPosition } from '../operators'
 
 export default class Node implements NodeBase {
@@ -30,3 +32,9 @@ export const getNodeOrder = (node: BinNode): number => {
 	return node.__orderPosition
 }
 /* eslint-enable no-underscore-dangle, no-param-reassign */
+
+export const getBinNodeDeepSide = <T: NodeType>(node: T, side: 'left' | 'right'): T => (
+	node.type === tt.BIN_OPERATOR
+	? node[side] && getBinNodeDeepSide(node[side], side) || node
+	: node
+)
