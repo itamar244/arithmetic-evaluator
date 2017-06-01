@@ -10,6 +10,7 @@ export default function pushItemToNode(node: N.Node, target: N.Node): N.Node {
 	if (node.type === tt.BIN_OPERATOR) {
 		if (
 			target.type === tt.BIN_OPERATOR
+			&& target.right
 			&& getNodeOrder(node) > getNodeOrder(target)
 		) {
 			target.right = pushItemToNode(node, target.right)

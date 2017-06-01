@@ -18,8 +18,8 @@ export type Node =
 
 
 export type BinNode = NodeBase & {
-	left: Node,
-	right: Node,
+	left: ?Node,
+	right: ?Node,
 	__orderPosition?: number,
 }
 

@@ -89,7 +89,7 @@ export default class StatementParser {
 			case tt.ABS_BRACKETS:
 				return this.parseAbsBrackets(token)
 			case tt.FUNCTION:
-				return this.parseFunction(token.match)
+				return this.parseFunction(token)
 			case tt.CONSTANT:
 				return this.parseNamedNode(token)
 			case tt.PARAM:
@@ -105,15 +105,22 @@ export default class StatementParser {
 		return get(this.state.errors, -1)
 	}
 
+	createNode(token: Token) {
+		return new Node(token.type, token.match, this.state.pos)
+	}
+
 	parseLiteral(token: Token) {
-		const node: N.Literal = new Node(token.type, token.match, this.state.pos)
+		const node: N.Literal = this.createNode(token)
 		node.value = Number(node.raw)
 		return node
 	}
 
 	parseBinOperator(token: Token) {
-		const node: N.BinOperator = new Node(token.type, token.match, this.state.pos)
+		const node: N.BinOperator = this.createNode(token)
 		node.operator = node.raw
+		// NOTE: because both are initialized to null this is faster
+		// eslint-disable-next-line no-multi-assign
+		node.left = node.right = null
 		return node
 	}
 
@@ -129,11 +136,11 @@ export default class StatementParser {
 		return node
 	}
 
-	parseFunction(match: string) {
-		const node: N.Function = new Node(tt.FUNCTION, match, this.state.pos)
+	parseFunction(token: Token) {
+		const node: N.Function = this.createNode(token)
 
-		node.name = getMatch(match, /[a-z]+/)
-		node.arguments = getMatch(match, /\(.+\)/)
+		node.name = getMatch(token.match, /[a-z]+/)
+		node.arguments = getMatch(token.match, /\(.+\)/)
 			.slice(1, -1)
 			.split(',')
 			.map(str => this.parseBrackets(str))
@@ -142,7 +149,7 @@ export default class StatementParser {
 	}
 
 	parseNamedNode(token: Token) {
-		const node: N.NamedNode = new Node(token.type, token.match, this.state.pos)
+		const node: N.NamedNode = this.createNode(token)
 		node.name = token.match
 		return node
 	}
