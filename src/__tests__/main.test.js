@@ -1,7 +1,7 @@
 // @flow
 import { parse, evaluateExpression, evaluateEquation } from '../'
 
-const expressions: [string, number, { [string]: number }][] = [
+const expressions = [
 	['3-3+ (3+3*3^3)( 2 - 1 ) + cos(PI)', 83, {}],
 	['cos(PI)', -1, {}],
 	['3 / 2', 3 / 2, {}],

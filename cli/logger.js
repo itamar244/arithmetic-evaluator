@@ -1,7 +1,6 @@
 // @flow
-/* eslint-disable no-console */
-
 export function log(str: string, error: bool = false) {
+	// eslint-disable-next-line no-console
 	(error ? console.error : console.log)(str.replace(/\t*/g, ''))
 }
 
@@ -44,7 +43,7 @@ export function rulesOfExpression() {
 
 		     - parameters can be used too.
 	         just use lower-cased chars and for each char the program will ask for its value.
-					 
+
 		     - also supports equations. just put one parameter in the equation and add \`=\` sign.
 	`)
 }

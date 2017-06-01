@@ -5,15 +5,15 @@
  * handles the checks around the functions for the parser.
  *
  * the main function checks if there is such a function
- * and if there are execatly enough arguments to the fitting function
+ * and if there are execatly enough args to the fitting function
  *
  * @flow
  */
 
 import { pluralize } from './utils'
 
-/* Map<string presesting the name, length: the needed length arguments>
- * Infinity means any length of arguments */
+/* Map<string presesting the name, length: the needed length args>
+ * Infinity means any length of args */
 export const functions = new Map([
 	['cos', 1],
 	['sin', 1],

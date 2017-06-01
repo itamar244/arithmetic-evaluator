@@ -18,7 +18,7 @@ export type TokenType =
 	| typeof LITERAL
 	| typeof PARAM
 
-export interface Token {
+export type Token = {
 	type: TokenType;
 	match: string;
 }
