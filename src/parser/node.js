@@ -13,7 +13,7 @@ export default class Node implements NodeBase {
 	loc: Location
 	raw: string
 
-	constructor(type: string, raw: string, start: number): * {
+	constructor(type: string, raw: string, start: number) {
 		this.type = type
 		this.raw = raw
 		this.loc = {
@@ -33,8 +33,8 @@ export const getNodeOrder = (node: BinNode): number => {
 }
 /* eslint-enable no-underscore-dangle, no-param-reassign */
 
-export const getBinNodeDeepSide = <T: NodeType>(node: T, side: 'left' | 'right'): T => (
+export const getBinNodeSideDeep = <T: NodeType>(node: T, side: 'left' | 'right'): T => (
 	node.type === tt.BIN_OPERATOR
-	? node[side] && getBinNodeDeepSide(node[side], side) || node
+	? node[side] && getBinNodeSideDeep(node[side], side) || node
 	: node
 )

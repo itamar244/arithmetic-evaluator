@@ -4,7 +4,7 @@ import * as tt from '../tokenizer/types'
 import toTokens from '../tokenizer'
 import type { Token } from '../tokenizer'
 import { getMatch, get } from '../utils'
-import Node, { getBinNodeDeepSide } from './node'
+import Node, { getBinNodeSideDeep } from './node'
 import pushItemToNode from './util'
 import isNotValidFunction from '../functions'
 
@@ -64,7 +64,7 @@ export default class StatementParser {
 			node.type !== tt.BIN_OPERATOR
 			&& tree.body
 			&& (tree.body.type !== tt.BIN_OPERATOR
-			|| getBinNodeDeepSide(tree.body, 'right').type !== tt.BIN_OPERATOR)
+			|| getBinNodeSideDeep(tree.body, 'right').type !== tt.BIN_OPERATOR)
 		) {
 			const multi = this.parseToken({
 				type: tt.BIN_OPERATOR,
