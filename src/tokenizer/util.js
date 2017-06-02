@@ -72,7 +72,7 @@ export default function toToken(pos: number, blob: string) {
 	}
 
 	const constant = getMatch(str, PATTERNS.constant)
-	if (constant && typeof Math[constant] === 'number') {
+	if (constant) {
 		return match(tt.CONSTANT, constant)
 	}
 

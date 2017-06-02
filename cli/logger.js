@@ -48,11 +48,11 @@ export function rulesOfExpression() {
 	`)
 }
 
-export function result(res: *) {
+export function result(res: mixed) {
 	log(String(res))
 }
 
-export async function ifHasArgs(args: string[], strOrFunction: any | () => any) {
+export async function ifHasArgs(args: string[], strOrFunction: mixed | () => mixed) {
 	if (args.some(arg => process.argv.indexOf(arg) > -1)) {
 		if (typeof strOrFunction === 'function') {
 			const res = await strOrFunction()

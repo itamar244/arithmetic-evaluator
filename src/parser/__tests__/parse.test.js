@@ -48,6 +48,8 @@ const expressions = [
 
 	['#',	item(tt.ERROR, '#: not a valid token')],
 	['(',	item('EXPRESSION', '')],
+
+	['x=3', [item(tt.PARAM, 'x'), item(tt.LITERAL, '3')]],
 ]
 
 describe('parse method', () => {

@@ -143,7 +143,7 @@ export default class StatementParser {
 	}
 
 	parseFunction(token: Token): N.Function {
-		const node = this.createNode(token)
+		const node: N.Function = this.createNode(token)
 
 		node.name = getMatch(token.match, /[a-z]+/)
 		node.args =
