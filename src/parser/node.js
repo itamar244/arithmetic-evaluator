@@ -5,7 +5,7 @@ import type {
 	BinNode,
 	Node as NodeType,
 } from '../types'
-import * as tt from '../tokenizer/types'
+import { BIN_OPERATOR } from '../tokenizer/types'
 import { orderPosition } from '../operators'
 
 export default class Node implements NodeBase {
@@ -23,18 +23,13 @@ export default class Node implements NodeBase {
 	}
 }
 
-/* eslint-disable no-underscore-dangle, no-param-reassign */
-export const getNodeOrder = (node: BinNode): number => {
-	if (node.__orderPosition === undefined) {
-		node.__orderPosition = orderPosition(node.raw)
-	}
-
-	return node.__orderPosition
-}
-/* eslint-enable no-underscore-dangle, no-param-reassign */
+export const getNodeOrder = (node: BinNode): number => (
+	// eslint-disable-next-line no-underscore-dangle, no-param-reassign
+	node.__orderPosition || (node.__orderPosition = orderPosition(node.raw))
+)
 
 export const getBinNodeSideDeep = <T: NodeType>(node: T, side: 'left' | 'right'): T => (
-	node.type === tt.BIN_OPERATOR
-	? node[side] && getBinNodeSideDeep(node[side], side) || node
+	node.type === BIN_OPERATOR && node[side]
+	? getBinNodeSideDeep(node[side], side)
 	: node
 )

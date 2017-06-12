@@ -1,10 +1,9 @@
 // @flow
 import * as N from '../types'
 import * as tt from '../tokenizer/types'
-import toTokens from '../tokenizer'
-import type { Token } from '../tokenizer'
-import { getMatch, get } from '../utils'
-import Node, { getBinNodeSideDeep } from './node'
+import toTokens, { type Token } from '../tokenizer'
+import { getMatch } from '../utils'
+import Node, { getNodeOrder } from './node'
 import pushItemToNode from './util'
 import isNotValidFunction from '../functions'
 
@@ -44,10 +43,11 @@ export default class StatementParser {
 	}
 
 	parse(tokens: Token[], blob: string) {
-		const start = this.state.pos
 		const tree: N.Expression = new Node('EXPRESSION', blob, this.state.pos)
-		for (const token of tokens) {
-			this.state.pos += this.nextToken(token, tree)
+		const start = this.state.pos
+
+		for (const [i, token] of tokens.entries()) {
+			this.state.pos += this.nextToken(token, tokens[i - 1], tree)
 		}
 
 		this.state.pos = start
@@ -55,24 +55,20 @@ export default class StatementParser {
 		return tree
 	}
 
-	nextToken(token: Token, tree: N.Expression) {
+	nextToken(token: Token, prevToken: ?Token, tree: N.Expression) {
 		if (this.state.pos >= this.blob.length) return 0
 
-		const node = this.parseToken(token)
+		const node = this.parseToken(token, tree)
 
 		if (
-			node.type !== tt.BIN_OPERATOR
-			&& tree.body
-			&& (tree.body.type !== tt.BIN_OPERATOR
-			|| getBinNodeSideDeep(tree.body, 'right').type !== tt.BIN_OPERATOR)
+			token.type !== tt.BIN_OPERATOR
+			&& prevToken && prevToken.type !== tt.BIN_OPERATOR
 		) {
-			const multi = this.parseToken({
-				type: tt.BIN_OPERATOR,
-				match: '*',
-			})
-
 			// eslint-disable-next-line no-param-reassign
-			tree.body = pushItemToNode(multi, tree.body)
+			tree.body = pushItemToNode(
+				this.parseBinOperator({ type: tt.BIN_OPERATOR, match: '*' }),
+				tree.body,
+			)
 		}
 
 		// eslint-disable-next-line no-param-reassign
@@ -81,12 +77,26 @@ export default class StatementParser {
 		return token.match.length
 	}
 
-	parseToken(token: Token) {
+	parseToken(token: Token, tree: N.Expression) {
 		switch (token.type) {
 			case tt.LITERAL:
 				return this.parseLiteral(token)
-			case tt.BIN_OPERATOR:
-				return this.parseBinOperator(token)
+			case tt.BIN_OPERATOR: {
+				const node = this.parseBinOperator(token)
+				if (!tree.body && getNodeOrder(node) !== 1) {
+					this.state.errors.push(this.createNode({
+						type: tt.ERROR,
+						match: `'${token.match}' can't be an unary operator`,
+					}))
+				} else if (tree.body && tree.body.type === tt.BIN_OPERATOR && !tree.body.right) {
+					this.state.errors.push(this.createNode({
+						type: tt.ERROR,
+						match: `two operators can't be near each other: ${tree.body.raw} ${node.raw}`,
+					}))
+				}
+
+				return node
+			}
 			case tt.BRACKETS:
 				return this.parseBrackets(token.match.slice(1, -1))
 			case tt.ABS_BRACKETS:
@@ -105,7 +115,7 @@ export default class StatementParser {
 				)
 		}
 
-		return get(this.state.errors, -1)
+		return this.createNode({ type: 'NONPARSABLE', match: token.match })
 	}
 
 	createNode(token: Token): N.Node & { [string]: any } {

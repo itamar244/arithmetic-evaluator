@@ -7,6 +7,7 @@ export const ERROR: 'ERROR' = 'ERROR'
 export const FUNCTION: 'FUNCTION' = 'FUNCTION'
 export const LITERAL: 'LITERAL' = 'LITERAL'
 export const PARAM: 'PARAM' = 'PARAM'
+export const NONPARSABLE: 'NONPARSABLE' = 'NONPARSABLE'
 
 export type TokenType =
 	typeof ABS_BRACKETS
@@ -17,6 +18,7 @@ export type TokenType =
 	| typeof FUNCTION
 	| typeof LITERAL
 	| typeof PARAM
+	| typeof NONPARSABLE
 
 export type Token = {
 	type: TokenType;

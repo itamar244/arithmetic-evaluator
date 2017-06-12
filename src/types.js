@@ -15,6 +15,7 @@ export type Node =
 	| Literal
 	| FunctionNode
 	| NamedNode
+	| NonParsable
 
 
 export type BinNode = NodeBase & {
@@ -57,4 +58,8 @@ export type Constant = NodeBase & {
 export type Parameter = NodeBase & {
 	type: 'PARAM';
 	name: string;
+}
+
+export type NonParsable = NodeBase & {
+	type: 'NONPARSABLE'
 }
