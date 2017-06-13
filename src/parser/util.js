@@ -2,7 +2,7 @@
 /* eslint-disable no-param-reassign */
 import * as N from '../types'
 import * as tt from '../tokenizer/types'
-import { getNodeOrder } from './node'
+import { getOperatorNodeOrder } from './node'
 
 export default function pushItemToNode(node: N.Node, target: ?N.Node): N.Node {
 	if (!target) return node
@@ -10,7 +10,7 @@ export default function pushItemToNode(node: N.Node, target: ?N.Node): N.Node {
 	if (node.type === tt.BIN_OPERATOR) {
 		if (
 			target.type === tt.BIN_OPERATOR
-			&& getNodeOrder(node) > getNodeOrder(target)
+			&& getOperatorNodeOrder(node) > getOperatorNodeOrder(target)
 		) {
 			target.right = pushItemToNode(node, target.right)
 			return target

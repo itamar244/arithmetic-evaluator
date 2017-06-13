@@ -3,7 +3,7 @@ import * as N from '../types'
 import * as tt from '../tokenizer/types'
 import toTokens, { type Token } from '../tokenizer'
 import { getMatch } from '../utils'
-import Node, { getNodeOrder } from './node'
+import Node, { getOperatorNodeOrder } from './node'
 import pushItemToNode from './util'
 import isNotValidFunction from '../functions'
 
@@ -15,7 +15,6 @@ type StatementState = {
 
 export default class StatementParser {
 	blob: string
-	tokens: Token[]
 	trees: N.Expression[]
 	state: StatementState = {
 		pos: 0,
@@ -26,19 +25,14 @@ export default class StatementParser {
 	constructor(blob: string) {
 		this.blob = blob
 
-		const parts = blob.split('=')
+		const parts = this.blob.split('=')
 
 		if (parts.length > 2) {
 			this.state.errors.push(
 				new Node(tt.ERROR, 'to many equal signs. need max of one sign', this.state.pos),
 			)
 		} else {
-			this.trees = parts.map(part => (
-				this.parse(
-					toTokens(part),
-					part,
-				)
-			))
+			this.trees = parts.map(part => this.parse(toTokens(part), part))
 		}
 	}
 
@@ -56,9 +50,9 @@ export default class StatementParser {
 	}
 
 	nextToken(token: Token, prevToken: ?Token, tree: N.Expression) {
-		if (this.state.pos >= this.blob.length) return 0
+		if (this.state.pos >= tree.raw.length) return 0
 
-		const node = this.parseToken(token, tree)
+		const node = this.parseToken(token, prevToken, tree)
 
 		if (
 			token.type !== tt.BIN_OPERATOR
@@ -77,18 +71,18 @@ export default class StatementParser {
 		return token.match.length
 	}
 
-	parseToken(token: Token, tree: N.Expression) {
+	parseToken(token: Token, prevToken: ?Token, tree: N.Expression) {
 		switch (token.type) {
 			case tt.LITERAL:
 				return this.parseLiteral(token)
 			case tt.BIN_OPERATOR: {
 				const node = this.parseBinOperator(token)
-				if (!tree.body && getNodeOrder(node) !== 1) {
+				if (!tree.body && getOperatorNodeOrder(node) !== 1) {
 					this.state.errors.push(this.createNode({
 						type: tt.ERROR,
 						match: `'${token.match}' can't be an unary operator`,
 					}))
-				} else if (tree.body && tree.body.type === tt.BIN_OPERATOR && !tree.body.right) {
+				} else if (tree.body && prevToken && token.type === prevToken.type) {
 					this.state.errors.push(this.createNode({
 						type: tt.ERROR,
 						match: `two operators can't be near each other: ${tree.body.raw} ${node.raw}`,
@@ -98,7 +92,7 @@ export default class StatementParser {
 				return node
 			}
 			case tt.BRACKETS:
-				return this.parseBrackets(token.match.slice(1, -1))
+				return this.parseExpression(token.match.slice(1, -1))
 			case tt.ABS_BRACKETS:
 				return this.parseAbsBrackets(token)
 			case tt.FUNCTION:
@@ -108,14 +102,13 @@ export default class StatementParser {
 			case tt.PARAM:
 				return this.parseParam(token)
 			default:
-				this.state.errors.push(
-					token.type === tt.ERROR
-					? new Node(token.type, `${token.match}: not a valid token`, this.state.pos)
-					: new Node(tt.ERROR, `${token.type}: wrong type`, this.state.pos),
-				)
-		}
+				this.state.errors.push(this.createNode({
+					type: tt.ERROR,
+					match: `${token.match}: not a valid token`,
+				}))
 
-		return this.createNode({ type: 'NONPARSABLE', match: token.match })
+				return this.createNode({ type: 'NONPARSABLE', match: token.match })
+		}
 	}
 
 	createNode(token: Token): N.Node & { [string]: any } {
@@ -137,17 +130,14 @@ export default class StatementParser {
 		return node
 	}
 
-	parseBrackets(match: string) {
+	parseExpression(match: string) {
 		return this.parse(toTokens(match), match)
 	}
 
 	parseAbsBrackets(token: Token): N.Function {
-		const node = this.createNode({
-			type: tt.FUNCTION,
-			match: token.match,
-		})
+		const node = this.createNode({ type: tt.FUNCTION, match: token.match })
 		node.name = 'abs'
-		node.args = [this.parseBrackets(token.match.slice(1, -1))]
+		node.args = [this.parseExpression(token.match.slice(1, -1))]
 
 		return node
 	}
@@ -160,7 +150,7 @@ export default class StatementParser {
 			token.match.replace(node.name, '')
 			.slice(1, -1)
 			.split(',')
-			.map(str => this.parseBrackets(str))
+			.map(str => this.parseExpression(str))
 
 		const isNotValid = isNotValidFunction(node.name, node.args)
 
