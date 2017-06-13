@@ -81,5 +81,7 @@ export const evaluateExpression = (node?: N.Node, params?: { [string]: number } 
 	? Math[node.name]
 	: node.type === tt.FUNCTION
 	? Math[node.name](...node.args.map(arg => evaluateExpression(arg, params)))
-	: params[node.name] // param
+	: node.type === tt.PARAM
+	? params[node.name]
+	: 0
 )

@@ -1,6 +1,5 @@
 // @flow
 import * as tt from './types'
-import type { TokenType } from './types'
 import { isOperator } from './../operators'
 import { getMatch } from '../utils'
 
@@ -10,7 +9,7 @@ const PATTERNS = {
 	constant: /^[A-Z][A-Z0-9]+|^[A-Z]/,
 }
 
-const match = (type: TokenType, m) => ({ type, match: m })
+const match = (type: tt.TokenType, m) => ({ type, match: m })
 
 const matchingBracket = (str: string, index: number, start: string, end: string) => {
 	let amountOfOpenBrackets = 0
@@ -26,7 +25,7 @@ const matchingBracket = (str: string, index: number, start: string, end: string)
 		}
 	}
 
-	return 0
+	throw Error('wrong amount of brackets')
 }
 
 export default function toToken(pos: number, blob: string) {
@@ -36,21 +35,21 @@ export default function toToken(pos: number, blob: string) {
 		return match(tt.BIN_OPERATOR, char)
 	}
 
-	if (char === '(') {
+	const str = blob.slice(pos)
+
+	if (/^\(.*\)/.test(str)) {
 		return match(
 			tt.BRACKETS,
 			blob.slice(pos, matchingBracket(blob, pos, '(', ')') + 1),
 		)
 	}
 
-	if (char === '|') {
+	if (/^\|.*\|/.test(str)) {
 		return match(
 			tt.ABS_BRACKETS,
 			blob.slice(pos, matchingBracket(blob, pos, '(', '|)') + 1),
 		)
 	}
-
-	const str = blob.slice(pos)
 
 	const num = getMatch(str, PATTERNS.number)
 	if (num) {

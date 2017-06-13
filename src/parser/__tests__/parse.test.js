@@ -47,7 +47,7 @@ const expressions = [
 	],
 
 	['#',	item(tt.NONPARSABLE, '#')],
-	['(',	item('EXPRESSION', '')],
+	['(',	item(tt.NONPARSABLE, '(')],
 
 	['x=3', [item(tt.PARAM, 'x'), item(tt.LITERAL, '3')]],
 

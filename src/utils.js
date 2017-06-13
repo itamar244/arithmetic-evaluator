@@ -9,22 +9,15 @@ export const has = (obj: mixed, key: string) => (
 )
 
 export async function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: number = 1000) {
+	const bindFunc = func.bind(null, ...args)
 	let times = 0
 	let timeSum = 0
-	let start
-	let end
 
 	while (timeSum < time) {
-		/* using array destruction because this is much
-		* faster than assigning values. and speed is
-		* what matter because it is a benchmark */
-		[start,, end] = [
-			Date.now(),
-			func(...args),
-			Date.now(),
-		]
+		const start = Date.now()
+		bindFunc()
 
-		timeSum += end - start
+		timeSum += Date.now() - start
 		times += 1
 	}
 
@@ -35,6 +28,6 @@ export const pluralize = (num: number, item: string, items: string) => (
 	num === 1 ? item : items
 )
 
-export const getMatch = (str: string, regexp: RegExp) => (
+export const getMatch = (str: string, regexp: string|RegExp) => (
 	(str.match(regexp) || [''])[0]
 )
