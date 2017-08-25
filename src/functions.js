@@ -2,17 +2,17 @@
  * Copyright 2017-present, Itamar Yatom.
  * All rights reserved.
  *
- * handles the checks around the functions for the parser.
+ * checks functions for the parser.
  *
- * the main function checks if there is such a function
- * and if there are execatly enough arguments to the fitting function
+ * the main function checks if there is such function
+ * and if there are correct amount of arguments
  *
  * @flow
  */
 
 import { pluralize } from './utils'
 
-/* Map<string presesting the name, length: the needed length arguments>
+/* Map<name, arguments length>
  * Infinity means any length of arguments */
 export const functions = new Map([
 	['cos', 1],
