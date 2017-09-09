@@ -14,7 +14,7 @@ import { pluralize } from './utils'
 
 /* Map<string presesting the name, length: the needed length args>
  * Infinity means any length of args */
-export const functions = new Map([
+export const functions: Map<string, number> = new Map([
 	['cos', 1],
 	['sin', 1],
 	['tan', 1],

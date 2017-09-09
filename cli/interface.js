@@ -7,7 +7,9 @@ const rl = readline.createInterface({
 	output: process.stdout,
 })
 
-export const question = (query: string) => new Promise(res => rl.question(query, res))
+export const question = (query: string): Promise<string> => (
+	new Promise(res => rl.question(query, res))
+)
 
 export async function getParams(params: Iterable<string>) {
 	const givenParams = {}
