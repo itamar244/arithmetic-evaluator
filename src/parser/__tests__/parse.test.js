@@ -1,19 +1,18 @@
 // @flow
 import { parse } from '../../'
-import * as tt from '../../tokenizer/types'
 import { op, expr, item, func } from './utils'
 
 const expressions = [
-	['3+3', op('+', item(tt.LITERAL, '3'), item(tt.LITERAL, '3'))],
+	['3+3', op('+', item('Literal', '3'), item('Literal', '3'))],
 
 	['x+x*x^x',
 		op('+',
-			item(tt.PARAM, 'x'),
+			item('Parameter', 'x'),
 			op('*',
-				item(tt.PARAM, 'x'),
+				item('Parameter', 'x'),
 				op('^',
-					item(tt.PARAM, 'x'),
-					item(tt.PARAM, 'x'),
+					item('Parameter', 'x'),
+					item('Parameter', 'x'),
 				),
 			),
 		),
@@ -21,12 +20,12 @@ const expressions = [
 
 	['y (( y + y ))',
 		op('*',
-			item(tt.PARAM, 'y'),
+			item('Parameter', 'y'),
 			expr(
 				expr(
 					op('+',
-						item(tt.PARAM, 'y'),
-						item(tt.PARAM, 'y'),
+						item('Parameter', 'y'),
+						item('Parameter', 'y'),
 					),
 				),
 			),
@@ -35,32 +34,32 @@ const expressions = [
 
 	['max(3, PI)',
 		func('max',
-			item(tt.LITERAL, '3'),
-			item(tt.CONSTANT, 'PI'),
+			item('Literal', '3'),
+			item('Constant', 'PI'),
 		),
 	],
 
 	['| - 3 |',
 		func('cos',
-			op('-',	undefined, item(tt.LITERAL, '3')),
+			op('-',	undefined, item('Literal', '3')),
 		),
 	],
 
-	['#',	item(tt.NONPARSABLE, '#')],
-	['(',	item(tt.NONPARSABLE, '(')],
+	['#',	item('NonParsable', '#')],
+	['(',	item('NonParsable', '(')],
 
 	['x=3', op('=',
-		item(tt.PARAM, 'x'),
-		item(tt.LITERAL, '3'),
+		item('Parameter', 'x'),
+		item('Literal', '3'),
 	)],
 
 	['xxx', [
 		op('*',
 			op('*',
-				item(tt.PARAM, 'x'),
-				item(tt.PARAM, 'x'),
+				item('Parameter', 'x'),
+				item('Parameter', 'x'),
 			),
-			item(tt.PARAM, 'x'),
+			item('Parameter', 'x'),
 		),
 	]],
 ]

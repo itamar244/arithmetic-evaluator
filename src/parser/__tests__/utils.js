@@ -1,6 +1,4 @@
 // @flow
-import * as tt from '../../tokenizer/types'
-
 type Item = {
 	type: string,
 	raw?: string,
@@ -9,7 +7,7 @@ type Item = {
 
 export const op = (operator: string, left?: Item, right: Item) => ({
 	raw: operator,
-	type: left != null ? tt.BIN_OPERATOR : tt.UNARY_OPERATOR,
+	type: left != null ? 'BinaryOperator' : 'UnaryOperator',
 	...(
 		left != null
 		? { left, right }
@@ -24,12 +22,12 @@ export const item = (type: string, raw: string): Item => ({
 
 export const expr = (body: Item): Item => ({
 	body,
-	type: 'EXPRESSION',
+	type: 'Expression',
 })
 
 export const func = (name: string, ...args: Item[]) => ({
 	args: args.map(expr),
-	type: tt.FUNCTION,
+	type: 'Function',
 })
 
 // this file is tested, so testing should be added

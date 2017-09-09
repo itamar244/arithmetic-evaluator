@@ -21,13 +21,13 @@ export type Node =
 	| NonParsable
 
 export type Result = NodeBase & {
-	type: 'RESULT';
+	type: 'Result';
 	expression: Expression;
 	params: string[];
 }
 
 export type Expression = NodeBase & {
-	type: 'EXPRESSION';
+	type: 'Expression';
 	body: Node;
 }
 
@@ -37,24 +37,24 @@ export type Operator = NodeBase & {
 }
 
 export type UnaryOperator = Operator & {
-	type: 'UNARY_OPERATOR';
+	type: 'UnaryOperator';
 	argument: Node;
 	prefix: bool;
 }
 
 export type BinOperator = Operator & {
-	type: 'BIN_OPERATOR';
+	type: 'BinaryOperator';
 	left: Node;
 	right: Node;
 }
 
 export type Literal = NodeBase & {
-	type: 'LITERAL';
+	type: 'Literal';
 	value: number
 }
 
 type FunctionNode = NodeBase & {
-	type: 'FUNCTION';
+	type: 'Function';
 	name: string;
 	args: Node[];
 }
@@ -65,15 +65,15 @@ export type { FunctionNode as Function }
 export type NamedNode = Constant | Parameter
 
 export type Constant = NodeBase & {
-	type: 'CONSTANT';
+	type: 'Constant';
 	name: string;
 }
 
 export type Parameter = NodeBase & {
-	type: 'PARAM';
+	type: 'Parameter';
 	name: string;
 }
 
 export type NonParsable = NodeBase & {
-	type: 'NONPARSABLE'
+	type: 'NonParsable'
 }

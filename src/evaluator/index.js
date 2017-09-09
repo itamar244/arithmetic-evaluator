@@ -1,5 +1,4 @@
 // @flow
-import * as tt from '../tokenizer/types'
 import * as N from '../types'
 import {
 	BIN_OPERATORS_METHODS,
@@ -71,22 +70,22 @@ export function evaluateEquation(
 export const evaluateExpression = (node?: N.Node, params?: { [string]: number } = {}) => (
 	!node
 	? 0
-	: node.type === tt.LITERAL
+	: node.type === 'Literal'
 	?	node.value
-	: node.type === tt.BIN_OPERATOR
+	: node.type === 'BinaryOperator'
 	? BIN_OPERATORS_METHODS[node.operator](
 		node.left ? evaluateExpression(node.left, params) : 0,
 		node.right ? evaluateExpression(node.right, params) : 0,
 	)
-	: node.type === tt.UNARY_OPERATOR
+	: node.type === 'UnaryOperator'
 	? UNARY_OPERATORS_METHODS[node.operator](evaluateExpression(node.argument))
-	: node.type === 'EXPRESSION'
+	: node.type === 'Expression'
 	? (node.body ? evaluateExpression(node.body, params) : 0)
-	: node.type === tt.CONSTANT
+	: node.type === 'Constant'
 	? Math[node.name]
-	: node.type === tt.FUNCTION
+	: node.type === 'Function'
 	? Math[node.name](...node.args.map(arg => evaluateExpression(arg, params)))
-	: node.type === tt.PARAM
+	: node.type === 'Parameter'
 	? params[node.name]
 	: 0
 )

@@ -26,11 +26,11 @@ export default class NodeUtils {
 
 	startNode<T: NodeType>(raw: string): T {
 		// $FlowIgnore
-		return new Node(this.state.pos, raw)
+		return new Node(raw, this.state.pos)
 	}
 
 	finishNode<T: NodeType>(node: T, type: string): T {
-		// $FlowFixMe
+		// $FlowIgnore
 		node.type = type
 		node.loc.end = this.state.pos
 		return node

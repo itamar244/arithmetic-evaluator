@@ -27,8 +27,8 @@ it('should equations work', () => {
 		const result = parse(expr)
 		const { body } = result.expression
 
-		expect(body.type).toBe('BIN_OPERATOR')
-		if (body.type === 'BIN_OPERATOR') {
+		expect(body.type).toBe('BinaryOperator')
+		if (body.type === 'BinaryOperator') {
 			expect(evaluateEquation(body, result.params[0])).toBe(val)
 		}
 	}

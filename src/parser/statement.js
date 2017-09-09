@@ -21,7 +21,7 @@ export default class StatementParser extends NodeUtils {
 	parseTopLevel(result: N.Result): N.Result {
 		result.expression = this.parseString(this.input)
 		result.params = [...this.state.params]
-		return this.finishNode(result, 'RESULT')
+		return this.finishNode(result, 'Result')
 	}
 
 	// FIXME: fix this.state.pos, it is broken when `parse` is called recursively
@@ -41,14 +41,12 @@ export default class StatementParser extends NodeUtils {
 			this.state.prevToken = tokens[i]
 		}
 
-		return this.finishNode(tree, 'EXPRESSION')
+		return this.finishNode(tree, 'Expression')
 	}
 
 	nextToken(token: Token, tree: N.Expression) {
 		// eslint-disable-next-line no-param-reassign
 		tree.body = mergeNodes(this.parseToken(token, tree), tree.body)
-
-		return token.match.length
 	}
 
 	parseToken(token: Token, tree: N.Expression) {
@@ -56,7 +54,7 @@ export default class StatementParser extends NodeUtils {
 
 		switch (token.type) {
 			case tt.LITERAL:
-				return this.parseLiteral(node, token)
+				return this.parseLiteral(node)
 			case tt.OPERATOR: {
 				this.parseOperator(node, tree)
 				// if node is binary operator and there it is the first node
@@ -71,22 +69,22 @@ export default class StatementParser extends NodeUtils {
 			case tt.BRACKETS:
 				return this.parseString(token.match.slice(1, -1))
 			case tt.ABS_BRACKETS:
-				return this.parseAbsBrackets(node, token)
+				return this.parseAbsBrackets(node)
 			case tt.FUNCTION:
-				return this.parseFunction(node, token)
+				return this.parseFunction(node)
 			case tt.CONSTANT:
-				return this.parseNamedNode(node, token)
+				return this.parseConstant(node)
 			case tt.PARAM:
-				return this.parseParam(node, token)
+				return this.parseParam(node)
 			default:
 				this.addError(`${token.match}: not a valid token`)
-				return this.finishNode(node, 'NONPARSABLE')
+				return this.finishNode(node, 'NonParsable')
 		}
 	}
 
-	parseLiteral(node: N.Literal, token: Token): N.Literal {
-		node.value = Number(token.match)
-		return this.finishNode(node, token.type)
+	parseLiteral(node: N.Literal): N.Literal {
+		node.value = Number(node.raw)
+		return this.finishNode(node, 'Literal')
 	}
 
 	parseOperator(
@@ -97,23 +95,23 @@ export default class StatementParser extends NodeUtils {
 		const isPrefix = UNARY_OPERATORS.prefix.includes(node.operator)
 		if (isPrefix && tree.body == null	|| UNARY_OPERATORS.postfix.includes(node.operator)) {
 			node.prefix = isPrefix
-			return this.finishNode(node, tt.UNARY_OPERATOR)
+			return this.finishNode(node, 'UnaryOperator')
 		}
 
-		return this.finishNode(node, tt.BIN_OPERATOR)
+		return this.finishNode(node, 'BinaryOperator')
 	}
 
-	parseAbsBrackets(node: N.Function, token: Token): N.Function {
+	parseAbsBrackets(node: N.Function): N.Function {
 		node.name = 'abs'
-		node.args = [this.parseString(token.match.slice(1, -1))]
+		node.args = [this.parseString(node.raw.slice(1, -1))]
 
-		return this.finishNode(node, tt.FUNCTION)
+		return this.finishNode(node, 'Function')
 	}
 
-	parseFunction(node: N.Function, token: Token): N.Function {
-		node.name = getMatch(token.match, /[a-z]+/)
+	parseFunction(node: N.Function): N.Function {
+		node.name = getMatch(node.raw, /[a-z]+/)
 		node.args =
-			token.match.replace(node.name, '')
+			node.raw.replace(node.name, '')
 			.slice(1, -1)
 			.split(',')
 			.map(arg => this.parseString(arg))
@@ -122,16 +120,17 @@ export default class StatementParser extends NodeUtils {
 
 		if (isNotValid) this.addError(isNotValid)
 
-		return this.finishNode(node, token.type)
+		return this.finishNode(node, 'Function')
 	}
 
-	parseNamedNode(node: N.NamedNode, token: Token): N.NamedNode {
-		node.name = token.match
-		return this.finishNode(node, token.type)
+	parseConstant(node: N.NamedNode): N.NamedNode {
+		node.name = node.raw
+		return this.finishNode(node, 'Constant')
 	}
 
-	parseParam(node: N.NamedNode, token: Token) {
-		this.state.params.add(token.match)
-		return this.parseNamedNode(node, token)
+	parseParam(node: N.Parameter): N.Parameter {
+		this.state.params.add(node.raw)
+		node.name = node.raw
+		return this.finishNode(node, 'Parameter')
 	}
 }
