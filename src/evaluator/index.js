@@ -21,11 +21,11 @@ const toFixed = precision => (num) => {
 
 // using newton's binom for getting the correct value
 export function evaluateEquation(
-	startingEquation: N.Expression[],
+	node: N.BinOperator,
 	variableName: string,
-	firstTime: bool = true,
+	reversed: bool = false,
 ) {
-	const equation = startingEquation
+	const equation = reversed ? [node.right, node.left] : [node.left, node.right]
 	// using mutable object here only for performance
 	const params: { [key: string]: number } = { [variableName]: -1 }
 	// pointing if need to add positive or negative values
@@ -53,9 +53,9 @@ export function evaluateEquation(
 		// if one of the values is Infinity than it will return
 		if (values.some(n => Math.abs(n) === Infinity) && i > 100) {
 			return (
-				firstTime
+				reversed
 				// if it the first time it wil reRun with a revers equation
-				? evaluateEquation([...equation].reverse(), variableName, false)
+				? evaluateEquation(node, variableName, true)
 				: 'no value'
 			)
 		}

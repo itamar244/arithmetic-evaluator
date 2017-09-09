@@ -24,13 +24,12 @@ const equations = [
 
 it('should equations work', () => {
 	for (const [expr, val] of equations) {
-		const parsed = parse(expr)
+		const result = parse(expr)
+		const { body } = result.expression
 
-		// expect(
-		// 	evaluateEquation(
-		// 		parsed.tree,
-		// 		[...parsed.state.params][0],
-		// 	),
-		// ).toBe(val)
+		expect(body.type).toBe('BIN_OPERATOR')
+		if (body.type === 'BIN_OPERATOR') {
+			expect(evaluateEquation(body, result.params[0])).toBe(val)
+		}
 	}
 })

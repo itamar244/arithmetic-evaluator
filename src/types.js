@@ -42,8 +42,8 @@ export type UnaryOperator = Operator & {
 
 export type BinOperator = Operator & {
 	type: 'BIN_OPERATOR';
-	left: ?Node;
-	right: ?Node;
+	left: Node;
+	right: Node;
 }
 
 export type Literal = NodeBase & {
