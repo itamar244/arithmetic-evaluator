@@ -1,5 +1,4 @@
 // @flow
-import * as N from '../types'
 import type { Token } from '../tokenizer'
 
 export default class State {

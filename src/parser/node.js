@@ -4,7 +4,6 @@ import type {
 	NodeBase,
 	Node as NodeType,
 } from '../types'
-import { type Token } from '../tokenizer/types'
 import State from './state'
 
 class Node implements NodeBase {
@@ -12,12 +11,11 @@ class Node implements NodeBase {
 	loc: Location
 	raw: string
 
-	constructor(type: string, raw: string, start: number) {
-		this.type = type
+	constructor(raw: string, start: number) {
 		this.raw = raw
 		this.loc = {
 			start,
-			end: start + raw.length,
+			end: start,
 		}
 	}
 }
@@ -26,12 +24,15 @@ export default class NodeUtils {
 	// forward declarations
 	state: State
 
-	createNode<T: NodeType>(type: string, match: string): T {
+	startNode<T: NodeType>(raw: string): T {
 		// $FlowIgnore
-		return new Node(type, match, this.state.pos)
+		return new Node(this.state.pos, raw)
 	}
 
-	createNodeFromToken(token: Token) {
-		return this.createNode(token.type, token.match)
+	finishNode<T: NodeType>(node: T, type: string): T {
+		// $FlowFixMe
+		node.type = type
+		node.loc.end = this.state.pos
+		return node
 	}
 }

@@ -30,12 +30,12 @@ async function main(args) {
 		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(expression, null, 4))
 
 		if (expression.body.type === 'BIN_OPERATOR' && expression.body.operator === '=') {
-			// logger.result(
-			// 	evaluateEquation(
-			// 		expression,
-			// 		[...state.params][0],
-			// 	),
-			// )
+			logger.result(
+				evaluateEquation(
+					expression.body,
+					result.params[0],
+				),
+			)
 		} else {
 			logger.result(
 				evaluateExpression(
@@ -44,5 +44,8 @@ async function main(args) {
 				),
 			)
 		}
+		main(process.argv)
+	} else {
+		cli.close()
 	}
 }

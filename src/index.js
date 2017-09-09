@@ -9,6 +9,7 @@
  */
 
 import Parser from './parser'
+
 export { evaluateExpression, evaluateEquation } from './evaluator'
 
 export function parse(input: string) {

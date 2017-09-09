@@ -9,8 +9,10 @@ export interface NodeBase {
 	raw: string;
 }
 
+export type AnyNode = NodeBase & { [string]: any }
 export type Node =
-	Expression
+	Result
+	| Expression
 	| UnaryOperator
 	| BinOperator
 	| Literal

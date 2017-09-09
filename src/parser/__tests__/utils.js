@@ -14,7 +14,7 @@ export const op = (operator: string, left?: Item, right: Item) => ({
 		left != null
 		? { left, right }
 		: { argument: right }
-	)
+	),
 })
 
 export const item = (type: string, raw: string): Item => ({

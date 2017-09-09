@@ -15,6 +15,7 @@ module.exports = {
 		'no-tabs': [0],
 		'no-use-before-define': [0],
 		'no-restricted-syntax': [0],
+		'no-param-reassign': [0],
 		/* only because it used as if else with a clear syntax I created it's been silenced */
 		'no-nested-ternary': [0],
 		'no-mixed-operators': [0],

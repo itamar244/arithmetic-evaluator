@@ -10,25 +10,24 @@ import State from './state'
 import mergeNodes from './util'
 
 export default class StatementParser extends NodeUtils {
-	errors: N.Node[] = []
+	errors: string[] = []
 	input: string
 	state: State
 
 	addError(error: string) {
-		this.errors.push(this.createNode(tt.ERROR, error))
+		this.errors.push(error)
 	}
 
-	parseTopLevel(): N.Result {
-		const result: N.Result = this.createNode('RESULT', this.input)
-		result.expression = this.parseString(result.raw)
+	parseTopLevel(result: N.Result): N.Result {
+		result.expression = this.parseString(this.input)
 		result.params = [...this.state.params]
-		return result
+		return this.finishNode(result, 'RESULT')
 	}
 
-	// FIXME: fix state.pos, it is broken when `parse` is called recursively
+	// FIXME: fix this.state.pos, it is broken when `parse` is called recursively
 	parseString(input: string): N.Expression {
 		const tokens = toTokens(input)
-		const tree = this.createNode('EXPRESSION', input)
+		const tree = this.startNode(input)
 
 		for (let i = 0; i < tokens.length; i += 1) {
 			if (
@@ -42,7 +41,7 @@ export default class StatementParser extends NodeUtils {
 			this.state.prevToken = tokens[i]
 		}
 
-		return tree
+		return this.finishNode(tree, 'EXPRESSION')
 	}
 
 	nextToken(token: Token, tree: N.Expression) {
@@ -53,11 +52,13 @@ export default class StatementParser extends NodeUtils {
 	}
 
 	parseToken(token: Token, tree: N.Expression) {
+		const node = this.startNode(token.match)
+
 		switch (token.type) {
 			case tt.LITERAL:
-				return this.parseLiteral(token)
+				return this.parseLiteral(node, token)
 			case tt.OPERATOR: {
-				const node = this.parseOperator(token, tree)
+				this.parseOperator(node, tree)
 				// if node is binary operator and there it is the first node
 				if (this.state.prevToken == null) {
 					if (node.type === 'BIN_OPERATOR') this.addError(`'${token.match}' can't be an unary operator`)
@@ -70,59 +71,46 @@ export default class StatementParser extends NodeUtils {
 			case tt.BRACKETS:
 				return this.parseString(token.match.slice(1, -1))
 			case tt.ABS_BRACKETS:
-				return this.parseAbsBrackets(token)
+				return this.parseAbsBrackets(node, token)
 			case tt.FUNCTION:
-				return this.parseFunction(token)
+				return this.parseFunction(node, token)
 			case tt.CONSTANT:
-				return this.parseNamedNode(token)
+				return this.parseNamedNode(node, token)
 			case tt.PARAM:
-				return this.parseParam(token)
+				return this.parseParam(node, token)
 			default:
 				this.addError(`${token.match}: not a valid token`)
-				return this.createNode('NONPARSABLE', token.match)
+				return this.finishNode(node, 'NONPARSABLE')
 		}
 	}
 
-	parseLiteral(token: Token): N.Literal {
-		const node = this.createNodeFromToken(token)
-		node.value = Number(node.raw)
-		return node
+	parseLiteral(node: N.Literal, token: Token): N.Literal {
+		node.value = Number(token.match)
+		return this.finishNode(node, token.type)
 	}
 
-	parseOperator(token: Token, tree: N.Expression): N.UnaryOperator | N.BinOperator {
-		const operator = token.match
-		const isPrefix = UNARY_OPERATORS.prefix.includes(operator)
-		let node
-
-		if (isPrefix && tree.body == null	|| UNARY_OPERATORS.postfix.includes(operator)) {
-			if (tree.body == null && !isPrefix) {
-				this.addError('postfixed unary operators can not be without an argument before')
-			}
-			node = this.createNode(tt.UNARY_OPERATOR, operator)
-			node.argument = null
+	parseOperator(
+		node: N.AnyNode,
+		tree: N.Expression,
+	): N.UnaryOperator | N.BinOperator {
+		node.operator = node.raw
+		const isPrefix = UNARY_OPERATORS.prefix.includes(node.operator)
+		if (isPrefix && tree.body == null	|| UNARY_OPERATORS.postfix.includes(node.operator)) {
 			node.prefix = isPrefix
-		} else {
-			node = this.createNode(tt.BIN_OPERATOR, operator)
-			// NOTE: because both are initialized to null this is faster
-			// eslint-disable-next-line no-multi-assign
-			node.left = node.right = null
+			return this.finishNode(node, tt.UNARY_OPERATOR)
 		}
-		node.operator = operator
 
-		return node
+		return this.finishNode(node, tt.BIN_OPERATOR)
 	}
 
-	parseAbsBrackets(token: Token): N.Function {
-		const node: N.Function = this.createNode(tt.FUNCTION, token.match)
+	parseAbsBrackets(node: N.Function, token: Token): N.Function {
 		node.name = 'abs'
 		node.args = [this.parseString(token.match.slice(1, -1))]
 
-		return node
+		return this.finishNode(node, tt.FUNCTION)
 	}
 
-	parseFunction(token: Token): N.Function {
-		const node: N.Function = this.createNodeFromToken(token)
-
+	parseFunction(node: N.Function, token: Token): N.Function {
 		node.name = getMatch(token.match, /[a-z]+/)
 		node.args =
 			token.match.replace(node.name, '')
@@ -134,18 +122,16 @@ export default class StatementParser extends NodeUtils {
 
 		if (isNotValid) this.addError(isNotValid)
 
-		return node
+		return this.finishNode(node, token.type)
 	}
 
-	parseNamedNode(token: Token): N.NamedNode {
-		const node = this.createNodeFromToken(token)
+	parseNamedNode(node: N.NamedNode, token: Token): N.NamedNode {
 		node.name = token.match
-		return node
+		return this.finishNode(node, token.type)
 	}
 
-	parseParam(token: Token) {
-		const node = this.parseNamedNode(token)
-		this.state.params.add(node.name)
-		return node
+	parseParam(node: N.NamedNode, token: Token) {
+		this.state.params.add(token.match)
+		return this.parseNamedNode(node, token)
 	}
 }

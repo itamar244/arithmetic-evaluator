@@ -1,5 +1,4 @@
 // @flow
-/* eslint-disable no-param-reassign */
 import * as N from '../types'
 import * as tt from '../tokenizer/types'
 import { orderPosition } from '../operators'
