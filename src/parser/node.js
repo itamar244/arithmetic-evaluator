@@ -2,13 +2,12 @@
 import type {
 	Location,
 	NodeBase,
-	BinOperator,
 	Node as NodeType,
 } from '../types'
-import { BIN_OPERATOR } from '../tokenizer/types'
-import { orderPosition } from '../operators'
+import { type Token } from '../tokenizer/types'
+import State from './state'
 
-export default class Node implements NodeBase {
+class Node implements NodeBase {
 	type: any
 	loc: Location
 	raw: string
@@ -23,11 +22,16 @@ export default class Node implements NodeBase {
 	}
 }
 
-export const getOperatorNodeOrder = (node: BinOperator): number => (
-	// eslint-disable-next-line no-underscore-dangle, no-param-reassign
-	node.__orderPosition || (node.__orderPosition = orderPosition(node.operator))
-)
+export default class NodeUtils {
+	// forward declarations
+	state: State
 
-export const getBinNodeSideDeep = <T: NodeType>(node: T, side: 'left' | 'right'): T => (
-	node.type === BIN_OPERATOR && node[side] ? getBinNodeSideDeep(node[side], side)	: node
-)
+	createNode<T: NodeType>(type: string, match: string): T {
+		// $FlowIgnore
+		return new Node(type, match, this.state.pos)
+	}
+
+	createNodeFromToken(token: Token) {
+		return this.createNode(token.type, token.match)
+	}
+}

@@ -1,30 +1,36 @@
-/*
-	written by Itamar Yatom.
-	supports functionional wrapper for basic operators of arithematic expressions.
-	@flow
-*/
-import { has } from './utils'
+/**
+ * Copyright 2017-present, Itamar Yatom.
+ * All rights reserved.
+ *
+ * supports functionional wrapper for basic operators of arithematic expressions.
+ * @flow
+ */
 
-export const operators: {
-	[key: string]: (number, number) => number
-} = {
-	'+': (a, b) => (typeof a === 'number' ? a + b : +b),
-	'-': (a, b) => (typeof a === 'number' ? a - b : -b),
-	'*': (a, b) => a * b,
-	'/': (a, b) => a / b,
-	'^': (a, b) => a ** b,
-	'%': (a, b) => a % b,
-}
-
-export const isOperator = (str: string) => has(operators, str)
-
-const ORDER = [
+/* operators order.
+ * not all of them have functions like `=`, but they are needed for parsing
+ */
+const OPERATORS_ORDER = [
+	'=',
 	'+-',
 	'*/%',
 	'^',
+	'!',
 ]
+const OPERATORS = OPERATORS_ORDER.join().split('')
+
+export const isOperator = (str: string) => OPERATORS.includes(str)
 
 export const orderPosition = (str: string) => (
-	ORDER.findIndex(item => item.indexOf(str) > -1) + 1
-	|| ORDER.length + 1
+	OPERATORS_ORDER.findIndex(item => item.indexOf(str) > -1) + 1
+	|| OPERATORS_ORDER.length + 1
+)
+
+export const UNARY_OPERATORS = {
+	prefix: '+-',
+	postfix: '!',
+}
+
+export const isUnaryOperator = (str: string) => (
+	UNARY_OPERATORS.prefix.includes(str)
+	|| UNARY_OPERATORS.postfix.includes(str)
 )

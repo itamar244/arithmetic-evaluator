@@ -7,16 +7,15 @@ type Item = {
 	body?: Item,
 }
 
-export const op = (operator: string, left?: Item, right: Item) => {
-	const res = {
-		operator,
-		left,
-		right,
-		type: tt.BIN_OPERATOR,
-	}
-	if (!left) delete res.left
-	return res
-}
+export const op = (operator: string, left?: Item, right: Item) => ({
+	raw: operator,
+	type: left != null ? tt.BIN_OPERATOR : tt.UNARY_OPERATOR,
+	...(
+		left != null
+		? { left, right }
+		: { argument: right }
+	)
+})
 
 export const item = (type: string, raw: string): Item => ({
 	type,

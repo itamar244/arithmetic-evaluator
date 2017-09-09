@@ -8,5 +8,9 @@
  * @flow
  */
 
-export { default as parse } from './parser'
+import Parser from './parser'
 export { evaluateExpression, evaluateEquation } from './evaluator'
+
+export function parse(input: string) {
+	return new Parser(input).parse()
+}

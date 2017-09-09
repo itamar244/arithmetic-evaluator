@@ -11,27 +11,39 @@ export interface NodeBase {
 
 export type Node =
 	Expression
+	| UnaryOperator
 	| BinOperator
 	| Literal
 	| FunctionNode
 	| NamedNode
 	| NonParsable
 
-
-export type BinNode = NodeBase & {
-	left: ?Node;
-	right: ?Node;
-	__orderPosition?: number;
-}
-
-export type BinOperator = BinNode & {
-	type: 'BIN_OPERATOR';
-	operator: string;
+export type Result = NodeBase & {
+	type: 'RESULT';
+	expression: Expression;
+	params: string[];
 }
 
 export type Expression = NodeBase & {
 	type: 'EXPRESSION';
-	body?: Node;
+	body: Node;
+}
+
+export type Operator = NodeBase & {
+	operator: string;
+	__orderPosition?: number;
+}
+
+export type UnaryOperator = Operator & {
+	type: 'UNARY_OPERATOR';
+	argument: Node;
+	prefix: bool;
+}
+
+export type BinOperator = Operator & {
+	type: 'BIN_OPERATOR';
+	left: ?Node;
+	right: ?Node;
 }
 
 export type Literal = NodeBase & {

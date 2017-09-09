@@ -32,7 +32,7 @@ export default function toToken(pos: number, blob: string) {
 	const char = blob.charAt(pos)
 
 	if (isOperator(char)) {
-		return match(tt.BIN_OPERATOR, char)
+		return match(tt.OPERATOR, char)
 	}
 
 	const str = blob.slice(pos)

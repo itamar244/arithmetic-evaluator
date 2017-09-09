@@ -1,5 +1,5 @@
 // @flow
-import parse from '../'
+import { parse } from '../../'
 import * as tt from '../../tokenizer/types'
 import { op, expr, item, func } from './utils'
 
@@ -49,7 +49,10 @@ const expressions = [
 	['#',	item(tt.NONPARSABLE, '#')],
 	['(',	item(tt.NONPARSABLE, '(')],
 
-	['x=3', [item(tt.PARAM, 'x'), item(tt.LITERAL, '3')]],
+	['x=3', op('=',
+		item(tt.PARAM, 'x'),
+		item(tt.LITERAL, '3'),
+	)],
 
 	['xxx', [
 		op('*',
@@ -64,16 +67,16 @@ const expressions = [
 
 describe('parse method', () => {
 	for (const [blob, trees] of expressions) {
-		const statement = parse(blob)
+		const { expression } = parse(blob)
 
 		// eslint-disable-next-line no-loop-func
 		it(`${blob} should be the correct tree`, () => {
 			if (trees instanceof Array) {
 				for (let i = 0; i < trees.length; i += 1) {
-					expect(statement.trees[i].body).toMatchObject(trees[i])
+					expect(expression.body).toMatchObject(trees[i])
 				}
 			} else {
-				expect(statement.trees[0].body).toMatchObject(trees)
+				expect(expression.body).toMatchObject(trees)
 			}
 		})
 	}

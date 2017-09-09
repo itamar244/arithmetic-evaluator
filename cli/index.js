@@ -17,34 +17,32 @@ async function main(args) {
 	const answer = await cli.question(' > ')
 
 	if (answer) {
-		const parsedResult = parse(answer)
+		const result = parse(answer)
+		const { expression } = result
 
 		logger.ifHasArgs(['--benchmark'], () =>
-			benchmark(parse, [answer], Number(args[args.indexOf('--benchmark') + 1]) || undefined),
+			benchmark(
+				() => parse(answer),
+				[],
+				Number(args[args.indexOf('--benchmark') + 1]) || undefined,
+			),
 		)
-		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(parsedResult, null, 4))
+		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(expression, null, 4))
 
-		if (parsedResult.state.errors.length === 0) {
-			if (parsedResult.trees.length === 1) {
-				logger.result(
-					evaluateExpression(
-						parsedResult.trees[0],
-						await cli.getParams(parsedResult.state.params),
-					),
-				)
-			} else {
-				logger.result(
-					evaluateEquation(
-						parsedResult.trees,
-						[...parsedResult.state.params][0],
-					),
-				)
-			}
+		if (expression.body.type === 'BIN_OPERATOR' && expression.body.operator === '=') {
+			// logger.result(
+			// 	evaluateEquation(
+			// 		expression,
+			// 		[...state.params][0],
+			// 	),
+			// )
 		} else {
-			logger.log(parsedResult.state.errors.map(error => error.raw).join('\n'), true)
+			logger.result(
+				evaluateExpression(
+					expression,
+					await cli.getParams(result.params),
+				),
+			)
 		}
-		main(args)
-	} else {
-		cli.close()
 	}
 }

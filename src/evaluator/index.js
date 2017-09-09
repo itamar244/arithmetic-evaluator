@@ -1,7 +1,10 @@
 // @flow
 import * as tt from '../tokenizer/types'
 import * as N from '../types'
-import { operators } from '../operators'
+import {
+	BIN_OPERATORS_METHODS,
+	UNARY_OPERATORS_METHODS,
+} from './operator-functions'
 
 // there are some number anomalies at these ocations. the results supposed to be +-Infinity
 // they are the limits of safe numbers in js, so they have their issues
@@ -12,7 +15,7 @@ const ANOMALY_NUMBERS = [
 ]
 
 const toFixed = precision => (num) => {
-	const res = Math.floor(num * 10 ** precision) / 10 ** precision
+	const res = Math.floor(num * (10 ** precision)) / (10 ** precision)
 	return Math.abs(res) === Infinity ? +num.toFixed(precision) : res
 }
 
@@ -71,10 +74,12 @@ export const evaluateExpression = (node?: N.Node, params?: { [string]: number } 
 	: node.type === tt.LITERAL
 	?	node.value
 	: node.type === tt.BIN_OPERATOR
-	? operators[node.operator](
+	? BIN_OPERATORS_METHODS[node.operator](
 		node.left ? evaluateExpression(node.left, params) : 0,
 		node.right ? evaluateExpression(node.right, params) : 0,
 	)
+	: node.type === tt.UNARY_OPERATOR
+	? UNARY_OPERATORS_METHODS[node.operator](evaluateExpression(node.argument))
 	: node.type === 'EXPRESSION'
 	? (node.body ? evaluateExpression(node.body, params) : 0)
 	: node.type === tt.CONSTANT
