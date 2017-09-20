@@ -22,14 +22,17 @@ const equations = [
 	['x=sqrt(2)', Math.sqrt(2)],
 ]
 
-it('should equations work', () => {
-	for (const [expr, val] of equations) {
-		const result = parse(expr)
-		const { body } = result.expression
+describe('should equations work', () => {
 
-		expect(body.type).toBe('BinaryOperator')
-		if (body.type === 'BinaryOperator') {
-			expect(evaluateEquation(body, result.params[0])).toBe(val)
-		}
+	for (const [expr, val] of equations) {
+		it(`${expr}: ${val}`, () => {
+				const result = parse(expr)
+				const { body } = result.expression
+
+				expect(body.type === 'BinaryOperator' && body.operator === '=').toBe(true)
+				if (body.type === 'BinaryOperator') {
+					expect(evaluateEquation(body, result.params[0])).toBe(val)
+				}
+		})
 	}
 })

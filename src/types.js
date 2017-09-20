@@ -4,7 +4,7 @@ export type Location = {
 	end: number;
 }
 
-export interface NodeBase {
+export type NodeBase = {
 	loc: Location;
 	raw: string;
 }
@@ -20,10 +20,22 @@ export type Node =
 	| NamedNode
 	| NonParsable
 
+export type NodeType =
+	'Result'
+	| 'Expression'
+	| 'UnaryOperator'
+	| 'BinaryOperator'
+	| 'Literal'
+	| 'Function'
+	| 'Constant'
+	| 'Identifier'
+	| 'NonParsable'
+
 export type Result = NodeBase & {
 	type: 'Result';
 	expression: Expression;
 	params: string[];
+	isEquation: bool;
 }
 
 export type Expression = NodeBase & {
@@ -33,7 +45,7 @@ export type Expression = NodeBase & {
 
 export type Operator = NodeBase & {
 	operator: string;
-	__orderPosition?: number;
+	__prec?: number;
 }
 
 export type UnaryOperator = Operator & {
@@ -42,10 +54,13 @@ export type UnaryOperator = Operator & {
 	prefix: bool;
 }
 
-export type BinOperator = Operator & {
-	type: 'BinaryOperator';
+type BinNode = Operator & {
 	left: Node;
 	right: Node;
+}
+
+export type BinOperator = BinNode & {
+	type: 'BinaryOperator';
 }
 
 export type Literal = NodeBase & {
@@ -62,15 +77,15 @@ type FunctionNode = NodeBase & {
 // eslint-disable-next-line import/prefer-default-export
 export type { FunctionNode as Function }
 
-export type NamedNode = Constant | Parameter
+export type NamedNode = Constant | Identifier
 
 export type Constant = NodeBase & {
 	type: 'Constant';
 	name: string;
 }
 
-export type Parameter = NodeBase & {
-	type: 'Parameter';
+export type Identifier = NodeBase & {
+	type: 'Identifier';
 	name: string;
 }
 

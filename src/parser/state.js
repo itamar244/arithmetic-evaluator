@@ -1,9 +1,11 @@
 // @flow
-import type { Token } from '../tokenizer'
+import type { Node } from '../types';
+import type { TokenType } from '../tokenizer/types'
 
 export default class State {
 	pos = 0
-	prevToken: ?Token = null
+	lastTokenType: ?$PropertyType<Node, 'type'> = null
+	curTokenType: TokenType
 	params: Set<string> = new Set()
 	input: string
 	isEquation: bool

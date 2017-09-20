@@ -2,10 +2,20 @@
 import * as N from '../types'
 import { orderPosition } from '../operators'
 
+const deepestRightBinaryNode = (node: N.BinOperator): N.BinOperator => (
+	node.right != null && node.right.type === 'BinaryOperator'
+	? deepestRightBinaryNode(node.right)
+	: node
+)
+
+const getOrder = (node: N.BinOperator): number => (
+	node.__prec !== undefined ? node.__prec : (node.__prec = orderPosition(node.operator))
+)
+
 function mergeBinary(nextNode, target) {
 	if (
 		target.type === 'BinaryOperator'
-		&& orderPosition(nextNode.operator) > orderPosition(target.operator)
+		&& getOrder(nextNode) > getOrder(target)
 	) {
 		target.right = mergeNodes(nextNode, target.right)
 		return target
@@ -32,8 +42,7 @@ export default function mergeNodes(nextNode: N.Node, target: ?N.Node): N.Node {
 		returnedNode = mergeBinary(nextNode, target)
 	} else if (target.type === 'BinaryOperator') {
 		// old node is binary operator followed by literal
-		// NOTE: important to recursively merge nodes for incremently order of binary operators
-		target.right = target.right	? mergeNodes(nextNode, target.right) : nextNode
+		deepestRightBinaryNode(target).right = nextNode
 	}
 
 	return returnedNode

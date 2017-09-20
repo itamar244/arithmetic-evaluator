@@ -7,12 +7,12 @@ const expressions = [
 
 	['x+x*x^x',
 		op('+',
-			item('Parameter', 'x'),
+			item('Identifier', 'x'),
 			op('*',
-				item('Parameter', 'x'),
+				item('Identifier', 'x'),
 				op('^',
-					item('Parameter', 'x'),
-					item('Parameter', 'x'),
+					item('Identifier', 'x'),
+					item('Identifier', 'x'),
 				),
 			),
 		),
@@ -20,12 +20,12 @@ const expressions = [
 
 	['y (( y + y ))',
 		op('*',
-			item('Parameter', 'y'),
+			item('Identifier', 'y'),
 			expr(
 				expr(
 					op('+',
-						item('Parameter', 'y'),
-						item('Parameter', 'y'),
+						item('Identifier', 'y'),
+						item('Identifier', 'y'),
 					),
 				),
 			),
@@ -45,38 +45,41 @@ const expressions = [
 		),
 	],
 
-	['#',	item('NonParsable', '#')],
-	['(',	item('NonParsable', '(')],
-
 	['x=3', op('=',
-		item('Parameter', 'x'),
+		item('Identifier', 'x'),
 		item('Literal', '3'),
 	)],
 
-	['xxx', [
+	['xxx',
 		op('*',
 			op('*',
-				item('Parameter', 'x'),
-				item('Parameter', 'x'),
+				item('Identifier', 'x'),
+				item('Identifier', 'x'),
 			),
-			item('Parameter', 'x'),
+			item('Identifier', 'x'),
 		),
-	]],
+	],
 ]
 
 describe('parse method', () => {
-	for (const [blob, trees] of expressions) {
+	for (const [blob, tree] of expressions) {
 		const { expression } = parse(blob)
 
-		// eslint-disable-next-line no-loop-func
 		it(`${blob} should be the correct tree`, () => {
-			if (trees instanceof Array) {
-				for (let i = 0; i < trees.length; i += 1) {
-					expect(expression.body).toMatchObject(trees[i])
-				}
-			} else {
-				expect(expression.body).toMatchObject(trees)
-			}
+			expect(expression.body).toMatchObject(tree)
+		})
+	}
+})
+
+const throwables = [
+	['#',	item('NonParsable', '#')],
+	['(',	item('NonParsable', '(')],
+]
+
+describe('parse execptions', () => {
+	for (const [blob, tree] of throwables) {
+		it(`${blob} should throw`, () => {
+			expect(() => parse(blob)).toThrow(`0 - ${blob[0]}: not a valid token`)
 		})
 	}
 })

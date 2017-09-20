@@ -9,8 +9,6 @@ const PATTERNS = {
 	constant: /^[A-Z][A-Z0-9]+|^[A-Z]/,
 }
 
-const match = (type: tt.TokenType, m) => ({ type, match: m })
-
 const matchingBracket = (str: string, index: number, start: string, end: string) => {
 	let amountOfOpenBrackets = 0
 	for (let i = index + 1, len = str.length; i < len; i += 1) {
@@ -28,32 +26,36 @@ const matchingBracket = (str: string, index: number, start: string, end: string)
 	throw Error('wrong amount of brackets')
 }
 
-export default function toToken(pos: number, blob: string) {
+const token = (type, start, end) => ({ type, start, end })
+
+export default function toToken(pos: number, blob: string): tt.Token {
 	const char = blob.charAt(pos)
 
 	if (isOperator(char)) {
-		return match(tt.OPERATOR, char)
+		return token(tt.OPERATOR, pos, pos + 1)
 	}
 
 	const str = blob.slice(pos)
 
 	if (/^\(.*\)/.test(str)) {
-		return match(
+		return token(
 			tt.BRACKETS,
-			blob.slice(pos, matchingBracket(blob, pos, '(', ')') + 1),
+			pos,
+			matchingBracket(blob, pos, '(', ')') + 1,
 		)
 	}
 
 	if (/^\|.*\|/.test(str)) {
-		return match(
+		return token(
 			tt.ABS_BRACKETS,
-			blob.slice(pos, matchingBracket(blob, pos, '(', '|)') + 1),
+			pos,
+			matchingBracket(blob, pos, '', '|') + 1,
 		)
 	}
 
 	const num = getMatch(str, PATTERNS.number)
 	if (num) {
-		return match(tt.LITERAL, num)
+		return token(tt.LITERAL, pos, pos + num.length)
 	}
 
 
@@ -61,19 +63,19 @@ export default function toToken(pos: number, blob: string) {
 	// if there is the following case <func>(<str>)...() the last bracket will fit,
 	// so this manually fix it
 	if (func) {
-		const matchedBracketIndex = matchingBracket(func, func.indexOf('('), '(', ')')
-		return match(tt.FUNCTION, func.slice(0, matchedBracketIndex + 1))
+		const matchedBracketIndex = matchingBracket(str, str.indexOf('('), '(', ')')
+		return token(tt.FUNCTION, pos, pos + matchedBracketIndex + 1)
 	}
 
 	// needs to be after function because they both start with a char
 	if (char.match(/[a-z]/)) {
-		return match(tt.PARAM, char)
+		return token(tt.IDENTIFIER, pos, pos + 1)
 	}
 
 	const constant = getMatch(str, PATTERNS.constant)
 	if (constant) {
-		return match(tt.CONSTANT, constant)
+		return token(tt.CONSTANT, pos, pos + constant.length)
 	}
 
-	return match(tt.ERROR, char)
+	return token(tt.ERROR, pos, pos + 1)
 }

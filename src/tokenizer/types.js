@@ -6,7 +6,7 @@ export const CONSTANT: 'CONSTANT' = 'CONSTANT'
 export const ERROR: 'ERROR' = 'ERROR'
 export const FUNCTION: 'FUNCTION' = 'FUNCTION'
 export const LITERAL: 'LITERAL' = 'LITERAL'
-export const PARAM: 'PARAM' = 'PARAM'
+export const IDENTIFIER: 'IDENTIFIER' = 'IDENTIFIER'
 
 export type TokenType =
 	typeof ABS_BRACKETS
@@ -16,9 +16,10 @@ export type TokenType =
 	| typeof ERROR
 	| typeof FUNCTION
 	| typeof LITERAL
-	| typeof PARAM
+	| typeof IDENTIFIER
 
 export type Token = {
 	type: TokenType;
-	match: string;
+	start: number;
+	end: number;
 }

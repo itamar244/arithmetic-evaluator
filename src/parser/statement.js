@@ -10,47 +10,44 @@ import State from './state'
 import mergeNodes from './util'
 
 export default class StatementParser extends NodeUtils {
-	errors: string[] = []
 	input: string
 	state: State
 
-	addError(error: string) {
-		this.errors.push(error)
+	raise(error: string) {
+		throw `${this.state.pos} - ${error}`
 	}
 
 	parseTopLevel(result: N.Result): N.Result {
-		result.expression = this.parseString(this.input)
+		result.expression = this.parseString(this.input, true)
 		result.params = [...this.state.params]
 		return this.finishNode(result, 'Result')
 	}
 
 	// FIXME: fix this.state.pos, it is broken when `parse` is called recursively
-	parseString(input: string): N.Expression {
+	parseString(input: string, topLevel?: bool): N.Expression {
 		const tokens = toTokens(input)
-		const tree = this.startNode(input)
+		const expression: N.Expression = this.startNode(input)
+		const nextToken = (node) => {
+			expression.body = mergeNodes(node, expression.body)
+		}
 
 		for (let i = 0; i < tokens.length; i += 1) {
 			if (
 				tokens[i].type !== tt.OPERATOR
 				&& i > 0 && tokens[i - 1].type !== tt.OPERATOR
 			) {
-				this.nextToken({ type: tt.OPERATOR, match: '*' }, tree)
+				nextToken(this.parseOperator(this.startNode('*'), expression))
 			}
-
-			this.nextToken(tokens[i], tree)
-			this.state.prevToken = tokens[i]
+			nextToken(this.parseToken(tokens[i], expression, !!topLevel))
+			this.state.lastTokenType = tokens[i].type
 		}
 
-		return this.finishNode(tree, 'Expression')
+		return this.finishNode(expression, 'Expression')
 	}
 
-	nextToken(token: Token, tree: N.Expression) {
-		// eslint-disable-next-line no-param-reassign
-		tree.body = mergeNodes(this.parseToken(token, tree), tree.body)
-	}
-
-	parseToken(token: Token, tree: N.Expression) {
-		const node = this.startNode(token.match)
+	parseToken(token: Token, tree: N.Expression, topLevel: bool) {
+		const match = tree.raw.slice(token.start, token.end)
+		const node = this.startNode(match)
 
 		switch (token.type) {
 			case tt.LITERAL:
@@ -58,26 +55,31 @@ export default class StatementParser extends NodeUtils {
 			case tt.OPERATOR: {
 				this.parseOperator(node, tree)
 				// if node is binary operator and there it is the first node
-				if (this.state.prevToken == null) {
-					if (node.type === 'BIN_OPERATOR') this.addError(`'${token.match}' can't be an unary operator`)
-				} else if (this.state.prevToken.type === tt.OPERATOR) {
-					this.addError(`two operators can't be near each other: ${tree.body.raw} ${node.raw}`)
+				if (tree.body == null) {
+					if (node.type === 'BinaryOperator') {
+						this.raise(`'${node.operator}' can't be an unary operator`)
+					}
+				} else if (this.state.lastTokenType === tt.OPERATOR) {
+					this.raise(`two operators can't be near each other: ${tree.body.raw} ${node.raw}`)
+				}
+				if (!topLevel && node.operator === '=') {
+					this.raise("'=' sign can only be at top level")
 				}
 
 				return node
 			}
 			case tt.BRACKETS:
-				return this.parseString(token.match.slice(1, -1))
+				return this.parseString(match.slice(1, -1))
 			case tt.ABS_BRACKETS:
 				return this.parseAbsBrackets(node)
 			case tt.FUNCTION:
 				return this.parseFunction(node)
 			case tt.CONSTANT:
 				return this.parseConstant(node)
-			case tt.PARAM:
-				return this.parseParam(node)
+			case tt.IDENTIFIER:
+				return this.parseIdentifier(node)
 			default:
-				this.addError(`${token.match}: not a valid token`)
+				this.raise(`${match}: not a valid token`)
 				return this.finishNode(node, 'NonParsable')
 		}
 	}
@@ -118,7 +120,7 @@ export default class StatementParser extends NodeUtils {
 
 		const isNotValid = isNotValidFunction(node.name, node.args)
 
-		if (isNotValid) this.addError(isNotValid)
+		if (isNotValid) this.raise(isNotValid)
 
 		return this.finishNode(node, 'Function')
 	}
@@ -128,9 +130,9 @@ export default class StatementParser extends NodeUtils {
 		return this.finishNode(node, 'Constant')
 	}
 
-	parseParam(node: N.Parameter): N.Parameter {
+	parseIdentifier(node: N.Identifier): N.Identifier {
 		this.state.params.add(node.raw)
 		node.name = node.raw
-		return this.finishNode(node, 'Parameter')
+		return this.finishNode(node, 'Identifier')
 	}
 }

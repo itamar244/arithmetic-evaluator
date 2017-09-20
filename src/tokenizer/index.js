@@ -13,7 +13,7 @@ export default function toTokens(str: string) {
 			pos += getMatch(str.slice(pos), /\s+/).length
 		} else {
 			const token = toToken(pos, str)
-			pos += token.match.length
+			pos += token.end - token.start
 			tokens.push(token)
 		}
 	}

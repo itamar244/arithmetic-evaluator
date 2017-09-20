@@ -85,7 +85,7 @@ export const evaluateExpression = (node?: N.Node, params?: { [string]: number } 
 	? Math[node.name]
 	: node.type === 'Function'
 	? Math[node.name](...node.args.map(arg => evaluateExpression(arg, params)))
-	: node.type === 'Parameter'
+	: node.type === 'Identifier'
 	? params[node.name]
 	: 0
 )

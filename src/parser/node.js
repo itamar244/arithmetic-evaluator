@@ -2,35 +2,28 @@
 import type {
 	Location,
 	NodeBase,
-	Node as NodeType,
+	Node,
+	AnyNode,
+	NodeType,
 } from '../types'
 import State from './state'
-
-class Node implements NodeBase {
-	type: any
-	loc: Location
-	raw: string
-
-	constructor(raw: string, start: number) {
-		this.raw = raw
-		this.loc = {
-			start,
-			end: start,
-		}
-	}
-}
 
 export default class NodeUtils {
 	// forward declarations
 	state: State
 
-	startNode<T: NodeType>(raw: string): T {
+	startNode<T: Node>(raw: string): T {
 		// $FlowIgnore
-		return new Node(raw, this.state.pos)
+		return {
+			raw,
+			loc: {
+				start: this.state.pos,
+				end: this.state.pos,
+			}
+		}
 	}
 
-	finishNode<T: NodeType>(node: T, type: string): T {
-		// $FlowIgnore
+	finishNode<T: AnyNode>(node: T, type: NodeType): T {
 		node.type = type
 		node.loc.end = this.state.pos
 		return node

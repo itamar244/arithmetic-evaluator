@@ -17,32 +17,36 @@ async function main(args) {
 	const answer = await cli.question(' > ')
 
 	if (answer) {
-		const result = parse(answer)
-		const { expression } = result
+		try {
+			const result = parse(answer)
+			const { expression } = result
 
-		logger.ifHasArgs(['--benchmark'], () =>
-			benchmark(
-				() => parse(answer),
-				[],
-				Number(args[args.indexOf('--benchmark') + 1]) || undefined,
-			),
-		)
-		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(expression, null, 4))
-
-		if (expression.body.type === 'BIN_OPERATOR' && expression.body.operator === '=') {
-			logger.result(
-				evaluateEquation(
-					expression.body,
-					result.params[0],
+			logger.ifHasArgs(['--benchmark'], () =>
+				benchmark(
+					() => parse(answer),
+					[],
+					Number(args[args.indexOf('--benchmark') + 1]) || undefined,
 				),
 			)
-		} else {
-			logger.result(
-				evaluateExpression(
-					expression,
-					await cli.getParams(result.params),
-				),
-			)
+			logger.ifHasArgs(['-t', '--tree'], JSON.stringify(expression, null, 4))
+
+			if (expression.body.type === 'BinaryOperator' && expression.body.operator === '=') {
+				logger.result(
+					evaluateEquation(
+						expression.body,
+						result.params[0],
+					),
+				)
+			} else {
+				logger.result(
+					evaluateExpression(
+						expression,
+						await cli.getParams(result.params),
+					),
+				)
+			}
+		} catch (e) {
+			console.error(e)
 		}
 		main(process.argv)
 	} else {
