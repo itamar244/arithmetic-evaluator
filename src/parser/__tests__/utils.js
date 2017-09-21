@@ -1,12 +1,9 @@
 // @flow
 type Item = {
-	type: string,
-	raw?: string,
-	body?: Item,
+	type: string;
 }
 
 export const op = (operator: string, left?: Item, right: Item) => ({
-	raw: operator,
 	type: left != null ? 'BinaryOperator' : 'UnaryOperator',
 	...(
 		left != null
@@ -15,9 +12,9 @@ export const op = (operator: string, left?: Item, right: Item) => ({
 	),
 })
 
-export const item = (type: string, raw: string): Item => ({
+export const item = (type: string, key: string, value: string | number | Item): Item => ({
 	type,
-	raw,
+	[key]: value,
 })
 
 export const expr = (body: Item): Item => ({
@@ -26,7 +23,7 @@ export const expr = (body: Item): Item => ({
 })
 
 export const func = (name: string, ...args: Item[]) => ({
-	args: args.map(expr),
+	args,
 	type: 'Function',
 })
 

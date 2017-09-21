@@ -29,9 +29,11 @@ describe('should equations work', () => {
 				const result = parse(expr)
 				const { body } = result.expression
 
-				expect(body.type === 'BinaryOperator' && body.operator === '=').toBe(true)
-				if (body.type === 'BinaryOperator') {
-					expect(evaluateEquation(body, result.params[0])).toBe(val)
+				if (body) {
+					expect(body.type === 'BinaryOperator' && body.operator === '=').toBe(true)
+					if (body.type === 'BinaryOperator') {
+						expect(evaluateEquation(body, result.identifiers[0])).toBe(val)
+					}
 				}
 		})
 	}

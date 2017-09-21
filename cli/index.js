@@ -1,5 +1,10 @@
 // @flow
-import { parse, evaluateExpression, evaluateEquation } from '../src'
+import {
+	parse,
+	evaluateExpression,
+	evaluateEquation,
+	PREDEFINED_IDENTIFIERS,
+} from '../src'
 import * as cli from './interface'
 import * as logger from './logger'
 import { benchmark } from '../src/utils'
@@ -30,18 +35,22 @@ async function main(args) {
 			)
 			logger.ifHasArgs(['-t', '--tree'], JSON.stringify(expression, null, 4))
 
-			if (expression.body.type === 'BinaryOperator' && expression.body.operator === '=') {
+			if (
+				expression.body
+				&& expression.body.type === 'BinaryOperator'
+				&& expression.body.operator === '='
+			) {
 				logger.result(
 					evaluateEquation(
 						expression.body,
-						result.params[0],
+						result.identifiers[0],
 					),
 				)
 			} else {
 				logger.result(
 					evaluateExpression(
 						expression,
-						await cli.getParams(result.params),
+						await cli.getParams(result.identifiers, PREDEFINED_IDENTIFIERS),
 					),
 				)
 			}

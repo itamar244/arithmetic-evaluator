@@ -67,7 +67,7 @@ export function evaluateEquation(
 	)
 }
 
-export const evaluateExpression = (node?: N.Node, params?: { [string]: number } = {}) => (
+export const evaluateExpression = (node: ?N.Node, params?: { [string]: number } = {}) => (
 	!node
 	? 0
 	: node.type === 'Literal'
@@ -81,11 +81,11 @@ export const evaluateExpression = (node?: N.Node, params?: { [string]: number } 
 	? UNARY_OPERATORS_METHODS[node.operator](evaluateExpression(node.argument))
 	: node.type === 'Expression'
 	? (node.body ? evaluateExpression(node.body, params) : 0)
-	: node.type === 'Constant'
-	? Math[node.name]
 	: node.type === 'Function'
-	? Math[node.name](...node.args.map(arg => evaluateExpression(arg, params)))
+	? Math[node.callee.name](...node.args.map(arg => evaluateExpression(arg, params)))
+	: node.type === 'AbsParentheses'
+	? Math.abs(evaluateExpression(node.body, params))
 	: node.type === 'Identifier'
-	? params[node.name]
+	? node.name in params ? params[node.name] : Math[node.name]
 	: 0
 )

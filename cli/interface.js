@@ -11,10 +11,12 @@ export const question = (query: string): Promise<string> => (
 	new Promise(res => rl.question(query, res))
 )
 
-export async function getParams(params: Iterable<string>) {
+export async function getParams(params: Iterable<string>, predefined: string[]) {
 	const givenParams = {}
 	for (const param of params) {
-		givenParams[param] = Number(await question(`enter value for param ${param}: `))
+		if (!predefined.includes(param)) {
+			givenParams[param] = Number(await question(`enter value for param ${param}: `))
+		}
 	}
 	return givenParams
 }

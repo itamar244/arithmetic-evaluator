@@ -3,29 +3,29 @@ import { parse } from '../../'
 import { op, expr, item, func } from './utils'
 
 const expressions = [
-	['3+3', op('+', item('Literal', '3'), item('Literal', '3'))],
+	['3+3', op('+', item('Literal', 'value', 3), item('Literal', 'value', 3))],
 
 	['x+x*x^x',
 		op('+',
-			item('Identifier', 'x'),
+			item('Identifier', 'name', 'x'),
 			op('*',
-				item('Identifier', 'x'),
+				item('Identifier', 'name', 'x'),
 				op('^',
-					item('Identifier', 'x'),
-					item('Identifier', 'x'),
+					item('Identifier', 'name', 'x'),
+					item('Identifier', 'name', 'x'),
 				),
 			),
 		),
 	],
 
-	['y (( y + y ))',
+	['y * (( y + y ))',
 		op('*',
-			item('Identifier', 'y'),
+			item('Identifier', 'name', 'y'),
 			expr(
 				expr(
 					op('+',
-						item('Identifier', 'y'),
-						item('Identifier', 'y'),
+						item('Identifier', 'name', 'y'),
+						item('Identifier', 'name', 'y'),
 					),
 				),
 			),
@@ -34,29 +34,30 @@ const expressions = [
 
 	['max(3, PI)',
 		func('max',
-			item('Literal', '3'),
-			item('Constant', 'PI'),
+			item('Literal', 'value', 3),
+			item('Identifier', 'name', 'PI'),
 		),
 	],
 
 	['| - 3 |',
-		func('cos',
-			op('-',	undefined, item('Literal', '3')),
+		item('AbsParentheses',
+			'body',
+			op('-',	undefined, item('Literal', 'value', 3)),
 		),
 	],
 
 	['x=3', op('=',
-		item('Identifier', 'x'),
-		item('Literal', '3'),
+		item('Identifier', 'name', 'x'),
+		item('Literal', 'value', 3),
 	)],
 
-	['xxx',
+	['x x x',
 		op('*',
 			op('*',
-				item('Identifier', 'x'),
-				item('Identifier', 'x'),
+				item('Identifier', 'name', 'x'),
+				item('Identifier', 'name', 'x'),
 			),
-			item('Identifier', 'x'),
+			item('Identifier', 'name', 'x'),
 		),
 	],
 ]
@@ -72,14 +73,14 @@ describe('parse method', () => {
 })
 
 const throwables = [
-	['#',	item('NonParsable', '#')],
-	['(',	item('NonParsable', '(')],
+	['#'],
+	['(', "0 - '(': no matching closing parentheses"],
 ]
 
 describe('parse execptions', () => {
-	for (const [blob, tree] of throwables) {
+	for (const [blob, error] of throwables) {
 		it(`${blob} should throw`, () => {
-			expect(() => parse(blob)).toThrow(`0 - ${blob[0]}: not a valid token`)
+			expect(() => parse(blob)).toThrow(error || `0 - ${blob[0]}: not a valid token`)
 		})
 	}
 })
