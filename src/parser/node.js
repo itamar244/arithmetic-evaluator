@@ -1,25 +1,22 @@
 // @flow
 import type {
-	Location,
-	NodeBase,
-	Node,
 	AnyNode,
 	NodeType,
+	Node,
 } from '../types'
+import Utils from '../utils/common-class'
 import State from './state'
 
-export default class NodeUtils {
+export default class NodeUtils extends Utils {
 	// forward declarations
 	state: State
 
-	startNode<T: Node>(raw: string): T {
-		// $FlowIgnore
+	startNode(): AnyNode {
 		return {
-			raw,
 			loc: {
-				start: this.state.pos,
-				end: this.state.pos,
-			}
+				start: this.state.start,
+				end: this.state.start,
+			},
 		}
 	}
 

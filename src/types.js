@@ -6,7 +6,6 @@ export type Location = {
 
 export type NodeBase = {
 	loc: Location;
-	raw: string;
 }
 
 export type AnyNode = NodeBase & { [string]: any }
@@ -16,9 +15,9 @@ export type Node =
 	| UnaryOperator
 	| BinOperator
 	| Literal
+	| Identifier
+	| AbsParentheses
 	| FunctionNode
-	| NamedNode
-	| NonParsable
 
 export type NodeType =
 	'Result'
@@ -26,21 +25,19 @@ export type NodeType =
 	| 'UnaryOperator'
 	| 'BinaryOperator'
 	| 'Literal'
-	| 'Function'
-	| 'Constant'
 	| 'Identifier'
-	| 'NonParsable'
+	| 'AbsParentheses'
+	| 'Function'
 
 export type Result = NodeBase & {
 	type: 'Result';
 	expression: Expression;
-	params: string[];
-	isEquation: bool;
+	identifiers: string[];
 }
 
 export type Expression = NodeBase & {
 	type: 'Expression';
-	body: Node;
+	body: ?Node;
 }
 
 export type Operator = NodeBase & {
@@ -68,27 +65,21 @@ export type Literal = NodeBase & {
 	value: number
 }
 
-type FunctionNode = NodeBase & {
-	type: 'Function';
-	name: string;
-	args: Node[];
-}
-// there is some problem with built-in Function class; so this fixes it
-// eslint-disable-next-line import/prefer-default-export
-export type { FunctionNode as Function }
-
-export type NamedNode = Constant | Identifier
-
-export type Constant = NodeBase & {
-	type: 'Constant';
-	name: string;
-}
-
 export type Identifier = NodeBase & {
 	type: 'Identifier';
 	name: string;
 }
 
-export type NonParsable = NodeBase & {
-	type: 'NonParsable'
+export type AbsParentheses = NodeBase & {
+	type: 'AbsParentheses';
+	body: ?Node;
 }
+
+type FunctionNode = NodeBase & {
+	type: 'Function';
+	callee: Identifier;
+	args: Array<?Node>;
+}
+// there is some problem with built-in Function class; so this fixes it
+// eslint-disable-next-line import/prefer-default-export
+export type { FunctionNode as Function }

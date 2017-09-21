@@ -7,7 +7,7 @@
  */
 
 /* operators order.
- * not all of them have functions like `=`, but they are needed for parsing
+ * not all of them have functions, like `=`, but they are needed for parsing
  */
 const OPERATORS_ORDER = [
 	'=',
@@ -16,9 +16,10 @@ const OPERATORS_ORDER = [
 	'^',
 	'!',
 ]
-const OPERATORS = OPERATORS_ORDER.join().split('')
-
-export const isOperator = (str: string) => OPERATORS.includes(str)
+export const OPERATOR_CODES = OPERATORS_ORDER
+	.join('')
+	.split('')
+	.map(operator => operator.charCodeAt(0))
 
 export const orderPosition = (str: string) => (
 	OPERATORS_ORDER.findIndex(item => item.indexOf(str) > -1) + 1

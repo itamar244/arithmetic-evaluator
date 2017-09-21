@@ -36,5 +36,5 @@ export default function isNotValidFunction(name: string, { length: argsLen }: an
 		)
 	}
 
-	return false
+	return null
 }
