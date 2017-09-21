@@ -8,14 +8,11 @@ export default class Parser extends Statement {
 	input: string
 
 	constructor(input: string) {
-		super()
+		super(input)
 		this.input = input
 	}
 
 	parse(): Result {
-		this.state = new State(this.input)
-		this.tokenizer = new Tokenizer(this.state)
-
 		return this.parseTopLevel(this.startNode())
 	}
 }

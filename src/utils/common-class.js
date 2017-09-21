@@ -4,7 +4,7 @@ import State from '../parser/state'
 export default class Util {
 	state: State
 
-	raise(error: string, pos: number = this.state.pos) {
+	raise(error: string, pos: number = this.state.start) {
 		throw new Error(`${pos} - ${error}`)
 	}
 

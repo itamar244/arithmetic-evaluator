@@ -4,13 +4,10 @@ import type {
 	NodeType,
 	Node,
 } from '../types'
-import Utils from '../utils/common-class'
+import Tokenizer from '../tokenizer'
 import State from './state'
 
-export default class NodeUtils extends Utils {
-	// forward declarations
-	state: State
-
+export default class NodeUtils extends Tokenizer {
 	startNode(): AnyNode {
 		return {
 			loc: {
