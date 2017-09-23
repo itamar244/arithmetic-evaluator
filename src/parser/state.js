@@ -10,6 +10,7 @@ export default class State {
 	prevType: ?TokenType
 	type: TokenType
 	prevSpacePadding: number
+	lookahead: bool
 	identifiers: Set<string>
 	value: any
 	input: string
@@ -21,6 +22,7 @@ export default class State {
 		this.prevNode = null
 		this.prevType = null
 		this.prevSpacePadding = 0
+		this.lookahead = false
 		this.identifiers = new Set()
 		this.input = input
 	}

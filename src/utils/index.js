@@ -1,4 +1,8 @@
 // @flow
+export const has = (obj: Object, key: string) => (
+	Object.prototype.hasOwnProperty.call(obj, key)
+)
+
 export async function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: number = 1000) {
 	const bindFunc = func.bind(null, ...args)
 	let times = 0

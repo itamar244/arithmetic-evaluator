@@ -37,8 +37,7 @@ async function main(args) {
 
 			if (
 				expression.body
-				&& expression.body.type === 'BinaryOperator'
-				&& expression.body.operator === '='
+				&& expression.body.type === 'Equation'
 			) {
 				logger.result(
 					evaluateEquation(

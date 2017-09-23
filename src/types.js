@@ -14,6 +14,7 @@ export type Node =
 	| Expression
 	| UnaryOperator
 	| BinOperator
+	| Equation
 	| Literal
 	| Identifier
 	| AbsParentheses
@@ -24,6 +25,7 @@ export type NodeType =
 	| 'Expression'
 	| 'UnaryOperator'
 	| 'BinaryOperator'
+	| 'Equation'
 	| 'Literal'
 	| 'Identifier'
 	| 'AbsParentheses'
@@ -51,13 +53,17 @@ export type UnaryOperator = Operator & {
 	prefix: bool;
 }
 
-type BinNode = Operator & {
+type BinNode = {
 	left: Node;
 	right: Node;
 }
 
-export type BinOperator = BinNode & {
+export type BinOperator = Operator & BinNode & {
 	type: 'BinaryOperator';
+}
+
+export type Equation = NodeBase & BinNode & {
+	type: 'Equation'
 }
 
 export type Literal = NodeBase & {

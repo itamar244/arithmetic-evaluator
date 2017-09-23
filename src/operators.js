@@ -10,16 +10,15 @@
  * not all of them have functions, like `=`, but they are needed for parsing
  */
 const OPERATORS_ORDER = [
-	'=',
+	// '=',
 	'+-',
 	'*/%',
 	'^',
 	'!',
 ]
-export const OPERATOR_CODES = OPERATORS_ORDER
+export const OPERATORS = OPERATORS_ORDER
 	.join('')
 	.split('')
-	.map(operator => operator.charCodeAt(0))
 
 export const orderPosition = (str: string) => (
 	OPERATORS_ORDER.findIndex(item => item.indexOf(str) > -1) + 1

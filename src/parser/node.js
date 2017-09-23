@@ -2,10 +2,8 @@
 import type {
 	AnyNode,
 	NodeType,
-	Node,
 } from '../types'
 import Tokenizer from '../tokenizer'
-import State from './state'
 
 export default class NodeUtils extends Tokenizer {
 	startNode(): AnyNode {

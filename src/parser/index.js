@@ -1,7 +1,5 @@
 // @flow
 import type { Result } from '../types'
-import State from './state'
-import Tokenizer from '../tokenizer'
 import Statement from './statement'
 
 export default class Parser extends Statement {

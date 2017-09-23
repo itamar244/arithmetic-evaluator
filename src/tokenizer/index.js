@@ -2,7 +2,7 @@
 import Utils from '../utils/common-class'
 import State from '../parser/state'
 import { OPERATORS } from '../operators'
-import * as tt from './types'
+import { types as tt, type TokenType } from '../tokenizer/types'
 
 const OPERATOR_CODES = OPERATORS.map(operator => operator.charCodeAt(0))
 const isNumber = (code: number) => code >= 48 && code <= 57
@@ -20,13 +20,37 @@ export default class Tokenizer extends Utils {
 		this.state.init(input)
 	}
 
-	next() {
+	lookaheadFor(type: TokenType) {
+		this.lookahead()
+		if (this.state.type === type) {
+			this.state.lookahead = false
+			return true
+		}
+		return false
+	}
+
+	// getting the next item, but if next is called again then it will the lookahead
+	// NOTE: use with caution, it will affect state to next token
+	lookahead() {
+		this.next()
+		this.state.lookahead = true
+	}
+
+	next(): void {
+		if (this.state.lookahead) {
+			this.state.lookahead = false
+			return
+		}
 		this.skipSpace()
+		this.state.start = this.state.pos
+		this.nextToken()
+	}
+
+	nextToken(): void {
 		const code = this.state.input.charCodeAt(this.state.pos)
 
-		this.state.start = this.state.pos
 		if (this.state.pos >= this.state.input.length) {
-			return this.finishToken(tt.EOF)
+			return this.finishToken(tt.eof)
 		}
 		if (isNumber(code) || code === 46 /* . */) {
 			return this.readNumber()
@@ -37,21 +61,22 @@ export default class Tokenizer extends Utils {
 		// one long tokens
 		this.state.pos += 1
 		if (OPERATOR_CODES.includes(code)) {
-			return this.finishToken(tt.OPERATOR, String.fromCharCode(code))
+			return this.finishToken(tt.operator, String.fromCharCode(code))
 		}
 		switch (code) {
+			case 61: // '='
+				return this.finishToken(tt.eq)
 			case 44: // ','
-				return this.finishToken(tt.COMMA)
+				return this.finishToken(tt.comma)
 			case 40: // '('
-				return this.finishToken(tt.PAREN_L)
+				return this.finishToken(tt.parenL)
 			case 41: // ')'
-				return this.finishToken(tt.PAREN_R)
+				return this.finishToken(tt.parenR)
 			case 124: // '|'
-				return this.finishToken(tt.CROTCHET)
+				return this.finishToken(tt.crotchet)
 			default:
-				return this.finishToken(tt.ERROR, String.fromCharCode(code))
+				return this.finishToken(tt.error, String.fromCharCode(code))
 		}
-
 	}
 
 	readNumber() {
@@ -71,7 +96,7 @@ export default class Tokenizer extends Utils {
 			}
 		}
 
-		this.finishToken(tt.LITERAL, state.input.slice(state.start, state.pos))
+		this.finishToken(tt.literal, state.input.slice(state.start, state.pos))
 	}
 
 	readIdentifier() {
@@ -80,25 +105,23 @@ export default class Tokenizer extends Utils {
 			state.pos += 1
 		}
 
-		this.finishToken(tt.IDENTIFIER, state.input.slice(state.start, state.pos))
+		this.finishToken(tt.identifier, state.input.slice(state.start, state.pos))
 	}
 
 	skipSpace() {
 		const { state } = this
-		let toBreak = false
+		let cur = state.input.charCodeAt(state.pos)
+		let padding = 0
 
-		state.prevSpacePadding = 0
-		while (!toBreak && state.pos < state.input.length) {
-			if (state.input.charCodeAt(state.pos) === 32 /* ' ' */) {
-				state.prevSpacePadding += 1
-				state.pos += 1
-			} else {
-				toBreak = true
-			}
+		while (cur === 32 /* ' ' */) {
+			padding += 1
+			cur = state.input.charCodeAt(state.pos + padding)
 		}
+		state.prevSpacePadding = padding
+		state.pos += padding
 	}
 
-	finishToken(type: tt.TokenType, value?: any) {
+	finishToken(type: TokenType, value?: any) {
 		this.state.value = value
 		this.state.prevType = this.state.type
 		this.state.type = type

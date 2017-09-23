@@ -1,6 +1,6 @@
 // @flow
 import { parse } from '../../'
-import { op, expr, item, func } from './utils'
+import { eq, op, expr, item, func } from './utils'
 
 const expressions = [
 	['3+3', op('+', item('Literal', 'value', 3), item('Literal', 'value', 3))],
@@ -46,7 +46,7 @@ const expressions = [
 		),
 	],
 
-	['x=3', op('=',
+	['x=3', eq(
 		item('Identifier', 'name', 'x'),
 		item('Literal', 'value', 3),
 	)],

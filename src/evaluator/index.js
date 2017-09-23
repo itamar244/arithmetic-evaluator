@@ -18,9 +18,9 @@ const toFixed = precision => (num) => {
 	return Math.abs(res) === Infinity ? +num.toFixed(precision) : res
 }
 
-// using newton's binom for getting the correct value
+// using newton's binom algroithm for getting the correct value
 export function evaluateEquation(
-	node: N.BinOperator,
+	node: N.Equation,
 	variableName: string,
 	reversed: bool = false,
 ) {

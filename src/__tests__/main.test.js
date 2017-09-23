@@ -30,8 +30,8 @@ describe('should equations work', () => {
 				const { body } = result.expression
 
 				if (body) {
-					expect(body.type === 'BinaryOperator' && body.operator === '=').toBe(true)
-					if (body.type === 'BinaryOperator') {
+					expect(body.type === 'Equation').toBe(true)
+					if (body.type === 'Equation') {
 						expect(evaluateEquation(body, result.identifiers[0])).toBe(val)
 					}
 				}

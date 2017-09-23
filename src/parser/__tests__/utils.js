@@ -3,6 +3,12 @@ type Item = {
 	type: string;
 }
 
+export const eq = (left: Item, right: Item) => ({
+	type: 'Equation',
+	left,
+	right,
+})
+
 export const op = (operator: string, left?: Item, right: Item) => ({
 	type: left != null ? 'BinaryOperator' : 'UnaryOperator',
 	...(
