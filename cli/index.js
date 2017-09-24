@@ -1,13 +1,14 @@
 // @flow
 import {
-	parse,
-	evaluateExpression,
-	evaluateEquation,
+	createParser,
+	evaluate,
 	PREDEFINED_IDENTIFIERS,
 } from '../src'
 import * as cli from './interface'
 import * as logger from './logger'
 import { benchmark } from '../src/utils'
+
+const parse = createParser()
 
 logger.infoOfProgram()
 logger.ifHasArgs(['-h', '--help'], () => logger.rulesOfExpression()).then((neededHelp) => {
@@ -19,42 +20,23 @@ logger.ifHasArgs(['-h', '--help'], () => logger.rulesOfExpression()).then((neede
 })
 
 async function main(args) {
-	const answer = await cli.question(' > ')
+	const input = await cli.question(' > ')
 
-	if (answer) {
+	if (input) {
 		try {
-			const result = parse(answer)
-			const { expression } = result
-
+			const result = parse(input)
 			logger.ifHasArgs(['--benchmark'], () =>
 				benchmark(
-					() => parse(answer),
-					[],
+					parse,
+					[input],
 					Number(args[args.indexOf('--benchmark') + 1]) || undefined,
 				),
 			)
-			logger.ifHasArgs(['-t', '--tree'], JSON.stringify(expression, null, 4))
+			logger.ifHasArgs(['-t', '--tree'], JSON.stringify(result.expression, null, 4))
 
-			if (
-				expression.body
-				&& expression.body.type === 'Equation'
-			) {
-				logger.result(
-					evaluateEquation(
-						expression.body,
-						Object.keys(result.identifiers)[0],
-					),
-				)
-			} else {
-				logger.result(
-					evaluateExpression(
-						expression,
-						await cli.getParams(Object.keys(result.identifiers), PREDEFINED_IDENTIFIERS),
-					),
-				)
-			}
+			logger.result(evaluate(result))
 		} catch (e) {
-			console.error(e)
+			console.error(e.message)
 		}
 		main(process.argv)
 	} else {

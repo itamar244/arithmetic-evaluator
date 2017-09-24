@@ -3,22 +3,26 @@ type TokenTypeOptions = {
 	binop?: number;
 	prefix?: bool;
 	postfix?: bool;
+	afterOp?: bool;
 }
 
 const prefix = true
 const postfix = true
+const afterOp = true
 
 export class TokenType {
 	label: string
 	binop: number | null
 	prefix: bool
 	postfix: bool
+	afterOp: bool
 
 	constructor(label: string, options: TokenTypeOptions = {}) {
 		this.label = label
 		this.binop = options.binop || null
 		this.prefix = !!options.prefix
 		this.postfix = !!options.postfix
+		this.afterOp = !!options.afterOp
 	}
 }
 
@@ -30,16 +34,17 @@ export class BinopTokenType extends TokenType {
 }
 
 export const types = {
-	literal: new TokenType('literal'),
+	literal: new TokenType('literal', { afterOp }),
 	error: new TokenType('error'),
-	identifier: new TokenType('identifier'),
+	identifier: new TokenType('identifier', { afterOp }),
 	eof: new TokenType('eof'),
 	eq: new TokenType('='),
 	bang: new TokenType('!', { postfix }),
 	crotchet: new TokenType('|'),
 	comma: new TokenType(','),
-	parenL: new TokenType('('),
+	parenL: new TokenType('(', { afterOp }),
 	parenR: new TokenType(')'),
+	colon: new TokenType(':'),
 
 	plusMin: new BinopTokenType('+/-', 2, { prefix }),
 	star: new BinopTokenType('*', 3),

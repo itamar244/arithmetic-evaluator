@@ -51,12 +51,8 @@ export function evaluateEquation(
 		if (i % 1000 === 0) tmpToFixed = toFixed(16 - (Math.floor(i / 1000)))
 		// if one of the values is Infinity than it will return
 		if (values.some(n => Math.abs(n) === Infinity) && i > 100) {
-			return (
-				reversed
-				// if it the first time it wil reRun with a revers equation
-				? evaluateEquation(node, variableName, true)
-				: 'no value'
-			)
+			// if it the first time it wil re run with a revers equation
+			return !reversed ? evaluateEquation(node, variableName, true) : NaN
 		}
 	}
 
@@ -67,25 +63,40 @@ export function evaluateEquation(
 	)
 }
 
-export const evaluateExpression = (node: ?N.Node, params?: { [string]: number } = {}) => (
-	!node
-	? 0
-	: node.type === 'Literal'
-	?	node.value
-	: node.type === 'BinaryOperator'
-	? BIN_OPERATORS_METHODS[node.operator](
-		node.left ? evaluateExpression(node.left, params) : 0,
-		node.right ? evaluateExpression(node.right, params) : 0,
-	)
-	: node.type === 'UnaryOperator'
-	? UNARY_OPERATORS_METHODS[node.operator](evaluateExpression(node.argument))
-	: node.type === 'Expression'
-	? (node.body ? evaluateExpression(node.body, params) : 0)
-	: node.type === 'Function'
-	? Math[node.callee.name](...node.args.map(arg => evaluateExpression(arg, params)))
-	: node.type === 'AbsParentheses'
-	? Math.abs(evaluateExpression(node.body, params))
-	: node.type === 'Identifier'
-	? node.name in params ? params[node.name] : Math[node.name]
-	: 0
-)
+export function evaluateExpression(
+	node: N.Node,
+	params: N.Params | { [string]: number } = {},
+) {
+	switch (node.type) {
+		case 'Literal':
+			return node.value
+		case 'BinaryOperator':
+			return BIN_OPERATORS_METHODS[node.operator](
+				evaluateExpression(node.left, params),
+				evaluateExpression(node.right, params),
+			)
+		case 'UnaryOperator':
+			return UNARY_OPERATORS_METHODS[node.operator](evaluateExpression(node.argument))
+		case 'Expression':
+			return (node.body ? evaluateExpression(node.body, params) : 0)
+		case 'Function':
+			return Math[node.callee.name](...node.args.map(arg => evaluateExpression(arg, params)))
+		case 'AbsParentheses':
+			return Math.abs(evaluateExpression(node.body, params))
+		case 'Identifier': {
+			const inParams = node.name in params
+			if (!inParams && typeof Math[node.name] !== 'number') {
+				throw new ReferenceError(`${node.name} is undefined`)
+			}
+			return (
+				!inParams
+				? Math[node.name]
+				: typeof params[node.name] === 'number'
+				? params[node.name]
+				: evaluateExpression(params[node.name])
+			)
+		}
+		default:
+			return NaN
+	}
+}

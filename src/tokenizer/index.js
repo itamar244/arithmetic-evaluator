@@ -12,10 +12,14 @@ const isLetter = (code: number) => (
 export default class Tokenizer extends Utils {
 	state: State
 
-	constructor(input: string) {
+	constructor() {
 		super()
 		this.state = new State()
-		this.state.init(input)
+	}
+
+	expectNext(type: TokenType) {
+		this.next()
+		this.expected(this.match(type))
 	}
 
 	lookaheadFor(type: TokenType | (TokenType) => bool) {
@@ -45,6 +49,10 @@ export default class Tokenizer extends Utils {
 		this.skipSpace()
 		this.state.start = this.state.pos
 		this.nextToken()
+	}
+
+	match(type: TokenType) {
+		return this.state.type === type
 	}
 
 	nextToken(): void {
@@ -89,6 +97,8 @@ export default class Tokenizer extends Utils {
 				return this.finishToken(tt.parenR)
 			case 124: // '|'
 				return this.finishToken(tt.crotchet)
+			case 58: // ':'
+				return this.finishToken(tt.colon)
 			default:
 				return this.finishToken(tt.error, String.fromCharCode(code))
 		}

@@ -1,19 +1,18 @@
 // @flow
-import { parse, evaluateExpression, evaluateEquation } from '../'
+import { parse, run, evaluate } from '../index'
 
 const expressions = [
-	['3-3+ (3+3*3^3)( 2 - 1 ) + cos(PI)', 83, {}],
-	['cos(PI)', -1, {}],
-	['3 / 2', 3 / 2, {}],
-	['13.3 % 4', 13.3 % 4, {}],
-	['x - y', 10 - 5, { x: 10, y: 5 }],
+	['3-3+ (3+3*3^3)( 2 - 1 ) + cos(PI)', 83],
+	['cos(PI)', -1],
+	['3 / 2', 3 / 2],
+	['13.3 % 4', 13.3 % 4],
+	['x - y: x=10, y=5', 10 - 5],
 ]
 
 describe('should expression work', () => {
-	for (const [expr, val, params = {}] of expressions) {
+	for (const [expr, val] of expressions) {
 		it(expr, () => {
-			const { expression } = parse(expr)
-			expect(evaluateExpression(expression.body, params)).toBe(val)
+			expect(run(expr)).toBe(val)
 		})
 	}
 })
@@ -32,7 +31,7 @@ describe('should equations work', () => {
 			if (body) {
 				expect(body.type === 'Equation').toBe(true)
 				if (body.type === 'Equation') {
-					expect(evaluateEquation(body, Object.keys(result.identifiers)[0])).toBe(val)
+					expect(evaluate(result)).toBe(val)
 				}
 			}
 		})

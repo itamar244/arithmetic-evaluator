@@ -1,4 +1,6 @@
 // @flow
+export type Params = { [string]: Node }
+
 export type Location = {
 	start: number;
 	end: number;
@@ -34,12 +36,14 @@ export type NodeType =
 export type Result = NodeBase & {
 	type: 'Result';
 	expression: Expression;
-	identifiers: { [string]: ?true };
+	identifiers: string[];
+	params: Params;
+	isEquation: bool;
 }
 
 export type Expression = NodeBase & {
 	type: 'Expression';
-	body: ?Node;
+	body: Node;
 }
 
 export type Operator = NodeBase & {
@@ -77,14 +81,19 @@ export type Identifier = NodeBase & {
 
 export type AbsParentheses = NodeBase & {
 	type: 'AbsParentheses';
-	body: ?Node;
+	body: Node;
 }
 
 type FunctionNode = NodeBase & {
 	type: 'Function';
 	callee: Identifier;
-	args: Array<?Node>;
+	args: Array<Node>;
 }
 // there is some problem with built-in Function class; so this fixes it
 // eslint-disable-next-line import/prefer-default-export
 export type { FunctionNode as Function }
+
+export type VariableDeclerations = NodeBase & {
+	type: 'VariableDeclerations';
+	declerations: Equation[];
+}
