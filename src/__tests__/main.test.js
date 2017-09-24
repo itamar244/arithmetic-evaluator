@@ -9,11 +9,12 @@ const expressions = [
 	['x - y', 10 - 5, { x: 10, y: 5 }],
 ]
 
-it('should expression work', () => {
+describe('should expression work', () => {
 	for (const [expr, val, params = {}] of expressions) {
-		const { expression } = parse(expr)
-
-		expect(evaluateExpression(expression.body, params)).toBe(val)
+		it(expr, () => {
+			const { expression } = parse(expr)
+			expect(evaluateExpression(expression.body, params)).toBe(val)
+		})
 	}
 })
 
@@ -23,18 +24,17 @@ const equations = [
 ]
 
 describe('should equations work', () => {
-
 	for (const [expr, val] of equations) {
-		it(`${expr}: ${val}`, () => {
-				const result = parse(expr)
-				const { body } = result.expression
+		it(expr, () => {
+			const result = parse(expr)
+			const { body } = result.expression
 
-				if (body) {
-					expect(body.type === 'Equation').toBe(true)
-					if (body.type === 'Equation') {
-						expect(evaluateEquation(body, result.identifiers[0])).toBe(val)
-					}
+			if (body) {
+				expect(body.type === 'Equation').toBe(true)
+				if (body.type === 'Equation') {
+					expect(evaluateEquation(body, Object.keys(result.identifiers)[0])).toBe(val)
 				}
+			}
 		})
 	}
 })

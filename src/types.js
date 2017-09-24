@@ -34,7 +34,7 @@ export type NodeType =
 export type Result = NodeBase & {
 	type: 'Result';
 	expression: Expression;
-	identifiers: string[];
+	identifiers: { [string]: ?true };
 }
 
 export type Expression = NodeBase & {
@@ -44,7 +44,6 @@ export type Expression = NodeBase & {
 
 export type Operator = NodeBase & {
 	operator: string;
-	__prec?: number;
 }
 
 export type UnaryOperator = Operator & {

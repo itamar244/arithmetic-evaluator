@@ -1,10 +1,8 @@
 // @flow
 import Utils from '../utils/common-class'
 import State from '../parser/state'
-import { OPERATORS } from '../operators'
-import { types as tt, type TokenType } from '../tokenizer/types'
+import { types as tt, TokenType } from '../tokenizer/types'
 
-const OPERATOR_CODES = OPERATORS.map(operator => operator.charCodeAt(0))
 const isNumber = (code: number) => code >= 48 && code <= 57
 const isLetter = (code: number) => (
 	code >= 65 && code <= 90
@@ -20,9 +18,10 @@ export default class Tokenizer extends Utils {
 		this.state.init(input)
 	}
 
-	lookaheadFor(type: TokenType) {
+	lookaheadFor(type: TokenType | (TokenType) => bool) {
 		this.lookahead()
-		if (this.state.type === type) {
+
+		if (typeof type === 'function' ? type(this.state.type) : (this.state.type === type)) {
 			this.state.lookahead = false
 			return true
 		}
@@ -32,8 +31,10 @@ export default class Tokenizer extends Utils {
 	// getting the next item, but if next is called again then it will the lookahead
 	// NOTE: use with caution, it will affect state to next token
 	lookahead() {
-		this.next()
-		this.state.lookahead = true
+		if (!this.state.lookahead) {
+			this.next()
+			this.state.lookahead = true
+		}
 	}
 
 	next(): void {
@@ -58,12 +59,26 @@ export default class Tokenizer extends Utils {
 		if (isLetter(code)) {
 			return this.readIdentifier()
 		}
-		// one long tokens
+		return this.getTokenFromCode(code)
+	}
+
+	getTokenFromCode(code: number): void {
 		this.state.pos += 1
-		if (OPERATOR_CODES.includes(code)) {
-			return this.finishToken(tt.operator, String.fromCharCode(code))
-		}
+
 		switch (code) {
+			case 43: // '+'
+			case 45: // '-'
+				return this.finishWithValue(tt.plusMin)
+			case 42: // '*'
+				return this.finishWithValue(tt.star)
+			case 47: // '/'
+				return this.finishWithValue(tt.slash)
+			case 37: // '%'
+				return this.finishWithValue(tt.modulo)
+			case 94: // '^'
+				return this.finishWithValue(tt.exponent)
+			case 33: // '!'
+				return this.finishWithValue(tt.bang)
 			case 61: // '='
 				return this.finishToken(tt.eq)
 			case 44: // ','
@@ -96,7 +111,7 @@ export default class Tokenizer extends Utils {
 			}
 		}
 
-		this.finishToken(tt.literal, state.input.slice(state.start, state.pos))
+		this.finishWithValue(tt.literal)
 	}
 
 	readIdentifier() {
@@ -105,7 +120,7 @@ export default class Tokenizer extends Utils {
 			state.pos += 1
 		}
 
-		this.finishToken(tt.identifier, state.input.slice(state.start, state.pos))
+		this.finishWithValue(tt.identifier)
 	}
 
 	skipSpace() {
@@ -119,6 +134,13 @@ export default class Tokenizer extends Utils {
 		}
 		state.prevSpacePadding = padding
 		state.pos += padding
+	}
+
+	finishWithValue(type: TokenType) {
+		this.finishToken(
+			type,
+			this.state.input.slice(this.state.start, this.state.pos),
+		)
 	}
 
 	finishToken(type: TokenType, value?: any) {

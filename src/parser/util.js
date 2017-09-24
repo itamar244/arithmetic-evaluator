@@ -1,34 +1,10 @@
 // @flow
-import * as N from '../types'
-import { orderPosition } from '../operators'
+import type { Node } from '../types'
+import { types as tt } from '../tokenizer/types'
+import State from './state'
 
-const precendence = (node: N.BinOperator): number => (
-	// eslint-disable-next-line no-underscore-dangle
-	node.__prec !== undefined ? node.__prec : (node.__prec = orderPosition(node.operator))
+export const needMultiplierShortcut = (state: State, prevNode: ?Node) => (
+	state.type.binop === null
+	&& prevNode != null && state.prevType && state.prevType.binop === null
+	&& (state.type === tt.identifier || state.type === tt.parenL)
 )
-
-/** merge two continous nodes into one */
-export default function mergeNodes(nextNode: N.Node, target: ?N.Node): N.Node {
-	if (!target) return nextNode
-
-	if (nextNode.type === 'UnaryOperator') {
-		// new node is a postfixed unary operator
-		nextNode.argument = target
-		return nextNode
-	}
-	if (nextNode.type === 'BinaryOperator') {
-		// new node is a binary operator
-		if (
-			target.type === 'BinaryOperator'
-			&& precendence(nextNode) > precendence(target)
-		) {
-			target.right = mergeNodes(nextNode, target.right)
-			return target
-		}
-
-		nextNode.left = target
-		return nextNode
-	}
-
-	return target
-}

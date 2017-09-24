@@ -42,14 +42,14 @@ async function main(args) {
 				logger.result(
 					evaluateEquation(
 						expression.body,
-						result.identifiers[0],
+						Object.keys(result.identifiers)[0],
 					),
 				)
 			} else {
 				logger.result(
 					evaluateExpression(
 						expression,
-						await cli.getParams(result.identifiers, PREDEFINED_IDENTIFIERS),
+						await cli.getParams(Object.keys(result.identifiers), PREDEFINED_IDENTIFIERS),
 					),
 				)
 			}

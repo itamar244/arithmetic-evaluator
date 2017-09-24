@@ -1,6 +1,6 @@
 // @flow
 import type { Node } from '../types'
-import type { TokenType } from '../tokenizer/types'
+import { types as tt, type TokenType } from '../tokenizer/types'
 
 export default class State {
 	pos: number
@@ -8,10 +8,10 @@ export default class State {
 	end: number
 	prevNode: ?Node
 	prevType: ?TokenType
-	type: TokenType
+	type: TokenType = tt.eof
 	prevSpacePadding: number
 	lookahead: bool
-	identifiers: Set<string>
+	identifiers: { [string]: ?true }
 	value: any
 	input: string
 
@@ -21,9 +21,10 @@ export default class State {
 		this.end = 0
 		this.prevNode = null
 		this.prevType = null
+		this.type = tt.eof
 		this.prevSpacePadding = 0
 		this.lookahead = false
-		this.identifiers = new Set()
+		this.identifiers = {}
 		this.input = input
 	}
 }

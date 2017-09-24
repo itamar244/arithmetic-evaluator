@@ -1,36 +1,49 @@
 // @flow
-export const operator: 'operator' = 'operator'
-export const eq: 'eq' = 'eq'
-export const crotchet: 'crotchet' = 'crotchet'
-export const comma: 'comma' = 'comma'
-export const parenL: 'parenL' = 'parenL'
-export const parenR: 'parenR' = 'parenR'
-export const error: 'error' = 'error'
-export const literal: 'literal' = 'literal'
-export const identifier: 'identifier' = 'identifier'
-export const eof: 'eof' = 'eof'
-
-export const types = {
-	operator,
-	eq,
-	crotchet,
-	comma,
-	parenL,
-	parenR,
-	error,
-	literal,
-	identifier,
-	eof,
+type TokenTypeOptions = {
+	binop?: number;
+	prefix?: bool;
+	postfix?: bool;
 }
 
-export type TokenType =
-	typeof operator
-	| typeof eq
-	| typeof crotchet
-	| typeof comma
-	| typeof parenL
-	| typeof parenR
-	| typeof error
-	| typeof literal
-	| typeof identifier
-	| typeof eof
+const prefix = true
+const postfix = true
+
+export class TokenType {
+	label: string
+	binop: number | null
+	prefix: bool
+	postfix: bool
+
+	constructor(label: string, options: TokenTypeOptions = {}) {
+		this.label = label
+		this.binop = options.binop || null
+		this.prefix = !!options.prefix
+		this.postfix = !!options.postfix
+	}
+}
+
+export class BinopTokenType extends TokenType {
+	constructor(label: string, binop: number, options: TokenTypeOptions = {}) {
+		options.binop = binop
+		super(label, options)
+	}
+}
+
+export const types = {
+	literal: new TokenType('literal'),
+	error: new TokenType('error'),
+	identifier: new TokenType('identifier'),
+	eof: new TokenType('eof'),
+	eq: new TokenType('='),
+	bang: new TokenType('!', { postfix }),
+	crotchet: new TokenType('|'),
+	comma: new TokenType(','),
+	parenL: new TokenType('('),
+	parenR: new TokenType(')'),
+
+	plusMin: new BinopTokenType('+/-', 2, { prefix }),
+	star: new BinopTokenType('*', 3),
+	slash: new BinopTokenType('/', 3),
+	modulo: new BinopTokenType('%', 3),
+	exponent: new BinopTokenType('^', 4),
+}

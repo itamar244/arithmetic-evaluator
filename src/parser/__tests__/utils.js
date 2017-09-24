@@ -10,6 +10,7 @@ export const eq = (left: Item, right: Item) => ({
 })
 
 export const op = (operator: string, left?: Item, right: Item) => ({
+	operator,
 	type: left != null ? 'BinaryOperator' : 'UnaryOperator',
 	...(
 		left != null

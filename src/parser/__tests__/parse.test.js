@@ -53,11 +53,11 @@ const expressions = [
 
 	['x x x',
 		op('*',
+			item('Identifier', 'name', 'x'),
 			op('*',
 				item('Identifier', 'name', 'x'),
 				item('Identifier', 'name', 'x'),
 			),
-			item('Identifier', 'name', 'x'),
 		),
 	],
 ]
@@ -74,13 +74,13 @@ describe('parse method', () => {
 
 const throwables = [
 	['#'],
-	['(', "0 - '(': no matching closing parentheses"],
+	['(', "1 - eof: unexpected token"],
 ]
 
 describe('parse execptions', () => {
 	for (const [blob, error] of throwables) {
 		it(`${blob} should throw`, () => {
-			expect(() => parse(blob)).toThrow(error || `0 - ${blob[0]}: not a valid token`)
+			expect(() => parse(blob)).toThrow(error || `0 - ${blob[0]}: unexpected token`)
 		})
 	}
 })
