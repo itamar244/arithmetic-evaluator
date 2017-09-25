@@ -1,6 +1,8 @@
 // @flow
-export const BIN_OPERATORS_METHODS: {
-	[string]: (number, number) => number
+import type { UnaryOperator, BinaryOperator } from '../types';
+
+export const BINARY: {
+	[BinaryOperator]: (number, number) => number
 } = {
 	'+': (a, b) => (a + b),
 	'-': (a, b) => (a - b),
@@ -10,8 +12,8 @@ export const BIN_OPERATORS_METHODS: {
 	'%': (a, b) => a % b,
 }
 
-export const UNARY_OPERATORS_METHODS: {
-	[string]: (number) => number
+export const UNARY: {
+	[UnaryOperator]: (number) => number
 } = {
 	'+': num => +num,
 	'-': num => -num,

@@ -19,7 +19,7 @@ export default class ExpressionParser extends NodeUtils {
 		this.next()
 		if (!this.isLineTerminator()) {
 			if (this.needMultiplierShortcut()) {
-				node = this.parseBinaryOperator(node, -1, false, tt.star, '*')
+				node = this.parseBinaryExpression(node, -1, false, tt.star, '*')
 			}
 			if (!breakers.includes(this.state.type)) {
 				this.expect(this.state.type.binop !== null)
@@ -34,7 +34,7 @@ export default class ExpressionParser extends NodeUtils {
 
 		switch (this.state.type) {
 			case tt.plusMin:
-				if (body == null) return this.parseUnaryOperator(node, topLevel)
+				if (body == null) return this.parseUnaryExpression(node, topLevel)
 				// eslint-disable-next-line no-fallthrough
 			case tt.eq:
 			case tt.star:
@@ -49,7 +49,7 @@ export default class ExpressionParser extends NodeUtils {
 					throw this.raise(`'${node.operator}' can't be an unary operator`)
 				}
 
-				return this.parseBinaryOperator(body, -1)
+				return this.parseBinaryExpression(body, -1)
 			case tt.literal:
 				return this.parseLiteral(node)
 			case tt.parenL:
@@ -73,14 +73,14 @@ export default class ExpressionParser extends NodeUtils {
 	parseMaybeUnary(topLevel: ?bool, body: ?N.Node) {
 		const maybeArgument = this.parseToken(!!topLevel, body)
 		if (this.lookaheadFor(type => type.postfix)) {
-			const node: N.UnaryOperator = this.startNode()
+			const node: N.UnaryExpression = this.startNode()
 			node.argument = maybeArgument
-			return this.parseUnaryOperator(node, false)
+			return this.parseUnaryExpression(node, false)
 		}
 		return maybeArgument
 	}
 
-	parseUnaryOperator(node: N.AnyNode, topLevel: bool): N.UnaryOperator {
+	parseUnaryExpression(node: N.AnyNode, topLevel: bool): N.UnaryExpression {
 		node.operator = this.state.value
 		node.prefix = this.state.type.prefix
 
@@ -89,19 +89,19 @@ export default class ExpressionParser extends NodeUtils {
 			node.argument = this.parseToken(topLevel)
 		}
 
-		return this.finishNode(node, 'UnaryOperator')
+		return this.finishNode(node, 'UnaryExpression')
 	}
 
-	parseBinaryOperator(
+	parseBinaryExpression(
 		left: N.AnyNode,
 		minPrec: number,
 		toMoveNext: bool = true,
 		type: TokenType = this.state.type,
-		operator?: string,
-	): N.BinaryOperator {
+		operator?: N.BinaryOperator,
+	): N.BinaryExpression {
 		const prec = type.binop
 		if (prec !== null && prec > minPrec) {
-			const node: N.BinaryOperator = this.startNode()
+			const node: N.BinaryExpression = this.startNode()
 			node.left = left
 			node.operator = operator || this.state.value
 
@@ -110,12 +110,12 @@ export default class ExpressionParser extends NodeUtils {
 			const right = this.parseMaybeUnary()
 			this.next()
 			if (this.needMultiplierShortcut()) {
-				node.right = this.parseBinaryOperator(right, minPrec, false, tt.star, '*')
+				node.right = this.parseBinaryExpression(right, minPrec, false, tt.star, '*')
 			} else {
-				node.right = this.parseBinaryOperator(right, prec)
+				node.right = this.parseBinaryExpression(right, prec)
 			}
-			return this.parseBinaryOperator(
-				this.finishNode(node, type === tt.eq ? 'Equation' : 'BinaryOperator'),
+			return this.parseBinaryExpression(
+				this.finishNode(node, type === tt.eq ? 'Equation' : 'BinaryExpression'),
 				minPrec,
 			)
 		}

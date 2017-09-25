@@ -14,8 +14,8 @@ export type AnyNode = NodeBase & { [string]: any }
 export type Node =
 	| Program
 	| Expression
-	| UnaryOperator
-	| BinaryOperator
+	| UnaryExpression
+	| BinaryExpression
 	| VariableDeclerations
 	| VariableDeclerator
 	| FunctionDeclaration
@@ -33,8 +33,8 @@ export type Statement =
 export type NodeType =
 	| 'Program'
 	| 'Expression'
-	| 'UnaryOperator'
-	| 'BinaryOperator'
+	| 'UnaryExpression'
+	| 'BinaryExpression'
 	| 'VariableDeclerations'
 	| 'VariableDeclerator'
 	| 'FunctionDeclaration'
@@ -54,24 +54,36 @@ export type Expression = NodeBase & {
 	body: Node;
 }
 
-export type Operator = NodeBase & {
-	operator: string;
-}
 
-export type UnaryOperator = Operator & {
-	type: 'UnaryOperator';
+export type UnaryExpression = NodeBase & {
+	type: 'UnaryExpression';
+	operator: UnaryOperator;
 	argument: Node;
 	prefix: bool;
 }
 
-type BinNode = {
+export type UnaryOperator =
+	| '+'
+	| '-'
+	| '!'
+
+type BinNode = NodeBase & {
 	left: Node;
 	right: Node;
 }
 
-export type BinaryOperator = Operator & BinNode & {
-	type: 'BinaryOperator';
+export type BinaryExpression = BinNode & {
+	type: 'BinaryExpression';
+	operator: BinaryOperator;
 }
+
+export type BinaryOperator =
+	| '+'
+	| '-'
+	| '*'
+	| '/'
+	| '^'
+	| '%'
 
 export type VariableDeclerations = NodeBase & {
 	type: 'VariableDeclerations';
