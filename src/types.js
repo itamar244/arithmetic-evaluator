@@ -6,7 +6,7 @@ export type Location = {
 	end: number;
 }
 
-export type NodeBase = {
+export interface NodeBase {
 	loc: Location;
 }
 
