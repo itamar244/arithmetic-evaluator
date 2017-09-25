@@ -1,7 +1,6 @@
 // @flow
 import * as N from '../types'
 import { types as tt, type TokenType } from '../tokenizer/types'
-import isNotValidFunction from '../functions'
 import NodeUtils from './node'
 
 export default class ExpressionParser extends NodeUtils {
@@ -18,12 +17,14 @@ export default class ExpressionParser extends NodeUtils {
 	parseExpressionBody(topLevel: bool, breakers: TokenType[]): N.Node {
 		let node = this.parseMaybeUnary(topLevel)
 		this.next()
-		if (this.needMultiplierShortcut()) {
-			node = this.parseBinaryOperator(node, -1, false, tt.star, '*')
-		}
-		if (!breakers.includes(this.state.type)) {
-			this.expect(this.state.type.binop !== null)
-			node = this.parseToken(topLevel, node)
+		if (!this.isLineTerminator()) {
+			if (this.needMultiplierShortcut()) {
+				node = this.parseBinaryOperator(node, -1, false, tt.star, '*')
+			}
+			if (!breakers.includes(this.state.type)) {
+				this.expect(this.state.type.binop !== null)
+				node = this.parseToken(topLevel, node)
+			}
 		}
 		return node
 	}
@@ -121,7 +122,8 @@ export default class ExpressionParser extends NodeUtils {
 		return left
 	}
 
-	parseCallExpression(node: N.CallExpression, callee: N.Identifier): N.CallExpression {
+	parseCallExpression(callee: N.Identifier): N.CallExpression {
+		const node: N.CallExpression = this.startNode()
 		node.callee = callee
 		node.args = []
 
@@ -132,8 +134,6 @@ export default class ExpressionParser extends NodeUtils {
 			if (this.state.type !== tt.comma) inFunction = false
 		}
 
-		this.raiseIfTruthy(isNotValidFunction(callee.name, node.args))
-
 		return this.finishNode(node, 'CallExpression')
 	}
 
@@ -141,12 +141,9 @@ export default class ExpressionParser extends NodeUtils {
 		this.parseIdentifier(node)
 
 		if (this.lookaheadFor(type => type === tt.parenL && this.state.prevSpacePadding === 0)) {
-			return this.parseCallExpression(this.startNode(), node)
+			return this.parseCallExpression(node)
 		}
 
-		if (!this.state.identifiers.includes(node.name)) {
-			this.state.identifiers.push(node.name)
-		}
 		return node
 	}
 

@@ -25,13 +25,14 @@ const equations = [
 describe('should equations work', () => {
 	for (const [expr, val] of equations) {
 		it(expr, () => {
-			const result = parse(expr)
-			const { expression } = result
+			const program = parse(expr)
+			const expression = program.body[0]
 
+			expect(expression).toBeTruthy()
 			if (expression.type === 'Expression') {
 				expect(expression.body.type === 'Equation').toBe(true)
 				if (expression.body.type === 'Equation') {
-					expect(evaluate(result)).toBe(val)
+					expect(evaluate(program)).toBe(val)
 				}
 			}
 		})

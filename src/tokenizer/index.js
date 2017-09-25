@@ -1,7 +1,7 @@
 // @flow
 import State from '../parser/state'
 import { has } from '../utils'
-import { types as tt, keywords as kt, TokenType } from '../tokenizer/types'
+import { types as tt, keywords, TokenType } from '../tokenizer/types'
 
 const isNumber = (code: number) => code >= 48 && code <= 57
 const isLetter = (code: number) => (
@@ -47,6 +47,8 @@ export default class Tokenizer {
 			this.state.lookahead = false
 			return
 		}
+		this.state.prevStart = this.state.start
+		this.state.prevEnd = this.state.end
 		this.nextToken()
 	}
 
@@ -106,6 +108,8 @@ export default class Tokenizer {
 				return this.finishToken(tt.parenR)
 			case 124: // '|'
 				return this.finishToken(tt.crotchet)
+			case 59: // ';'
+				return this.finishToken(tt.semi)
 			default:
 				this.finishWithValue(tt.error)
 				return this.expect(false)
@@ -139,8 +143,8 @@ export default class Tokenizer {
 		}
 
 		const word = state.input.slice(state.start, state.pos)
-		if (has(kt, word)) {
-			this.finishToken(kt[word], word)
+		if (has(keywords, word)) {
+			this.finishToken(keywords[word], word)
 		} else {
 			this.finishToken(tt.name, word)
 		}
@@ -151,7 +155,7 @@ export default class Tokenizer {
 		let cur = state.input.charCodeAt(state.pos)
 		let padding = 0
 
-		while (cur === 32 /* ' ' */) {
+		while (cur === 32 /* ' ' */ || cur === 10 /* '\n' */ || cur === 9 /* '\t' */) {
 			padding += 1
 			cur = state.input.charCodeAt(state.pos + padding)
 		}

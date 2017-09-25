@@ -4,11 +4,15 @@ import { types as tt } from '../tokenizer/types'
 import ExpressionParser from './expression'
 
 export default class StatementParser extends ExpressionParser {
-	parseTopLevel(result: N.Result) {
+	parseTopLevel(program: N.Program): N.Program {
 		this.nextToken()
-		result.expression = this.parseStatement()
-		result.identifiers = this.state.identifiers
-		return this.finishNode(result, 'Result')
+
+		program.body = []
+		while (!this.match(tt.eof)) {
+			program.body.push(this.parseStatement())
+			this.semicolon()
+		}
+		return this.finishNode(program, 'Program')
 	}
 
 	parseStatement() {
@@ -17,6 +21,8 @@ export default class StatementParser extends ExpressionParser {
 		switch (this.state.type) {
 			case tt.let:
 				return this.parseVariableDeclarations(node)
+			case tt.func:
+				return this.parseFunction(node)
 			default:
 				return this.parseExpression(node, tt.eof, true)
 		}
@@ -46,5 +52,28 @@ export default class StatementParser extends ExpressionParser {
 		this.next()
 		node.init = this.parseExpressionBody(false, [tt.in, tt.comma])
 		return node
+	}
+
+	parseFunction(node: N.FunctionDeclaration) {
+		node.params = []
+		this.expectNext(tt.name)
+		node.id = this.parseIdentifier(this.startNode())
+
+		let end = false
+		this.expectNext(tt.parenL)
+		while (!end) {
+			this.expectNext(tt.name)
+			node.params.push(this.parseIdentifier(this.startNode()))
+			this.next()
+			if (this.eat(tt.parenR)) {
+				end = true
+			} else if (!this.eat(tt.comma)) {
+				this.expect(false)
+			}
+		}
+
+		node.body = this.parseExpressionBody(false, [tt.eof])
+
+		return this.finishNode(node, 'FunctionDeclaration')
 	}
 }

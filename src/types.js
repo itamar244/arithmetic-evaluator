@@ -1,5 +1,5 @@
 // @flow
-export type Params = { [string]: Node }
+export type Params = { [string]: ?Node }
 
 export type Location = {
 	start: number;
@@ -12,20 +12,26 @@ export type NodeBase = {
 
 export type AnyNode = NodeBase & { [string]: any }
 export type Node =
-	Result
+	| Program
 	| Expression
 	| UnaryOperator
 	| BinaryOperator
 	| VariableDeclerations
 	| VariableDeclerator
+	| FunctionDeclaration
 	| Equation
 	| Literal
 	| Identifier
 	| AbsParentheses
 	| CallExpression
 
+export type Statement =
+	| Expression
+	| VariableDeclerations
+	| FunctionDeclaration
+
 export type NodeType =
-	'Result'
+	| 'Program'
 	| 'Expression'
 	| 'UnaryOperator'
 	| 'BinaryOperator'
@@ -38,10 +44,9 @@ export type NodeType =
 	| 'AbsParentheses'
 	| 'CallExpression'
 
-export type Result = NodeBase & {
-	type: 'Result';
-	expression: Node;
-	identifiers: string[]
+export type Program = NodeBase & {
+	type: 'Program';
+	body: Statement[];
 }
 
 export type Expression = NodeBase & {
@@ -78,6 +83,13 @@ export type VariableDeclerator = NodeBase & {
 	type: 'VariableDeclerator';
 	id: Identifier;
 	init: Node;
+}
+
+export type FunctionDeclaration = NodeBase & {
+	type: 'FunctionDeclaration';
+	params: Identifier[];
+	id: Identifier;
+	body: Node;
 }
 
 export type Equation = NodeBase & BinNode & {

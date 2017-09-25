@@ -36,6 +36,7 @@ export class BinopTokenType extends TokenType {
 export const keywords = {
 	let: new TokenType('let'),
 	in: new TokenType('in'),
+	func: new TokenType('func'),
 }
 
 export const types = {

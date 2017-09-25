@@ -75,7 +75,8 @@ const expressions = [
 describe('parse method', () => {
 	for (const [blob, tree] of expressions) {
 		it(`${blob} should be the correct tree`, () => {
-			const { expression } = parse(blob)
+			const program = parse(blob)
+			const expression = program.body[0]
 
 			expect(expression).toMatchObject(tree)
 		})

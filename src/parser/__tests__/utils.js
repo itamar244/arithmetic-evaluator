@@ -39,7 +39,7 @@ export const expr = (body: Item): Item => ({
 
 export const func = (name: string, ...args: Item[]) => ({
 	args,
-	type: 'Function',
+	type: 'CallExpression',
 })
 
 // this file is tested, so testing should be added

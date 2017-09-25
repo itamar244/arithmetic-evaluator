@@ -17,24 +17,14 @@
  */
 
 import Parser from './parser'
-import {
-	evaluateExpression,
-	evaluateEquation,
-	getVariablesFromNode,
-} from './evaluator'
-import type { Result } from './types'
+import evaluate from './evaluator'
+import type { Program, Expression } from './types'
 
 export const parse = (input: string) => (
 	new Parser().parse(input)
 )
 
-export function evaluate({ expression, identifiers }: Result): number {
-	const params = getVariablesFromNode(expression)
-	if (expression.type === 'Expression' && expression.body.type === 'Equation') {
-		return evaluateEquation(expression.body, identifiers[0])
-	}
-	return evaluateExpression(expression, params)
-}
+export { evaluate }
 
 export const run = (input: string) => (
 	evaluate(parse(input))
