@@ -15,27 +15,28 @@ export type Node =
 	Result
 	| Expression
 	| UnaryOperator
-	| BinOperator
+	| BinaryOperator
 	| VariableDeclerations
 	| VariableDeclerator
 	| Equation
 	| Literal
 	| Identifier
 	| AbsParentheses
-	| FunctionNode
+	| CallExpression
 
 export type NodeType =
 	'Result'
 	| 'Expression'
 	| 'UnaryOperator'
 	| 'BinaryOperator'
+	| 'VariableDeclerations'
+	| 'VariableDeclerator'
+	| 'FunctionDeclaration'
 	| 'Equation'
 	| 'Literal'
 	| 'Identifier'
 	| 'AbsParentheses'
-	| 'Function'
-	| 'VariableDeclerations'
-	| 'VariableDeclerator'
+	| 'CallExpression'
 
 export type Result = NodeBase & {
 	type: 'Result';
@@ -63,7 +64,7 @@ type BinNode = {
 	right: Node;
 }
 
-export type BinOperator = Operator & BinNode & {
+export type BinaryOperator = Operator & BinNode & {
 	type: 'BinaryOperator';
 }
 
@@ -98,11 +99,8 @@ export type AbsParentheses = NodeBase & {
 	body: Node;
 }
 
-type FunctionNode = NodeBase & {
-	type: 'Function';
+export type CallExpression = NodeBase & {
+	type: 'CallExpression';
 	callee: Identifier;
 	args: Array<Node>;
 }
-// there is some problem with built-in Function class; so this fixes it
-// eslint-disable-next-line import/prefer-default-export
-export type { FunctionNode as Function }

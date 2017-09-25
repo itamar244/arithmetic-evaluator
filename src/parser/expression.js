@@ -57,7 +57,7 @@ export default class ExpressionParser extends NodeUtils {
 			case tt.crotchet:
 				this.next()
 				return this.parseExpression(node, tt.crotchet, false, 'AbsParentheses')
-			case tt.identifier:
+			case tt.name:
 				return this.parseMaybeIdentifier(node)
 			default:
 				throw this.expect(false)
@@ -97,10 +97,10 @@ export default class ExpressionParser extends NodeUtils {
 		toMoveNext: bool = true,
 		type: TokenType = this.state.type,
 		operator?: string,
-	): N.BinOperator {
+	): N.BinaryOperator {
 		const prec = type.binop
 		if (prec !== null && prec > minPrec) {
-			const node: N.BinOperator = this.startNode()
+			const node: N.BinaryOperator = this.startNode()
 			node.left = left
 			node.operator = operator || this.state.value
 
@@ -121,7 +121,7 @@ export default class ExpressionParser extends NodeUtils {
 		return left
 	}
 
-	parseFunction(node: N.Function, callee: N.Identifier): N.Function {
+	parseCallExpression(node: N.CallExpression, callee: N.Identifier): N.CallExpression {
 		node.callee = callee
 		node.args = []
 
@@ -134,14 +134,14 @@ export default class ExpressionParser extends NodeUtils {
 
 		this.raiseIfTruthy(isNotValidFunction(callee.name, node.args))
 
-		return this.finishNode(node, 'Function')
+		return this.finishNode(node, 'CallExpression')
 	}
 
-	parseMaybeIdentifier(node: N.Identifier): N.Identifier | N.Function {
+	parseMaybeIdentifier(node: N.Identifier): N.Identifier | N.CallExpression {
 		this.parseIdentifier(node)
 
 		if (this.lookaheadFor(type => type === tt.parenL && this.state.prevSpacePadding === 0)) {
-			return this.parseFunction(this.startNode(), node)
+			return this.parseCallExpression(this.startNode(), node)
 		}
 
 		if (!this.state.identifiers.includes(node.name)) {

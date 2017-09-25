@@ -41,13 +41,14 @@ export const keywords = {
 export const types = {
 	literal: new TokenType('literal', { afterOp }),
 	error: new TokenType('error'),
-	identifier: new TokenType('identifier', { afterOp }),
+	name: new TokenType('name', { afterOp }),
 	eof: new TokenType('eof'),
 	bang: new TokenType('!', { postfix }),
 	crotchet: new TokenType('|'),
 	comma: new TokenType(','),
 	parenL: new TokenType('(', { afterOp }),
 	parenR: new TokenType(')'),
+	semi: new TokenType(';'),
 
 	eq: new BinopTokenType('=', 1),
 	plusMin: new BinopTokenType('+/-', 2, { prefix }),
@@ -58,7 +59,3 @@ export const types = {
 
 	...keywords,
 }
-
-// Object.keys(keywords).forEach((name) => {
-//   types['_' + name] = keywords[name]
-// })

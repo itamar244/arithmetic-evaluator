@@ -2,6 +2,7 @@
 import type {
 	AnyNode,
 	NodeType,
+	Node,
 } from '../types'
 import UtilParser from './util'
 
@@ -15,8 +16,8 @@ export default class NodeUtils extends UtilParser {
 		}
 	}
 
-	finishNode<T: AnyNode>(node: T, type: NodeType): T {
-		node.type = type
+	finishNode<T: Node>(node: T, type: NodeType): T {
+		node.type = (type: any)
 		node.loc.end = this.state.pos
 		return node
 	}

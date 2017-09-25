@@ -88,7 +88,7 @@ export function evaluateExpression(
 			return UNARY_OPERATORS_METHODS[node.operator](evaluateExpression(node.argument))
 		case 'Expression':
 			return (node.body ? evaluateExpression(node.body, params) : 0)
-		case 'Function':
+		case 'CallExpression':
 			return Math[node.callee.name](...node.args.map(arg => evaluateExpression(arg, params)))
 		case 'AbsParentheses':
 			return Math.abs(evaluateExpression(node.body, params))

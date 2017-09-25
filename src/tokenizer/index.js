@@ -142,7 +142,7 @@ export default class Tokenizer {
 		if (has(kt, word)) {
 			this.finishToken(kt[word], word)
 		} else {
-			this.finishToken(tt.identifier, word)
+			this.finishToken(tt.name, word)
 		}
 	}
 

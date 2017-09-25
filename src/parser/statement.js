@@ -22,12 +22,12 @@ export default class StatementParser extends ExpressionParser {
 		}
 	}
 
-	parseVariableDeclarations(node: N.VariableDeclerations): N.VariableDeclerations {
+	parseVariableDeclarations(node: N.VariableDeclerations) {
 		node.declarations = []
 
 		let end = false
 		while (!end) {
-			node.declarations.push(this.parseDeclaration())
+			node.declarations.push(this.parseVarDeclarator())
 			if (this.eat(tt.in)) {
 				end = true
 			} else {
@@ -38,8 +38,8 @@ export default class StatementParser extends ExpressionParser {
 		return this.finishNode(node, 'VariableDeclerations')
 	}
 
-	parseDeclaration(): N.VariableDeclerator {
-		this.expectNext(tt.identifier)
+	parseVarDeclarator(): N.VariableDeclerator {
+		this.expectNext(tt.name)
 		const node: N.VariableDeclerator = this.startNode()
 		node.id = this.parseIdentifier(this.startNode())
 		this.expectNext(tt.eq)
