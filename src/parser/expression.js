@@ -101,7 +101,7 @@ export default class ExpressionParser extends NodeUtils {
 	): N.BinaryExpression {
 		const prec = type.binop
 		if (prec !== null && prec > minPrec) {
-			const node: N.BinaryExpression = this.startNode()
+			const node: N.BinaryExpression = this.startNodeAt(left.loc.start)
 			node.left = left
 			node.operator = operator || this.state.value
 
