@@ -6,7 +6,7 @@ const expressions = [
 	['cos(PI)', -1],
 	['3 / 2', 3 / 2],
 	['13.3 % 4', 13.3 % 4],
-	['x - y: x=10, y=5', 10 - 5],
+	['let x = 10, y = 5 in x - y', 10 - 5],
 ]
 
 describe('should expression work', () => {
@@ -26,11 +26,11 @@ describe('should equations work', () => {
 	for (const [expr, val] of equations) {
 		it(expr, () => {
 			const result = parse(expr)
-			const { body } = result.expression
+			const { expression } = result
 
-			if (body) {
-				expect(body.type === 'Equation').toBe(true)
-				if (body.type === 'Equation') {
+			if (expression.type === 'Expression') {
+				expect(expression.body.type === 'Equation').toBe(true)
+				if (expression.body.type === 'Equation') {
 					expect(evaluate(result)).toBe(val)
 				}
 			}

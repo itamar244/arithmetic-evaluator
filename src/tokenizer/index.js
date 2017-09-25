@@ -1,7 +1,7 @@
 // @flow
-import Utils from '../utils/common-class'
 import State from '../parser/state'
-import { types as tt, TokenType } from '../tokenizer/types'
+import { has } from '../utils'
+import { types as tt, keywords as kt, TokenType } from '../tokenizer/types'
 
 const isNumber = (code: number) => code >= 48 && code <= 57
 const isLetter = (code: number) => (
@@ -9,17 +9,18 @@ const isLetter = (code: number) => (
 	|| code >= 97 && code <= 122
 )
 
-export default class Tokenizer extends Utils {
+export default class Tokenizer {
+	// forward declarations: parser/util.js
+	+expect: (condition: bool) => void
 	state: State
 
 	constructor() {
-		super()
 		this.state = new State()
 	}
 
 	expectNext(type: TokenType) {
 		this.next()
-		this.expected(this.match(type))
+		this.expect(this.match(type))
 	}
 
 	lookaheadFor(type: TokenType | (TokenType) => bool) {
@@ -46,8 +47,6 @@ export default class Tokenizer extends Utils {
 			this.state.lookahead = false
 			return
 		}
-		this.skipSpace()
-		this.state.start = this.state.pos
 		this.nextToken()
 	}
 
@@ -55,9 +54,19 @@ export default class Tokenizer extends Utils {
 		return this.state.type === type
 	}
 
+	eat(type: TokenType) {
+		if (this.match(type)) {
+			this.next()
+			return true
+		}
+		return false
+	}
+
 	nextToken(): void {
+		this.skipSpace()
 		const code = this.state.input.charCodeAt(this.state.pos)
 
+		this.state.start = this.state.pos
 		if (this.state.pos >= this.state.input.length) {
 			return this.finishToken(tt.eof)
 		}
@@ -97,10 +106,9 @@ export default class Tokenizer extends Utils {
 				return this.finishToken(tt.parenR)
 			case 124: // '|'
 				return this.finishToken(tt.crotchet)
-			case 58: // ':'
-				return this.finishToken(tt.colon)
 			default:
-				return this.finishToken(tt.error, String.fromCharCode(code))
+				this.finishWithValue(tt.error)
+				return this.expect(false)
 		}
 	}
 
@@ -130,7 +138,12 @@ export default class Tokenizer extends Utils {
 			state.pos += 1
 		}
 
-		this.finishWithValue(tt.identifier)
+		const word = state.input.slice(state.start, state.pos)
+		if (has(kt, word)) {
+			this.finishToken(kt[word], word)
+		} else {
+			this.finishToken(tt.identifier, word)
+		}
 	}
 
 	skipSpace() {

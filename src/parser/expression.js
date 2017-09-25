@@ -3,22 +3,27 @@ import * as N from '../types'
 import { types as tt, type TokenType } from '../tokenizer/types'
 import isNotValidFunction from '../functions'
 import NodeUtils from './node'
-import { needMultiplierShortcut } from './util'
 
 export default class ExpressionParser extends NodeUtils {
-	parseExpression(topLevel: bool, breakers: TokenType[]): N.Node {
-		this.next()
+	parseExpression(
+		node: N.Expression,
+		closer: TokenType,
+		topLevel?: bool,
+		type?: N.NodeType,
+	): N.Expression {
+		node.body = this.parseExpressionBody(!!topLevel, [closer])
+		return this.finishNode(node, type || 'Expression')
+	}
+
+	parseExpressionBody(topLevel: bool, breakers: TokenType[]): N.Node {
 		let node = this.parseMaybeUnary(topLevel)
 		this.next()
-		if (needMultiplierShortcut(this.state)) {
+		if (this.needMultiplierShortcut()) {
 			node = this.parseBinaryOperator(node, -1, false, tt.star, '*')
 		}
 		if (!breakers.includes(this.state.type)) {
-			this.expected(this.state.type.binop !== null || this.state.type === tt.eq)
+			this.expect(this.state.type.binop !== null)
 			node = this.parseToken(topLevel, node)
-			if (this.match(tt.eq)) {
-				node = this.parseEquation(this.startNode(), node)
-			}
 		}
 		return node
 	}
@@ -30,53 +35,33 @@ export default class ExpressionParser extends NodeUtils {
 			case tt.plusMin:
 				if (body == null) return this.parseUnaryOperator(node, topLevel)
 				// eslint-disable-next-line no-fallthrough
+			case tt.eq:
 			case tt.star:
 			case tt.slash:
 			case tt.modulo:
 			case tt.exponent:
+				if (this.state.type === tt.eq) {
+					if (!topLevel) this.expect(false)
+					if (body == null) this.raise("expected token before '=' sign")
+				}
 				if (body == null) {
 					throw this.raise(`'${node.operator}' can't be an unary operator`)
 				}
 
 				return this.parseBinaryOperator(body, -1)
-			case tt.eq:
-				if (!topLevel) this.expected(false)
-				if (body == null) this.raise("expected token before '=' sign")
-
-				// $FlowIgnore - can't figure out that body isn't null because this.raise throws
-				return this.parseEquation(node, body)
 			case tt.literal:
 				return this.parseLiteral(node)
 			case tt.parenL:
-				return this.parseBrackets(node, tt.parenR, '(')
+				this.next()
+				return this.parseExpression(node, tt.parenR)
 			case tt.crotchet:
-				return this.parseBrackets(node, tt.crotchet, '|', 'AbsParentheses')
+				this.next()
+				return this.parseExpression(node, tt.crotchet, false, 'AbsParentheses')
 			case tt.identifier:
-				return this.parseIdentifier(node)
+				return this.parseMaybeIdentifier(node)
 			default:
-				throw this.expected(false)
+				throw this.expect(false)
 		}
-	}
-
-	parseParametersList(): N.Params {
-		const params = {}
-		if (!this.match(tt.colon)) return params
-
-		let end = false
-		while (!end) {
-			this.expectNext(tt.identifier)
-			const key = this.state.value
-			this.expectNext(tt.eq)
-			params[key] = this.parseExpression(false, [tt.eof, tt.comma])
-			this.next()
-			if (this.match(tt.eof)) {
-				end = true
-			} else {
-				this.expected(this.match(tt.comma))
-			}
-		}
-
-		return params
 	}
 
 	parseLiteral(node: N.Literal): N.Literal {
@@ -110,54 +95,30 @@ export default class ExpressionParser extends NodeUtils {
 		left: N.AnyNode,
 		minPrec: number,
 		toMoveNext: bool = true,
-		type?: TokenType,
+		type: TokenType = this.state.type,
 		operator?: string,
 	): N.BinOperator {
-		const prec = (type || this.state.type).binop
+		const prec = type.binop
 		if (prec !== null && prec > minPrec) {
 			const node: N.BinOperator = this.startNode()
 			node.left = left
 			node.operator = operator || this.state.value
 
 			if (toMoveNext) this.next()
-			this.expected(this.state.type.binop === null)
+			this.expect(this.state.type.binop === null)
 			const right = this.parseMaybeUnary()
 			this.next()
-			if (needMultiplierShortcut(this.state)) {
+			if (this.needMultiplierShortcut()) {
 				node.right = this.parseBinaryOperator(right, minPrec, false, tt.star, '*')
 			} else {
 				node.right = this.parseBinaryOperator(right, prec)
 			}
 			return this.parseBinaryOperator(
-				this.finishNode(node, 'BinaryOperator'),
+				this.finishNode(node, type === tt.eq ? 'Equation' : 'BinaryOperator'),
 				minPrec,
 			)
 		}
 		return left
-	}
-
-	parseEquation(node: N.Equation, body: N.Node): N.Equation {
-		const right = this.parseExpression(false, [tt.eof])
-		node.left = body
-		if (!right) {
-			this.raise("expected expression after '=' sign")
-		} else {
-			node.right = right
-		}
-		return this.finishNode(node, 'Equation')
-	}
-
-	parseBrackets(
-		node: N.Expression,
-		closer: TokenType,
-		noCloseMatch: string,
-		type?: N.NodeType,
-	): N.Expression {
-		node.body = this.parseExpression(false, [closer])
-		if (this.state.type === tt.eof) {
-			this.raise(`'${noCloseMatch}': no matching closing parentheses`, node.loc.start)
-		}
-		return this.finishNode(node, type || 'Expression')
 	}
 
 	parseFunction(node: N.Function, callee: N.Identifier): N.Function {
@@ -166,7 +127,8 @@ export default class ExpressionParser extends NodeUtils {
 
 		let inFunction = true
 		while (inFunction) {
-			node.args.push(this.parseExpression(false, [tt.comma, tt.parenR]))
+			this.next()
+			node.args.push(this.parseExpressionBody(false, [tt.comma, tt.parenR]))
 			if (this.state.type !== tt.comma) inFunction = false
 		}
 
@@ -175,9 +137,8 @@ export default class ExpressionParser extends NodeUtils {
 		return this.finishNode(node, 'Function')
 	}
 
-	parseIdentifier(node: N.Identifier): N.Identifier | N.Function {
-		node.name = this.state.value
-		this.finishNode(node, 'Identifier')
+	parseMaybeIdentifier(node: N.Identifier): N.Identifier | N.Function {
+		this.parseIdentifier(node)
 
 		if (this.lookaheadFor(type => type === tt.parenL && this.state.prevSpacePadding === 0)) {
 			return this.parseFunction(this.startNode(), node)
@@ -187,5 +148,11 @@ export default class ExpressionParser extends NodeUtils {
 			this.state.identifiers.push(node.name)
 		}
 		return node
+	}
+
+	parseIdentifier(node: N.Identifier): N.Identifier {
+		node.name = this.state.value
+
+		return this.finishNode(node, 'Identifier')
 	}
 }

@@ -1,9 +1,5 @@
 // @flow
-import {
-	createParser,
-	evaluate,
-	PREDEFINED_IDENTIFIERS,
-} from '../src'
+import { createParser, evaluate } from '../src'
 import * as cli from './interface'
 import * as logger from './logger'
 import { benchmark } from '../src/utils'

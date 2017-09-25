@@ -1,19 +1,9 @@
 // @flow
-import type { Result, Expression } from '../types'
-import { types as tt, type TokenType } from '../tokenizer/types'
-import ExpressionParser from './expression'
+import StatementParser from './statement'
 
-export default class Parser extends ExpressionParser {
-	parse(input: string): Result {
+export default class Parser extends StatementParser {
+	parse(input: string) {
 		this.state.init(input)
-		const result: Result = this.startNode()
-		const expression: Expression = this.startNode()
-
-		expression.body = this.parseExpression(true, [tt.eof, tt.colon])
-
-		result.expression = this.finishNode(expression, 'Expression')
-		result.identifiers = this.state.identifiers
-		result.params = this.parseParametersList()
-		return this.finishNode(result, 'Result')
+		return this.parseTopLevel(this.startNode())
 	}
 }

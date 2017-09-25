@@ -33,22 +33,32 @@ export class BinopTokenType extends TokenType {
 	}
 }
 
+export const keywords = {
+	let: new TokenType('let'),
+	in: new TokenType('in'),
+}
+
 export const types = {
 	literal: new TokenType('literal', { afterOp }),
 	error: new TokenType('error'),
 	identifier: new TokenType('identifier', { afterOp }),
 	eof: new TokenType('eof'),
-	eq: new TokenType('='),
 	bang: new TokenType('!', { postfix }),
 	crotchet: new TokenType('|'),
 	comma: new TokenType(','),
 	parenL: new TokenType('(', { afterOp }),
 	parenR: new TokenType(')'),
-	colon: new TokenType(':'),
 
+	eq: new BinopTokenType('=', 1),
 	plusMin: new BinopTokenType('+/-', 2, { prefix }),
 	star: new BinopTokenType('*', 3),
 	slash: new BinopTokenType('/', 3),
 	modulo: new BinopTokenType('%', 3),
 	exponent: new BinopTokenType('^', 4),
+
+	...keywords,
 }
+
+// Object.keys(keywords).forEach((name) => {
+//   types['_' + name] = keywords[name]
+// })

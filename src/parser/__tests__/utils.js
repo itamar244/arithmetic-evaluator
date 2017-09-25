@@ -9,6 +9,14 @@ export const eq = (left: Item, right: Item) => ({
 	right,
 })
 
+export const varDecls = (decls: Array<[string, Item]>, body: Item) => ({
+	declarations: decls.map(decl => ({
+		id: item('Identifier', 'name', decl[0]),
+		init: decl[1],
+	})),
+	expression: item('Expression', 'body', body),
+})
+
 export const op = (operator: string, left?: Item, right: Item) => ({
 	operator,
 	type: left != null ? 'BinaryOperator' : 'UnaryOperator',

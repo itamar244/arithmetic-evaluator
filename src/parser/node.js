@@ -3,9 +3,9 @@ import type {
 	AnyNode,
 	NodeType,
 } from '../types'
-import Tokenizer from '../tokenizer'
+import UtilParser from './util'
 
-export default class NodeUtils extends Tokenizer {
+export default class NodeUtils extends UtilParser {
 	startNode(): AnyNode {
 		return {
 			loc: {

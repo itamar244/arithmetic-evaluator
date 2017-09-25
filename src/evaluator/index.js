@@ -63,6 +63,15 @@ export function evaluateEquation(
 	)
 }
 
+export function getVariablesFromNode(node: N.Node): N.Params {
+	if (node.type !== 'VariableDeclerations') return {}
+
+	return node.declarations.reduce((params, declaration) => {
+		params[declaration.id.name] = declaration.init
+		return params
+	}, {})
+}
+
 export function evaluateExpression(
 	node: N.Node,
 	params: N.Params | { [string]: number } = {},
@@ -96,6 +105,8 @@ export function evaluateExpression(
 				: evaluateExpression(params[node.name])
 			)
 		}
+		case 'VariableDeclerations':
+			return evaluateExpression(node.expression, params)
 		default:
 			return NaN
 	}

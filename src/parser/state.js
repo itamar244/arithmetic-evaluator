@@ -1,5 +1,4 @@
 // @flow
-import type { Node, Params } from '../types'
 import { types as tt, type TokenType } from '../tokenizer/types'
 
 export default class State {
@@ -7,7 +6,7 @@ export default class State {
 	start: number
 	end: number
 	prevType: ?TokenType
-	type: TokenType = tt.eof
+	type: TokenType
 	prevSpacePadding: number
 	lookahead: bool
 	identifiers: string[]

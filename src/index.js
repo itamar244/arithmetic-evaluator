@@ -17,18 +17,23 @@
  */
 
 import Parser from './parser'
-import { evaluateExpression, evaluateEquation } from './evaluator'
-import type { Params, Result } from './types'
+import {
+	evaluateExpression,
+	evaluateEquation,
+	getVariablesFromNode,
+} from './evaluator'
+import type { Result } from './types'
 
 export const parse = (input: string) => (
 	new Parser().parse(input)
 )
 
-export function evaluate({ expression, identifiers, params }: Result): number {
-	if (expression.body != null && expression.body.type === 'Equation') {
+export function evaluate({ expression, identifiers }: Result): number {
+	const params = getVariablesFromNode(expression)
+	if (expression.type === 'Expression' && expression.body.type === 'Equation') {
 		return evaluateEquation(expression.body, identifiers[0])
 	}
-	return evaluateExpression(expression.body, params)
+	return evaluateExpression(expression, params)
 }
 
 export const run = (input: string) => (
@@ -44,5 +49,3 @@ export function createRunner() {
 	const parser = new Parser()
 	return (input: string) => evaluate(parser.parse(input))
 }
-
-export const PREDEFINED_IDENTIFIERS = Object.getOwnPropertyNames(Math)
