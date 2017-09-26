@@ -4,8 +4,8 @@ import {
 	getFunctionDeclaration,
 	callFunction,
 	getItemFromScopes,
-	type Scope
-} from './utils';
+	type Scope,
+} from './utils'
 import * as operators from './operator-functions'
 
 export default function evaluateNode(node: Node, scopes: Scope[]) {
@@ -27,8 +27,6 @@ export default function evaluateNode(node: Node, scopes: Scope[]) {
 			return Math.abs(evaluateNode(node.body, scopes))
 		case 'Identifier':
 			return evaluateIdentifier(node, scopes)
-		case 'VariableDeclerations':
-			return evaluateNode(node.expression, scopes)
 		default:
 			return NaN
 	}

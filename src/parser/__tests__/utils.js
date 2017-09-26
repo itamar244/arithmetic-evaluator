@@ -1,7 +1,12 @@
 // @flow
+import type { Location } from '../../types'
+import { has } from '../../utils'
+
 type Item = {
 	type: string;
+	loc: Location,
 }
+type ArrayLocation = [number, number]
 
 export const eq = (left: Item, right: Item) => ({
 	type: 'Equation',
@@ -9,38 +14,78 @@ export const eq = (left: Item, right: Item) => ({
 	right,
 })
 
-export const varDecls = (decls: Array<[string, Item]>, body: Item) => ({
+export const varDecls = (decls: Array<[string, Item]>, loc: ArrayLocation, body: Item) => ({
 	declarations: decls.map(decl => ({
-		id: item('Identifier', 'name', decl[0]),
+		id: item('Identifier',
+		[decl[1].loc.start - 1 - decl[0].length, decl[1].loc.start - 1],
+		'name',
+		decl[0],
+	),
 		init: decl[1],
 	})),
-	expression: item('Expression', 'body', body),
+	expression: item('Expression', loc, 'body', body),
 })
 
-export const op = (operator: string, left?: Item, right: Item) => ({
+export const binary = (operator: string, loc: ArrayLocation, left: Item, right: Item) => ({
 	operator,
-	type: left != null ? 'BinaryOperator' : 'UnaryOperator',
-	...(
-		left != null
-		? { left, right }
-		: { argument: right }
-	),
+	left,
+	right,
+	loc: { start: loc[0], end: loc[1] },
+	type:'BinaryExpression',
 })
 
-export const item = (type: string, key: string, value: string | number | Item): Item => ({
+export const unary = (operator: string, loc: ArrayLocation, prefix: bool, argument: Item) => ({
+	operator,
+	prefix,
+	argument,
+	loc: { start: loc[0], end: loc[1] },
+	type: 'UnaryExpression',
+})
+
+export const item = (
+	type: string,
+	loc: ArrayLocation,
+	key: string,
+	value: mixed,
+): Item => ({
 	type,
+	loc: { start: loc[0], end: loc[1] },
 	[key]: value,
 })
 
-export const expr = (body: Item): Item => ({
-	body,
-	type: 'Expression',
-})
+export const expr = (loc: ArrayLocation, body: Item): Item => (
+	item('Expression', loc, 'body', body)
+)
 
-export const func = (name: string, ...args: Item[]) => ({
+export const func = (
+	name: string,
+	calleLoc: ArrayLocation,
+	loc: ArrayLocation,
+	...args: Item[]
+) => ({
 	args,
+	loc: { start: loc[0], end: loc[1] },
+	callee: item('Identifier', calleLoc, 'name', name),
 	type: 'CallExpression',
 })
 
-// this file is tested, so testing should be added
-it('', () => {})
+export const toJson = (obj: mixed) => {
+	if (!(obj instanceof Object)) return obj
+	const next = {}
+
+	for (const key in obj) {
+		if (has(obj, key)) {
+			if (obj[key] instanceof Object) {
+				if (Array.isArray(obj[key])) {
+					next[key] = obj[key].map(toJson)
+				} else {
+					next[key] = toJson(obj[key])
+				}
+			} else {
+				next[key] = obj[key]
+			}
+		}
+	}
+
+	return next
+}

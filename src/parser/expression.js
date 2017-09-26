@@ -46,7 +46,7 @@ export default class ExpressionParser extends NodeUtils {
 					if (body == null) this.raise("expected token before '=' sign")
 				}
 				if (body == null) {
-					throw this.raise(`'${node.operator}' can't be an unary operator`)
+					throw this.raise(`'${this.state.value}' can't be an unary operator`)
 				}
 
 				return this.parseBinaryExpression(body, -1)

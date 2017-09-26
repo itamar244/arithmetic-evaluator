@@ -1,5 +1,5 @@
 // @flow
-import { readFileSync } from 'fs';
+import { readFileSync } from 'fs'
 import { createParser, evaluate } from '../src'
 import * as logger from './logger'
 import { benchmark } from '../src/utils'
@@ -18,14 +18,18 @@ function main(args) {
 	const input = String(readFileSync(args[args.length - 1]))
 	const program = parse(input)
 
-	logger.ifHasArgs(['--benchmark'], () =>
-		benchmark(
-			parse,
-			[input],
-		),
-	)
+	try {
+		logger.ifHasArgs(['--benchmark'], () =>
+			benchmark(
+				parse,
+				[input],
+			),
+		)
 
-	logger.ifHasArgs(['-t', '--tree'], JSON.stringify(program, null, 4))
+		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(program, null, 4))
 
-	logger.result(evaluate(program))
+		logger.result(evaluate(program))
+	} catch (e) {
+		logger.log(e.message)
+	}
 }

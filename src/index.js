@@ -18,7 +18,6 @@
 
 import Parser from './parser'
 import evaluate from './evaluator'
-import type { Program, Expression } from './types'
 
 export const parse = (input: string) => (
 	new Parser().parse(input)

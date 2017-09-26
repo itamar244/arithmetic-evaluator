@@ -10,10 +10,6 @@ export default class UtilParser extends Tokenizer {
 		throw new Error(`${pos} - ${error}`)
 	}
 
-	raiseIfTruthy(error: null | string | false) {
-		if (error) this.raise(error)
-	}
-
 	expect(condition: bool): void {
 		if (!condition) {
 			this.raise(`${this.state.value || this.state.type.label}: unexpected token`)

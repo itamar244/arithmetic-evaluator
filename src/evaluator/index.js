@@ -2,8 +2,8 @@
 import type {
 	Program,
 } from '../types'
-import evaluateNode from './eval';
-import { variableDeclarationsToObject, type Scope } from './utils';
+import evaluateNode from './eval'
+import { variableDeclarationsToObject, type Scope } from './utils'
 
 export default function evaluateProgram(program: Program) {
 	const scope: Scope = {}

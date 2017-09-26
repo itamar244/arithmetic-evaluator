@@ -1,5 +1,5 @@
 // @flow
-import type { UnaryOperator, BinaryOperator } from '../types';
+import type { UnaryOperator, BinaryOperator } from '../types'
 
 export const BINARY: {
 	[BinaryOperator]: (number, number) => number

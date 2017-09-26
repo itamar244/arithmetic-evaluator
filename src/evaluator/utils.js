@@ -5,7 +5,7 @@ import type {
 	VariableDeclerations,
 	FunctionDeclaration,
 } from '../types'
-import evaluateNode from './eval';
+import evaluateNode from './eval'
 
 export type Scope = Params
 
