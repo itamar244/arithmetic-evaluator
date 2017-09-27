@@ -99,6 +99,9 @@ const throwables = [
 	['(', "1 - 'eof': unexpected token"],
 	['*3', "0 - '*' can't be an unary operator"],
 	['(x=3)', "2 - '=': unexpected token"],
+	['3)', "1 - ')': unexpected token"],
+	['func y(x x) x ^ 2', "9 - 'x': unexpected token"],
+	['(3|', "2 - '|': unexpected token"],
 ]
 
 test('parse execptions', (t) => {

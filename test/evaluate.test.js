@@ -27,7 +27,8 @@ test('programs should work', (t) => {
 test('progams should throw', (t) => {
 	const inputs = [
 		['cube(3)', 'cube is not a function'],
-		['x+3', 'x is undefined'],
+		['x', 'x is undefined'],
+		['func x(x) x; x(2, 3)', "wrong number of arguments: 'x' needed 1, intead of 2"],
 	]
 
 	for (const [input, error] of inputs) {
