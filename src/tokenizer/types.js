@@ -52,7 +52,8 @@ export const types = {
 	semi: new TokenType(';'),
 
 	eq: new BinopTokenType('=', 1),
-	plusMin: new BinopTokenType('+/-', 2, { prefix }),
+	plus: new BinopTokenType('+', 2, { prefix }),
+	minus: new BinopTokenType('-', 2, { prefix }),
 	star: new BinopTokenType('*', 3),
 	slash: new BinopTokenType('/', 3),
 	modulo: new BinopTokenType('%', 3),

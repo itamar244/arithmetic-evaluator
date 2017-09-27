@@ -20,7 +20,8 @@ export default class ExpressionParser extends NodeUtils {
 		const node = this.startNode()
 
 		switch (this.state.type) {
-			case tt.plusMin:
+			case tt.plus:
+			case tt.minus:
 				if (body == null) return this.parseUnary(node)
 				// eslint-disable-next-line no-fallthrough
 			case tt.eq:

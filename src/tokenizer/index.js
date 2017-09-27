@@ -79,20 +79,21 @@ export default class Tokenizer {
 
 		switch (code) {
 			case 43: // '+'
+				return this.finishToken(tt.plus, '+')
 			case 45: // '-'
-				return this.finishWithValue(tt.plusMin)
+				return this.finishToken(tt.minus, '-')
 			case 42: // '*'
-				return this.finishWithValue(tt.star)
+				return this.finishToken(tt.star, '*')
 			case 47: // '/'
-				return this.finishWithValue(tt.slash)
+				return this.finishToken(tt.slash, '/')
 			case 37: // '%'
-				return this.finishWithValue(tt.modulo)
+				return this.finishToken(tt.modulo, '%')
 			case 94: // '^'
-				return this.finishWithValue(tt.exponent)
+				return this.finishToken(tt.exponent, '^')
 			case 33: // '!'
-				return this.finishWithValue(tt.bang)
+				return this.finishToken(tt.bang, '!')
 			case 61: // '='
-				return this.finishToken(tt.eq)
+				return this.finishToken(tt.eq, '=')
 			case 44: // ','
 				return this.finishToken(tt.comma)
 			case 40: // '('
