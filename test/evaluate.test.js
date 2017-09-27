@@ -1,6 +1,6 @@
 // @flow
 import test from 'ava'
-import { run } from '../../index'
+import { run } from '../src'
 
 test('programs should work', (t) => {
 	const inputs = [

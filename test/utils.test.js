@@ -1,10 +1,10 @@
 // @flow
-import test from 'ava';
+import test from 'ava'
 import {
 	pluralize,
 	benchmark,
 	has,
-} from '../utils';
+} from '../src/utils'
 
 
 test('utils should work', (t) => {

@@ -1,6 +1,6 @@
 // @flow
 import test from 'ava'
-import { parse } from '../../index'
+import { parse } from '../src'
 import {
 	// eq,
 	// varDecls,
@@ -10,7 +10,7 @@ import {
 	expr,
 	item,
 	func,
-} from './utils'
+} from './nodes'
 
 const expressions = [
 	['3+3', expr([0, 3],

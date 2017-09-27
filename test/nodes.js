@@ -1,6 +1,6 @@
 // @flow
-import type { Location } from '../../types'
-import { has } from '../../utils'
+import type { Location } from '../src/types'
+import { has } from '../src/utils'
 
 type Item = {
 	type: string;
