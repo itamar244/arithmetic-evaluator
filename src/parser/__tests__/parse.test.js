@@ -95,13 +95,14 @@ test('parse method', (t) => {
 })
 
 const throwables = [
-	['#'],
+	['#', "0 - '#': unexpected token"],
 	['(', "1 - 'eof': unexpected token"],
 	['*3', "0 - '*' can't be an unary operator"],
+	['(x=3)', "2 - '=': unexpected token"],
 ]
 
 test('parse execptions', (t) => {
 	for (const [blob, error] of throwables) {
-		t.throws(() => parse(blob), error || `0 - '${blob[0]}': unexpected token`)
+		t.throws(() => parse(blob), error, error)
 	}
 })
