@@ -103,7 +103,6 @@ export default class ExpressionParser extends NodeUtils {
 			node.operator = operator || this.state.value
 
 			if (toMoveNext) this.next()
-			if (this.state.type.binop !== null) this.unexpected()
 			const right = this.parseMaybeUnary()
 			this.next()
 			node.right =

@@ -38,7 +38,7 @@ export function callFunction(
 ) {
 	if (func.params.length !== args.length) {
 		throw RangeError(
-			`wrong number of arguments: '${func.id.name}`
+			`wrong number of arguments: '${func.id.name}'`
 			+ ` needed ${func.params.length}`
 			+ `, intead of ${args.length}`,
 		)
