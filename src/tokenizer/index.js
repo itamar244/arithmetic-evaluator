@@ -26,17 +26,12 @@ export default class Tokenizer {
 
 	// getting the next item, but if next is called again then it will the lookahead
 	// NOTE: use with caution, it will affect state to next token
-	lookaheadFor(type: TokenType | (TokenType) => bool) {
-		if (!this.state.lookahead) {
-			this.next()
-			this.state.lookahead = true
-		}
-
-		if (typeof type === 'function' ? type(this.state.type) : (this.match(type))) {
-			this.state.lookahead = false
+	lookaheadFor(type: (TokenType) => bool) {
+		this.next()
+		if (type(this.state.type)) {
 			return true
 		}
-
+		this.state.lookahead = true
 		return false
 	}
 

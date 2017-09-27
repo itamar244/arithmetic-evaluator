@@ -1,6 +1,6 @@
 // @flow
 import test from 'ava'
-import { run } from '../index'
+import { run } from '../../index'
 
 test('programs should work', (t) => {
 	const inputs = [
@@ -12,9 +12,11 @@ test('programs should work', (t) => {
 		['+3-3', 0],
 		['4!', 24],
 		['func cube(x) x ^ 2; cube(cube(2))', 16],
+		['(3+3); 3', 3],
 		['let x = 10, y = 5 in x - y', 10 - 5],
 		['let x = 10 in 3x', 3 * 10],
 		['x=3', NaN],
+		['let x = 3 in 3x+3', 12],
 	]
 
 	for (const [input, val] of inputs) {

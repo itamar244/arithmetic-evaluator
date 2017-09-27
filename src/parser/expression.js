@@ -28,10 +28,7 @@ export default class ExpressionParser extends NodeUtils {
 			case tt.slash:
 			case tt.modulo:
 			case tt.exponent:
-				if (this.match(tt.eq)) {
-					if (!topLevel) this.unexpected()
-					if (body == null) this.raise("expected token before '=' sign")
-				}
+				if (this.match(tt.eq) && !topLevel) this.unexpected()
 				if (body == null) {
 					throw this.raise(`'${this.state.value}' can't be an unary operator`)
 				}
@@ -126,11 +123,11 @@ export default class ExpressionParser extends NodeUtils {
 		node.callee = callee
 		node.args = []
 
+		this.next()
 		let inFunction = true
 		while (inFunction) {
-			this.next()
 			node.args.push(this.parseExpressionBody(false))
-			if (!this.match(tt.comma)) {
+			if (!this.eat(tt.comma)) {
 				this.expect(tt.parenR)
 				inFunction = false
 			}
