@@ -40,7 +40,8 @@ export const keywords = {
 }
 
 export const types = {
-	literal: new TokenType('literal', { afterOp }),
+	...keywords,
+	num: new TokenType('num', { afterOp }),
 	error: new TokenType('error'),
 	name: new TokenType('name', { afterOp }),
 	eof: new TokenType('eof'),
@@ -58,6 +59,4 @@ export const types = {
 	slash: new BinopTokenType('/', 3),
 	modulo: new BinopTokenType('%', 3),
 	exponent: new BinopTokenType('^', 4),
-
-	...keywords,
 }

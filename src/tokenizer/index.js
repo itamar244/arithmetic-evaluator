@@ -127,7 +127,7 @@ export default class Tokenizer {
 			}
 		}
 
-		this.finishWithValue(tt.literal)
+		this.finishWithValue(tt.num)
 	}
 
 	readIdentifier() {

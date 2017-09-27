@@ -35,7 +35,7 @@ export default class ExpressionParser extends NodeUtils {
 				}
 
 				return this.parseBinary(body, -1)
-			case tt.literal:
+			case tt.num:
 				return this.parseLiteral(node)
 			case tt.parenL:
 				this.next()
