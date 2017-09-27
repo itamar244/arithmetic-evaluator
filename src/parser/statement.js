@@ -24,8 +24,13 @@ export default class StatementParser extends ExpressionParser {
 			case tt.func:
 				return this.parseFunction(node)
 			default:
-				return this.parseExpression(node, tt.eof, true)
+				return this.parseExpressionStatement(node)
 		}
+	}
+
+	parseExpressionStatement(node: N.Expression) {
+		node.body = this.parseExpressionBody(true)
+		return this.finishNode(node, 'Expression')
 	}
 
 	parseVariableDeclarations(node: N.VariableDeclerations) {
@@ -37,10 +42,10 @@ export default class StatementParser extends ExpressionParser {
 			if (this.eat(tt.in)) {
 				end = true
 			} else {
-				this.expect(this.match(tt.comma))
+				this.expect(tt.comma)
 			}
 		}
-		node.expression = this.parseExpression(this.startNode(), tt.eof, true)
+		node.expression = this.parseExpressionStatement(this.startNode())
 		return this.finishNode(node, 'VariableDeclerations')
 	}
 
@@ -50,7 +55,7 @@ export default class StatementParser extends ExpressionParser {
 		node.id = this.parseIdentifier(this.startNode())
 		this.expectNext(tt.eq)
 		this.next()
-		node.init = this.parseExpressionBody(false, [tt.in, tt.comma])
+		node.init = this.parseExpressionBody(false)
 		return node
 	}
 
@@ -68,11 +73,11 @@ export default class StatementParser extends ExpressionParser {
 			if (this.eat(tt.parenR)) {
 				end = true
 			} else if (!this.eat(tt.comma)) {
-				this.expect(false)
+				this.unexpected()
 			}
 		}
 
-		node.body = this.parseExpressionBody(false, [tt.eof])
+		node.body = this.parseExpressionBody(false)
 
 		return this.finishNode(node, 'FunctionDeclaration')
 	}

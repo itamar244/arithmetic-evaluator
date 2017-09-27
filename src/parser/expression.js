@@ -4,27 +4,14 @@ import { types as tt, type TokenType } from '../tokenizer/types'
 import NodeUtils from './node'
 
 export default class ExpressionParser extends NodeUtils {
-	parseExpression(
-		node: N.Expression,
-		closer: TokenType,
-		topLevel?: bool,
-		type?: N.NodeType,
-	): N.Expression {
-		node.body = this.parseExpressionBody(!!topLevel, [closer])
-		return this.finishNode(node, type || 'Expression')
-	}
-
-	parseExpressionBody(topLevel: bool, breakers: TokenType[]): N.Node {
-		let node = this.parseMaybeUnary(topLevel)
+	parseExpressionBody(topLevel: bool): N.Node {
+		const node = this.parseMaybeUnary(topLevel)
 		this.next()
-		if (!this.isLineTerminator()) {
-			if (this.needMultiplierShortcut()) {
-				node = this.parseBinaryExpression(node, -1, false, tt.star, '*')
-			}
-			if (!breakers.includes(this.state.type)) {
-				this.expect(this.state.type.binop !== null)
-				node = this.parseToken(topLevel, node)
-			}
+		if (this.needMultiplierShortcut()) {
+			return this.parseBinary(node, -1, false, tt.star, '*')
+		}
+		if (this.state.type.binop !== null) {
+			return this.parseToken(topLevel, node)
 		}
 		return node
 	}
@@ -34,35 +21,47 @@ export default class ExpressionParser extends NodeUtils {
 
 		switch (this.state.type) {
 			case tt.plusMin:
-				if (body == null) return this.parseUnaryExpression(node, topLevel)
+				if (body == null) return this.parseUnary(node)
 				// eslint-disable-next-line no-fallthrough
 			case tt.eq:
 			case tt.star:
 			case tt.slash:
 			case tt.modulo:
 			case tt.exponent:
-				if (this.state.type === tt.eq) {
-					if (!topLevel) this.expect(false)
+				if (this.match(tt.eq)) {
+					if (!topLevel) this.unexpected()
 					if (body == null) this.raise("expected token before '=' sign")
 				}
 				if (body == null) {
 					throw this.raise(`'${this.state.value}' can't be an unary operator`)
 				}
 
-				return this.parseBinaryExpression(body, -1)
+				return this.parseBinary(body, -1)
 			case tt.literal:
 				return this.parseLiteral(node)
 			case tt.parenL:
 				this.next()
-				return this.parseExpression(node, tt.parenR)
+				return this.parseParenthesized(node, tt.parenR)
 			case tt.crotchet:
 				this.next()
-				return this.parseExpression(node, tt.crotchet, false, 'AbsParentheses')
+				return this.parseParenthesized(node, tt.crotchet)
 			case tt.name:
-				return this.parseMaybeIdentifier(node)
+				return this.parseMaybeCallExpression(node)
 			default:
-				throw this.expect(false)
+				throw this.unexpected()
 		}
+	}
+
+	parseParenthesized(
+		node: N.Expression,
+		end: TokenType,
+	): N.Expression {
+		node.body = this.parseExpressionBody(false)
+		this.expect(end)
+		return this.finishNode(
+			node,
+			end === tt.crotchet ? 'AbsParentheses' : 'Expression',
+		)
 	}
 
 	parseLiteral(node: N.Literal): N.Literal {
@@ -75,24 +74,24 @@ export default class ExpressionParser extends NodeUtils {
 		if (this.lookaheadFor(type => type.postfix)) {
 			const node: N.UnaryExpression = this.startNode()
 			node.argument = maybeArgument
-			return this.parseUnaryExpression(node, false)
+			return this.parseUnary(node)
 		}
 		return maybeArgument
 	}
 
-	parseUnaryExpression(node: N.AnyNode, topLevel: bool): N.UnaryExpression {
+	parseUnary(node: N.AnyNode): N.UnaryExpression {
 		node.operator = this.state.value
 		node.prefix = this.state.type.prefix
 
 		if (node.prefix) {
 			this.next()
-			node.argument = this.parseToken(topLevel)
+			node.argument = this.parseToken(false)
 		}
 
 		return this.finishNode(node, 'UnaryExpression')
 	}
 
-	parseBinaryExpression(
+	parseBinary(
 		left: N.AnyNode,
 		minPrec: number,
 		toMoveNext: bool = true,
@@ -101,20 +100,20 @@ export default class ExpressionParser extends NodeUtils {
 	): N.BinaryExpression {
 		const prec = type.binop
 		if (prec !== null && prec > minPrec) {
-			const node: N.BinaryExpression = this.startNodeAt(left.loc.start)
+			const node: N.BinaryExpression = this.startNodeAtNode(left)
 			node.left = left
 			node.operator = operator || this.state.value
 
 			if (toMoveNext) this.next()
-			this.expect(this.state.type.binop === null)
+			if (this.state.type.binop !== null) this.unexpected()
 			const right = this.parseMaybeUnary()
 			this.next()
-			if (this.needMultiplierShortcut()) {
-				node.right = this.parseBinaryExpression(right, minPrec, false, tt.star, '*')
-			} else {
-				node.right = this.parseBinaryExpression(right, prec)
-			}
-			return this.parseBinaryExpression(
+			node.right =
+				this.needMultiplierShortcut()
+				? this.parseBinary(right, minPrec, false, tt.star, '*')
+				: this.parseBinary(right, prec)
+
+			return this.parseBinary(
 				this.finishNode(node, type === tt.eq ? 'Equation' : 'BinaryExpression'),
 				minPrec,
 			)
@@ -130,14 +129,17 @@ export default class ExpressionParser extends NodeUtils {
 		let inFunction = true
 		while (inFunction) {
 			this.next()
-			node.args.push(this.parseExpressionBody(false, [tt.comma, tt.parenR]))
-			if (this.state.type !== tt.comma) inFunction = false
+			node.args.push(this.parseExpressionBody(false))
+			if (!this.match(tt.comma)) {
+				this.expect(tt.parenR)
+				inFunction = false
+			}
 		}
 
 		return this.finishNode(node, 'CallExpression')
 	}
 
-	parseMaybeIdentifier(node: N.Identifier): N.Identifier | N.CallExpression {
+	parseMaybeCallExpression(node: N.Identifier): N.Identifier | N.CallExpression {
 		this.parseIdentifier(node)
 
 		if (this.lookaheadFor(type => type === tt.parenL && this.state.prevSpacePadding === 0)) {

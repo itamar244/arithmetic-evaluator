@@ -1,7 +1,7 @@
 // @flow
 import State from '../parser/state'
 import { has } from '../utils'
-import { types as tt, keywords, TokenType } from '../tokenizer/types'
+import { types as tt, keywords, type TokenType } from '../tokenizer/types'
 
 const isNumber = (code: number) => code >= 48 && code <= 57
 const isLetter = (code: number) => (
@@ -11,7 +11,8 @@ const isLetter = (code: number) => (
 
 export default class Tokenizer {
 	// forward declarations: parser/util.js
-	+expect: (condition: bool) => void
+	+expect: (type: TokenType) => void
+	+unexpected: () => void
 	state: State
 
 	constructor() {
@@ -20,26 +21,23 @@ export default class Tokenizer {
 
 	expectNext(type: TokenType) {
 		this.next()
-		this.expect(this.match(type))
-	}
-
-	lookaheadFor(type: TokenType | (TokenType) => bool) {
-		this.lookahead()
-
-		if (typeof type === 'function' ? type(this.state.type) : (this.state.type === type)) {
-			this.state.lookahead = false
-			return true
-		}
-		return false
+		this.expect(type)
 	}
 
 	// getting the next item, but if next is called again then it will the lookahead
 	// NOTE: use with caution, it will affect state to next token
-	lookahead() {
+	lookaheadFor(type: TokenType | (TokenType) => bool) {
 		if (!this.state.lookahead) {
 			this.next()
 			this.state.lookahead = true
 		}
+
+		if (typeof type === 'function' ? type(this.state.type) : (this.match(type))) {
+			this.state.lookahead = false
+			return true
+		}
+
+		return false
 	}
 
 	next(): void {
@@ -112,7 +110,7 @@ export default class Tokenizer {
 				return this.finishToken(tt.semi)
 			default:
 				this.finishWithValue(tt.error)
-				return this.expect(false)
+				return this.unexpected()
 		}
 	}
 

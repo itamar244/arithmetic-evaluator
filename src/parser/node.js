@@ -26,9 +26,9 @@ export default class NodeUtils extends UtilParser {
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	startNodeAt(start: number): AnyNode {
+	startNodeAtNode(node: Node | AnyNode): AnyNode {
 		// $FlowIgnore
-		return new Node(start)
+		return new Node(node.loc.start)
 	}
 
 	finishNode<T: NodeObject>(node: T, type: NodeType): T {

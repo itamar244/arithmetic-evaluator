@@ -5,9 +5,9 @@ import type {
 import evaluateNode from './eval'
 import { variableDeclarationsToObject, type Scope } from './utils'
 
-export default function evaluateProgram(program: Program) {
+export default function evaluateProgram(program: Program): null | number {
 	const scope: Scope = {}
-	let expressionValue = NaN
+	let expressionValue = null
 
 	for (const statement of program.body) {
 		if (statement.type === 'FunctionDeclaration') {
@@ -21,5 +21,6 @@ export default function evaluateProgram(program: Program) {
 			expressionValue = evaluateNode(statement, [scope])
 		}
 	}
+
 	return expressionValue
 }

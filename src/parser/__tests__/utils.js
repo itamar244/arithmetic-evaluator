@@ -31,7 +31,7 @@ export const binary = (operator: string, loc: ArrayLocation, left: Item, right: 
 	left,
 	right,
 	loc: { start: loc[0], end: loc[1] },
-	type:'BinaryExpression',
+	type: 'BinaryExpression',
 })
 
 export const unary = (operator: string, loc: ArrayLocation, prefix: bool, argument: Item) => ({

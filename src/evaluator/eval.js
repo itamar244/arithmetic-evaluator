@@ -50,6 +50,7 @@ const evaluateCallExpression = (node, scopes) => {
 
 const evaluateIdentifier = (node, scopes) => {
 	const item = getItemFromScopes(scopes, node.name)
+
 	if (item == null && typeof Math[node.name] !== 'number') {
 		throw new ReferenceError(`${node.name} is undefined`)
 	}
