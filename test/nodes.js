@@ -26,15 +26,25 @@ export const varDecls = (decls: Array<[string, Item]>, loc: ArrayLocation, body:
 	expression: item('Expression', loc, 'body', body),
 })
 
-export const binary = (operator: string, loc: ArrayLocation, left: Item, right: Item) => ({
+export const binary = (
+	operator: string,
+	loc: ArrayLocation,
+	left: Item,
+	right: Item,
+) => ({
 	operator,
 	left,
 	right,
 	loc: { start: loc[0], end: loc[1] },
-	type: 'BinaryExpression',
+	type: operator === '=' ? 'Equation' : 'BinaryExpression',
 })
 
-export const unary = (operator: string, loc: ArrayLocation, prefix: bool, argument: Item) => ({
+export const unary = (
+	operator: string,
+	loc: ArrayLocation,
+	prefix: bool,
+	argument: Item,
+) => ({
 	operator,
 	prefix,
 	argument,

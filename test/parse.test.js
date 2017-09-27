@@ -61,10 +61,10 @@ const expressions = [
 		),
 	)],
 	//
-	// ['x=3', item('Expression', 'body', eq(
-	// 	item('Identifier', 'name', 'x'),
-	// 	item('Literal', 'value', 3),
-	// ))],
+	['x=3', expr([0, 3], binary('=', [0, 3],
+		item('Identifier', [0, 1], 'name', 'x'),
+		item('Literal', [2, 3], 'value', 3),
+	))],
 	//
 	// ['x x x', item('Expression', 'body',
 	// 	binary('*',
