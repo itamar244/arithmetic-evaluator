@@ -13,11 +13,7 @@ export default class Tokenizer {
 	// forward declarations: parser/util.js
 	+expect: (type: TokenType) => void
 	+unexpected: () => void
-	state: State
-
-	constructor() {
-		this.state = new State()
-	}
+	state: State = new State()
 
 	expectNext(type: TokenType) {
 		this.next()
