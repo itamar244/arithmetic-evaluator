@@ -1,13 +1,11 @@
 // @flow
+import type { Position, SourceLocation }  from './utils/location';
 export type Params = { [string]: ?Node }
 
-export type Location = {
+export interface NodeBase {
+	loc: SourceLocation;
 	start: number;
 	end: number;
-}
-
-export interface NodeBase {
-	loc: Location;
 }
 
 export type AnyNode = NodeBase & { [string]: any }

@@ -56,7 +56,12 @@ export default class StatementParser extends ExpressionParser {
 		this.expectNext(tt.eq)
 		this.next()
 		node.init = this.parseExpressionBody(false)
-		return this.finishNodeAt(node, this.state.prevEnd, 'VariableDeclerator')
+		return this.finishNodeAt(
+			node,
+			'VariableDeclerator',
+			this.state.prevEnd,
+			this.state.prevEndLoc,
+		)
 	}
 
 	parseFunction(node: N.FunctionDeclaration) {

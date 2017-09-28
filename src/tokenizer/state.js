@@ -1,14 +1,26 @@
 // @flow
-import { types as tt, type TokenType } from '../tokenizer/types'
+import { Position } from '../utils/location'
+import { types as tt, type TokenType } from './types'
 
 export default class State {
 	pos: number
+	line: number
+	lineStart: number
+
 	start: number
 	end: number
+
+	startLoc: Position
+	endLoc: Position
+
 	prevStart: number
 	prevEnd: number
+	prevStartLoc: Position
+	prevEndLoc: Position
+
 	prevType: ?TokenType
 	type: TokenType
+
 	prevSpacePadding: number
 	lookahead: bool
 	identifiers: string[]
@@ -16,16 +28,28 @@ export default class State {
 	input: string
 
 	init(input: string) {
+		const pos = new Position(0, 0)
+		
 		this.pos = 0
+		this.line = 0
+		this.lineStart = 0
 		this.start = 0
 		this.end = 0
+		this.startLoc = pos
+		this.endLoc = pos
 		this.prevStart = 0
 		this.prevEnd = 0
+		this.prevStartLoc = pos
+		this.prevEndLoc = pos
 		this.prevType = null
 		this.type = tt.eof
 		this.prevSpacePadding = 0
 		this.lookahead = false
 		this.identifiers = []
 		this.input = input
+	}
+
+	position() {
+		return new Position(this.line, this.pos - this.lineStart)
 	}
 }

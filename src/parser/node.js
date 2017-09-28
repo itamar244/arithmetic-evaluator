@@ -1,7 +1,7 @@
 // @flow
+import { SourceLocation, type Position } from '../utils/location';
 import type {
 	AnyNode,
-	Location,
 	NodeType,
 	Node as NodeObject,
 	NodeBase,
@@ -9,20 +9,21 @@ import type {
 import UtilParser from './util'
 
 class Node implements NodeBase {
-	loc: Location
+	start: number
+	end: number
+	loc: SourceLocation
 
-	constructor(start: number) {
-		this.loc = {
-			start,
-			end: 0,
-		}
+	constructor(start: Position) {
+		this.start = start.column
+		this.end = 0
+		this.loc = new SourceLocation(start)
 	}
 }
 
 export default class NodeUtils extends UtilParser {
 	startNode(): AnyNode {
 		// $FlowIgnore
-		return new Node(this.state.start)
+		return new Node(this.state.startLoc)
 	}
 
 	// eslint-disable-next-line class-methods-use-this
@@ -34,15 +35,22 @@ export default class NodeUtils extends UtilParser {
 	finishNode<T: NodeObject>(node: T, type: NodeType): T {
 		return this.finishNodeAt(
 			node,
-			this.state.end,
 			type,
+			this.state.end,
+			this.state.endLoc,
 		)
 	}
 
 	// eslint-disable-next-line class-methods-use-this
-	finishNodeAt<T: NodeObject>(node: T, end: number, type: NodeType): T {
+	finishNodeAt<T: NodeObject>(
+		node: T,
+		type: NodeType,
+		pos: number,
+		loc: Position,
+	): T {
 		node.type = (type: any)
-		node.loc.end = end
+		node.end = pos
+		node.loc.end = loc
 		return node
 	}
 }

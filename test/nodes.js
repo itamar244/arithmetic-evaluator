@@ -1,12 +1,24 @@
 // @flow
 import * as N from '../src/types'
+import type { SourceLocation } from '../src/utils/location'
 import { has } from '../src/utils'
 
 type ArrayLocation = [number, number]
 
-const arrToLoc = (loc: ArrayLocation) => ({
+export const arrToLoc = (loc: ArrayLocation) => ({
 	start: loc[0],
 	end: loc[1],
+
+	loc: (({
+		start: {
+			line: 0,
+			column: loc[0],
+		},
+		end: {
+			line: 0,
+			column: loc[1],
+		},
+	}: any): SourceLocation)
 })
 
 export const varDecls = (
@@ -14,30 +26,36 @@ export const varDecls = (
 	decls: Array<[string, N.Node]>,
 	expression: N.Node,
 ): N.VariableDeclerations => ({
-	loc: arrToLoc(loc),
-	declarations: decls.map(decl => ({
-		id: item('Identifier',
-			[decl[1].loc.start - 1 - decl[0].length, decl[1].loc.start - 1],
-			'name',
-			decl[0],
-		),
-		loc: arrToLoc([decl[1].loc.start - 1 - decl[0].length, decl[1].loc.end]),
-		init: decl[1],
-		type: 'VariableDeclerator',
-	})),
+	...arrToLoc(loc),
+	declarations: decls.map(decl => varDecl(...decl)),
 	expression: expr(expression),
 	type: 'VariableDeclerations',
 })
+
+export const varDecl = (name: string, init: N.Node): N.VariableDeclerator => {
+	const id = item('Identifier',
+		[init.start - 1 - name.length, init.start - 1],
+		'name',
+		name,
+	)
+
+	return {
+		...arrToLoc([init.start - 1 - name.length, init.end]),
+		id,
+		init,
+		type: 'VariableDeclerator',
+	}
+}
 
 export const eq = (
 	loc: ArrayLocation,
 	left: N.Node,
 	right: N.Node,
 ): N.Equation => ({
-	operator: '=',
+	...arrToLoc(loc),
 	left,
 	right,
-	loc: arrToLoc(loc),
+	operator: '=',
 	type: 'Equation',
 })
 
@@ -47,10 +65,10 @@ export const binary = (
 	left: N.Node,
 	right: N.Node,
 ): N.BinaryExpression => ({
+	...arrToLoc(loc),
 	operator,
 	left,
 	right,
-	loc: arrToLoc(loc),
 	type: 'BinaryExpression',
 })
 
@@ -60,10 +78,10 @@ export const unary = (
 	prefix: bool,
 	argument: N.Node,
 ) => ({
+	...arrToLoc(loc),
 	operator,
 	prefix,
 	argument,
-	loc: arrToLoc(loc),
 	type: 'UnaryExpression',
 })
 
@@ -73,14 +91,18 @@ export const item = (
 	key: string,
 	value: mixed,
 ): N.AnyNode => ({
+	...arrToLoc(loc),
 	type,
-	loc: arrToLoc(loc),
 	[key]: value,
 })
 
-export const expr = (body: N.AnyNode): N.Expression => (
-	item('Expression', body.loc, 'body', body)
-)
+export const expr = (body: N.AnyNode): N.Expression => ({
+	body,
+	start: body.start,
+	end: body.end,
+	loc: body.loc,
+	type: 'Expression',
+})
 
 export const num = (loc: ArrayLocation, value: number): N.Identifier => (
 	item('Literal', loc, 'value', value)
@@ -96,13 +118,13 @@ export const func = (
 	loc: ArrayLocation,
 	...args: N.Node[]
 ) => ({
+	...arrToLoc(loc),
 	args,
-	loc: arrToLoc(loc),
 	callee: item('Identifier', calleLoc, 'name', name),
 	type: 'CallExpression',
 })
 
-export const toJson = (obj: mixed) => {
+export const nodeToJson = (obj: mixed) => {
 	if (!(obj instanceof Object)) return obj
 	const next = {}
 
@@ -110,9 +132,9 @@ export const toJson = (obj: mixed) => {
 		if (has(obj, key)) {
 			if (obj[key] instanceof Object) {
 				if (Array.isArray(obj[key])) {
-					next[key] = obj[key].map(toJson)
+					next[key] = obj[key].map(nodeToJson)
 				} else {
-					next[key] = toJson(obj[key])
+					next[key] = nodeToJson(obj[key])
 				}
 			} else {
 				next[key] = obj[key]

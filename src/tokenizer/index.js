@@ -1,7 +1,7 @@
 // @flow
-import State from '../parser/state'
 import { has } from '../utils'
-import { types as tt, keywords, type TokenType } from '../tokenizer/types'
+import { types as tt, keywords, type TokenType } from './types'
+import State from './state'
 
 const isNumber = (code: number) => code >= 48 && code <= 57
 const isLetter = (code: number) => (
@@ -38,6 +38,8 @@ export default class Tokenizer {
 		}
 		this.state.prevStart = this.state.start
 		this.state.prevEnd = this.state.end
+		this.state.prevStartLoc = this.state.startLoc
+		this.state.prevEndLoc = this.state.endLoc
 		this.nextToken()
 	}
 
@@ -58,6 +60,7 @@ export default class Tokenizer {
 		const code = this.state.input.charCodeAt(this.state.pos)
 
 		this.state.start = this.state.pos
+		this.state.startLoc = this.state.position()
 		if (this.state.pos >= this.state.input.length) {
 			return this.finishToken(tt.eof)
 		}
@@ -147,6 +150,10 @@ export default class Tokenizer {
 
 		while (cur === 32 /* ' ' */ || cur === 10 /* '\n' */ || cur === 9 /* '\t' */) {
 			padding += 1
+			if (cur === 10 /* '\n' */) {
+				this.state.line += 1
+				this.state.lineStart = this.state.pos + padding
+			}
 			cur = state.input.charCodeAt(state.pos + padding)
 		}
 		state.prevSpacePadding = padding
@@ -161,9 +168,11 @@ export default class Tokenizer {
 	}
 
 	finishToken(type: TokenType, value?: any) {
-		this.state.value = value
 		this.state.prevType = this.state.type
+
+		this.state.value = value
 		this.state.type = type
 		this.state.end = this.state.pos
+		this.state.endLoc = this.state.position()
 	}
 }
