@@ -119,7 +119,7 @@ export default class ExpressionParser extends NodeUtils {
 	}
 
 	parseCallExpression(callee: N.Identifier): N.CallExpression {
-		const node: N.CallExpression = this.startNode()
+		const node: N.CallExpression = this.startNodeAtNode(callee)
 		node.callee = callee
 		node.args = []
 

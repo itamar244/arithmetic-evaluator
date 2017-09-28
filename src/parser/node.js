@@ -32,8 +32,17 @@ export default class NodeUtils extends UtilParser {
 	}
 
 	finishNode<T: NodeObject>(node: T, type: NodeType): T {
+		return this.finishNodeAt(
+			node,
+			this.state.end,
+			type,
+		)
+	}
+
+	// eslint-disable-next-line class-methods-use-this
+	finishNodeAt<T: NodeObject>(node: T, end: number, type: NodeType): T {
 		node.type = (type: any)
-		node.loc.end = this.state.pos
+		node.loc.end = end
 		return node
 	}
 }
