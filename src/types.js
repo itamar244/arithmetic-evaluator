@@ -104,13 +104,13 @@ export type FunctionDeclaration = NodeBase & {
 	body: Node;
 }
 
-export type Equation = NodeBase & BinNode & {
-	type: 'Equation'
+export type Equation = BinNode & {
+	type: 'Equation';
 }
 
 export type Literal = NodeBase & {
 	type: 'Literal';
-	value: number
+	value: number;
 }
 
 export type Identifier = NodeBase & {
