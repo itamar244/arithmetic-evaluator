@@ -1,11 +1,8 @@
 // @flow
 import { types as tt, type TokenType } from '../tokenizer/types'
 import Tokenizer from '../tokenizer'
-import State from './state'
 
 export default class UtilParser extends Tokenizer {
-	state: State
-
 	raise(error: string, pos: number = this.state.start) {
 		throw new Error(`${pos} - ${error}`)
 	}
