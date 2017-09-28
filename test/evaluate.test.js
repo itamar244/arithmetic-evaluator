@@ -1,6 +1,8 @@
 // @flow
 import test from 'ava'
-import { run } from '../src'
+import { run, createRunner } from '../src'
+
+const generatedRun = createRunner()
 
 test('programs should work', (t) => {
 	const inputs = [
@@ -21,6 +23,7 @@ test('programs should work', (t) => {
 
 	for (const [input, val] of inputs) {
 		t.is(run(input), val, `running ${input}`)
+		t.is(generatedRun(input), val, `running generatedRun ${input}`)
 	}
 })
 

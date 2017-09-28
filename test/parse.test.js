@@ -1,96 +1,90 @@
 // @flow
 import test from 'ava'
-import { parse } from '../src'
 import {
-	// eq,
-	// varDecls,
+	parse,
+	createParser,
+} from '../src'
+import {
 	toJson,
+	varDecls,
+	eq,
 	binary,
 	unary,
 	expr,
+	num,
+	identifer,
 	item,
 	func,
 } from './nodes'
 
 const expressions = [
-	['3+3', expr([0, 3],
+	['3+3', expr(
 		binary('+', [0, 3],
-			item('Literal', [0, 1], 'value', 3),
-			item('Literal', [2, 3], 'value', 3),
+			num([0, 1], 3),
+			num([2, 3], 3),
 		),
 	)],
 
-	['x+x*x^x', item('Expression', [0, 7], 'body',
+	['x+x*x^x', expr(
 		binary('+', [0, 7],
-			item('Identifier', [0, 1], 'name', 'x'),
+			identifer([0, 1], 'x'),
 			binary('*', [2, 7],
-				item('Identifier', [2, 3], 'name', 'x'),
+				identifer([2, 3], 'x'),
 				binary('^', [4, 7],
-					item('Identifier', [4, 5], 'name', 'x'),
-					item('Identifier', [6, 7], 'name', 'x'),
+					identifer([4, 5], 'x'),
+					identifer([6, 7], 'x'),
 				),
 			),
 		),
 	)],
-	//
-	// ['y * (( y + y ))', item('Expression', 'body',
-	// 	binary('*',
-	// 		item('Identifier', 'name', 'y'),
-	// 		expr(
-	// 			expr(
-	// 				binary('+',
-	// 					item('Identifier', 'name', 'y'),
-	// 					item('Identifier', 'name', 'y'),
-	// 				),
-	// 			),
-	// 		),
-	// 	),
-	// )],
-	//
-	['max(3, PI)', expr([0, 10],
-		func('max', [0, 3], [3, 10],
-			item('Literal', [4, 5], 'value', 3),
-			item('Identifier', [7, 9], 'name', 'PI'),
+
+	['max(3, PI)', expr(
+		func('max', [0, 3], [0, 10],
+			num([4, 5], 3),
+			identifer([7, 9], 'PI'),
 		),
 	)],
 
-	['| - 3 |', expr([0, 7],
+	['| - 3 |', expr(
 		item('AbsParentheses', [0, 7],
 			'body',
-			unary('-', [2, 5], true, item('Literal', [4, 5], 'value', 3)),
+			unary('-', [2, 5], true, num([4, 5], 3)),
 		),
 	)],
-	//
-	['x=3', expr([0, 3], binary('=', [0, 3],
-		item('Identifier', [0, 1], 'name', 'x'),
-		item('Literal', [2, 3], 'value', 3),
+
+	['x=3', expr(eq([0, 3],
+		identifer([0, 1], 'x'),
+		num([2, 3], 3),
 	))],
-	//
-	// ['x x x', item('Expression', 'body',
-	// 	binary('*',
-	// 		item('Identifier', 'name', 'x'),
-	// 		binary('*',
-	// 			item('Identifier', 'name', 'x'),
-	// 			item('Identifier', 'name', 'x'),
-	// 		),
-	// 	),
-	// )],
-	//
-	// ['let i = 3 in i + i', varDecls(
-	// 	[['i', item('Literal', 'value', 3)]],
-	// 	binary('+',
-	// 		item('Identifier', 'name', 'i'),
-	// 		item('Identifier', 'name', 'i'),
-	// 	),
-	// )],
+
+	['x x x', expr(
+		binary('*', [0, 5],
+			identifer([0, 1], 'x'),
+			binary('*', [2, 5],
+				identifer([2, 3], 'x'),
+				identifer([4, 5], 'x'),
+			),
+		),
+	)],
+
+	['let i=3 in i+i', varDecls([0, 14],
+		[['i', num([6, 7], 3)]],
+		binary('+', [11, 14],
+			identifer([11, 12], 'i'),
+			identifer([13, 14], 'i'),
+		),
+	)],
 ]
 
-test('parse method', (t) => {
-	for (const [blob, tree] of expressions) {
-		const program = parse(blob)
+test('should parse fine', (t) => {
+	const generatedParse = createParser()
+
+	for (const [input, tree] of expressions) {
+		const program = parse(input)
 		const expression = program.body[0]
 
-		t.deepEqual(tree, toJson(expression), `parsing ${blob}`)
+		t.deepEqual(tree, toJson(expression), `parsing ${input}`)
+		t.deepEqual(generatedParse(input), program, `parsing ${input}`)
 	}
 })
 
@@ -104,7 +98,7 @@ const throwables = [
 	['(3|', "2 - '|': unexpected token"],
 ]
 
-test('parse execptions', (t) => {
+test('should throw execptions', (t) => {
 	for (const [blob, error] of throwables) {
 		t.throws(() => parse(blob), error, error)
 	}
