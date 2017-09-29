@@ -1,7 +1,7 @@
 // @flow
 import readline from 'readline'
 
-export function createRepl() {
+export function createInterface() {
 	const rl = readline.createInterface({
 		input: process.stdin,
 		output: process.stdout,

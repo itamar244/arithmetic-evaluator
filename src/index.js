@@ -17,9 +17,12 @@
  */
 
 import Parser from './parser'
-import { evaluate } from './evaluator'
+import {
+	evaluate,
+	evaluateStatement,
+} from './evaluator'
 
-export { evaluate, createEvaluateStatement } from './evaluator'
+export { evaluate }
 
 export const parse = (input: string) => (
 	new Parser().parse(input)
@@ -35,10 +38,18 @@ export const run = (input: string) => (
 
 export function createParser() {
 	const parser = new Parser()
-	return (input: string) => parser.parse(input)
+	return parser.parse.bind(parser)
 }
 
 export function createRunner() {
-	const parser = new Parser()
-	return (input: string) => evaluate(parser.parse(input))
+	const parse = createParser()
+	return (input: string) => evaluate(parse(input))
+}
+
+export function createRepl() {
+	const scope = {}
+	return (input: string) => evaluateStatement(
+		parseStatement(input),
+		scope,
+	)
 }

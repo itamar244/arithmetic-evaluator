@@ -3,36 +3,33 @@ import { readFileSync } from 'fs'
 
 import {
 	createParser,
-	parseStatement,
 	evaluate,
-	createEvaluateStatement,
+	createRepl,
 } from '../src'
 import {
-	createRepl,
+	createInterface,
 	benchmark,
 } from './utils'
 import logger from './logger'
 
 export async function runRepl() {
+	const rl = createInterface()
 	const repl = createRepl()
-	const evaluateStatement = createEvaluateStatement()
 	let emptyLine = false
 
 	while (!emptyLine) {
 		// eslint-disable-next-line no-await-in-loop
-		const line = await repl.question('> ')
+		const line = await rl.question('> ')
 
 		if (line.length > 0) {
 			try {
-				const expression = parseStatement(line)
-
-				logger(evaluateStatement(expression))
+				logger(repl(line))
 			} catch (e) {
 				logger(e.message)
 			}
 		} else {
 			emptyLine = true
-			repl.close()
+			rl.close()
 		}
 	}
 }
