@@ -1,26 +1,38 @@
 // @flow
 import type {
 	Program,
+	Statement,
 } from '../types'
 import evaluateNode from './eval'
-import { variableDeclarationsToObject, type Scope } from './utils'
+import {
+	variableDeclarationsToObject,
+	type Scope,
+} from './utils'
 
-export default function evaluateProgram(program: Program): null | number {
+export const createEvaluateStatement = () => {
 	const scope: Scope = {}
-	let expressionValue = null
 
-	for (const statement of program.body) {
+	return (statement: Statement) => {
 		if (statement.type === 'FunctionDeclaration') {
 			scope[statement.id.name] = statement
-		} else if (statement.type === 'VariableDeclerations') {
-			expressionValue = evaluateNode(
+			return null
+		}
+
+		if (statement.type === 'VariableDeclerations') {
+			return evaluateNode(
 				statement.expression,
 				[variableDeclarationsToObject(statement), scope],
 			)
-		} else {
-			expressionValue = evaluateNode(statement, [scope])
 		}
-	}
 
-	return expressionValue
+		return evaluateNode(statement, [scope])
+	}
+}
+
+export function evaluate(program: Program): null | number {
+	const evaluateStatement = createEvaluateStatement()
+
+	return program.body.reduce((val, statement) => (
+		evaluateStatement(statement)
+	), null)
 }

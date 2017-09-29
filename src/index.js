@@ -17,13 +17,13 @@
  */
 
 import Parser from './parser'
-import evaluate from './evaluator'
+import { evaluate } from './evaluator'
+
+export { evaluate, createEvaluateStatement } from './evaluator'
 
 export const parse = (input: string) => (
 	new Parser().parse(input)
 )
-
-export { evaluate }
 
 export const run = (input: string) => (
 	evaluate(parse(input))
