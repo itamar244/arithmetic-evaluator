@@ -36,8 +36,8 @@ export default class NodeUtils extends UtilParser {
 		return this.finishNodeAt(
 			node,
 			type,
-			this.state.end,
-			this.state.endLoc,
+			this.state.prevEnd,
+			this.state.prevEndLoc,
 		)
 	}
 

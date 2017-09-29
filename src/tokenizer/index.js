@@ -10,32 +10,17 @@ const isLetter = (code: number) => (
 )
 
 export default class Tokenizer {
-	// forward declarations: parser/util.js
-	+expect: (type: TokenType) => void
+	// forward declarations:
+	// parser/util.js
 	+unexpected: () => void
 	state: State = new State()
 
 	expectNext(type: TokenType) {
 		this.next()
-		this.expect(type)
-	}
-
-	// getting the next item, but if next is called again then it will the lookahead
-	// NOTE: use with caution, it will affect state to next token
-	lookaheadFor(type: (TokenType) => bool) {
-		this.next()
-		if (type(this.state.type)) {
-			return true
-		}
-		this.state.lookahead = true
-		return false
+		if (!this.match(type)) this.unexpected()
 	}
 
 	next(): void {
-		if (this.state.lookahead) {
-			this.state.lookahead = false
-			return
-		}
 		this.state.prevStart = this.state.start
 		this.state.prevEnd = this.state.end
 		this.state.prevStartLoc = this.state.startLoc

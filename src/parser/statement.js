@@ -37,6 +37,7 @@ export default class StatementParser extends ExpressionParser {
 		node.declarations = []
 
 		let end = false
+		this.next()
 		while (!end) {
 			node.declarations.push(this.parseVarDeclarator())
 			if (this.eat(tt.in)) {
@@ -50,18 +51,12 @@ export default class StatementParser extends ExpressionParser {
 	}
 
 	parseVarDeclarator(): N.VariableDeclerator {
-		this.expectNext(tt.name)
+		if (!this.match(tt.name)) this.unexpected()
 		const node: N.VariableDeclerator = this.startNode()
 		node.id = this.parseIdentifier(this.startNode())
-		this.expectNext(tt.eq)
-		this.next()
+		this.expect(tt.eq)
 		node.init = this.parseExpressionBody(false)
-		return this.finishNodeAt(
-			node,
-			'VariableDeclerator',
-			this.state.prevEnd,
-			this.state.prevEndLoc,
-		)
+		return this.finishNode(node, 'VariableDeclerator')
 	}
 
 	parseFunction(node: N.FunctionDeclaration) {
@@ -70,15 +65,14 @@ export default class StatementParser extends ExpressionParser {
 		node.id = this.parseIdentifier(this.startNode())
 
 		let end = false
-		this.expectNext(tt.parenL)
+		this.expect(tt.parenL)
 		while (!end) {
-			this.expectNext(tt.name)
+			if (!this.match(tt.name)) this.unexpected()
 			node.params.push(this.parseIdentifier(this.startNode()))
-			this.next()
 			if (this.eat(tt.parenR)) {
 				end = true
-			} else if (!this.eat(tt.comma)) {
-				this.unexpected()
+			} else {
+				this.expect(tt.comma)
 			}
 		}
 

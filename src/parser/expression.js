@@ -6,7 +6,6 @@ import NodeUtils from './node'
 export default class ExpressionParser extends NodeUtils {
 	parseExpressionBody(topLevel: bool): N.Node {
 		const node = this.parseMaybeUnary(topLevel)
-		this.next()
 		if (this.needMultiplierShortcut()) {
 			return this.parseBinary(node, -1, false, tt.star, '*')
 		}
@@ -31,17 +30,15 @@ export default class ExpressionParser extends NodeUtils {
 			case tt.exponent:
 				if (this.match(tt.eq) && !topLevel) this.unexpected()
 				if (body == null) {
-					throw this.raise(`'${this.state.value}' can't be an unary operator`)
+					throw this.unexpected("can't be an unary operator")
 				}
 
 				return this.parseBinary(body, -1)
 			case tt.num:
 				return this.parseLiteral(node)
 			case tt.parenL:
-				this.next()
 				return this.parseParenthesized(node, tt.parenR)
 			case tt.crotchet:
-				this.next()
 				return this.parseParenthesized(node, tt.crotchet)
 			case tt.name:
 				return this.parseMaybeCallExpression(node)
@@ -54,6 +51,7 @@ export default class ExpressionParser extends NodeUtils {
 		node: N.Expression,
 		end: TokenType,
 	): N.Expression {
+		this.next()
 		node.body = this.parseExpressionBody(false)
 		this.expect(end)
 		return this.finishNode(
@@ -64,12 +62,14 @@ export default class ExpressionParser extends NodeUtils {
 
 	parseLiteral(node: N.Literal): N.Literal {
 		node.value = Number(this.state.value)
+		this.next()
 		return this.finishNode(node, 'Literal')
 	}
 
 	parseMaybeUnary(topLevel: ?bool, body: ?N.Node) {
 		const maybeArgument = this.parseToken(!!topLevel, body)
-		if (this.lookaheadFor(type => type.postfix)) {
+
+		if (this.state.type.postfix) {
 			const node: N.UnaryExpression = this.startNode()
 			node.argument = maybeArgument
 			return this.parseUnary(node)
@@ -81,8 +81,8 @@ export default class ExpressionParser extends NodeUtils {
 		node.operator = this.state.value
 		node.prefix = this.state.type.prefix
 
+		this.next()
 		if (node.prefix) {
-			this.next()
 			node.argument = this.parseToken(false)
 		}
 
@@ -104,7 +104,6 @@ export default class ExpressionParser extends NodeUtils {
 
 			if (toMoveNext) this.next()
 			const right = this.parseMaybeUnary()
-			this.next()
 			node.right =
 				this.needMultiplierShortcut()
 				? this.parseBinary(right, minPrec, false, tt.star, '*')
@@ -139,7 +138,7 @@ export default class ExpressionParser extends NodeUtils {
 	parseMaybeCallExpression(node: N.Identifier): N.Identifier | N.CallExpression {
 		this.parseIdentifier(node)
 
-		if (this.lookaheadFor(type => type === tt.parenL && this.state.prevSpacePadding === 0)) {
+		if (this.state.type === tt.parenL && this.state.prevSpacePadding === 0) {
 			return this.parseCallExpression(node)
 		}
 
@@ -148,7 +147,7 @@ export default class ExpressionParser extends NodeUtils {
 
 	parseIdentifier(node: N.Identifier): N.Identifier {
 		node.name = this.state.value
-
+		this.next()
 		return this.finishNode(node, 'Identifier')
 	}
 }

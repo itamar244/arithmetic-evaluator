@@ -22,14 +22,13 @@ export default class State {
 	type: TokenType
 
 	prevSpacePadding: number
-	lookahead: bool
-	identifiers: string[]
 	value: any
 	input: string
 
 	init(input: string) {
 		const pos = new Position(0, 0)
-		
+
+		this.input = input
 		this.pos = 0
 		this.line = 0
 		this.lineStart = 0
@@ -44,9 +43,6 @@ export default class State {
 		this.prevType = null
 		this.type = tt.eof
 		this.prevSpacePadding = 0
-		this.lookahead = false
-		this.identifiers = []
-		this.input = input
 	}
 
 	position() {

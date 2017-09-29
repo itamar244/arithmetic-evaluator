@@ -3,18 +3,21 @@ import { types as tt, type TokenType } from '../tokenizer/types'
 import Tokenizer from '../tokenizer'
 
 export default class UtilParser extends Tokenizer {
-	raise(error: string, pos: number = this.state.start) {
-		throw new Error(`${pos} - ${error}`)
-	}
+	unexpected(_error?: string) {
+		const error =	_error != null ? ` ${_error}` : ': unexpected token'
+		const {
+			start,
+			value,
+			type,
+		} = this.state
 
-	unexpected() {
-		this.raise(`'${this.state.value || this.state.type.label}': unexpected token`)
+		throw new SyntaxError(
+			`${start} - '${value || type.label}'${error}`
+		)
 	}
 
 	expect(type: TokenType): void {
-		if (!this.match(type)) {
-			this.unexpected()
-		}
+		if (!this.eat(type)) this.unexpected()
 	}
 
 	needMultiplierShortcut() {
