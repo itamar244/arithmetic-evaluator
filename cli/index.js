@@ -1,35 +1,22 @@
 // @flow
-import { readFileSync } from 'fs'
-import { createParser, evaluate } from '../src'
-import * as logger from './logger'
-import { benchmark } from '../src/utils'
+import commander from 'commander'
 
-const parse = createParser()
+import {
+	runRepl,
+	runWithFileGiven,
+} from './run'
 
-logger.ifHasArgs(['-h', '--help'], () => logger.rulesOfExpression()).then((neededHelp) => {
-	if (neededHelp) {
-		logger.rulesOfExpression()
-	} else {
-		main(process.argv)
-	}
-})
+commander
+	.version('0.0.1')
+	.arguments('<type> [file]')
+	.option('--benchmark', 'benchmark the speed of parsing and running')
+	.option('-t, --tree', 'print the output program in JSON')
+	.action((cmd, file, options) => {
+		if (cmd === 'run') {
+			runWithFileGiven(file, options)
+		} else if (cmd === 'repl') {
+			runRepl()
+		}
+	})
 
-function main(args) {
-	const input = String(readFileSync(args[args.length - 1]))
-	const program = parse(input)
-
-	try {
-		logger.ifHasArgs(['--benchmark'], () =>
-			benchmark(
-				parse,
-				[input],
-			),
-		)
-
-		logger.ifHasArgs(['-t', '--tree'], JSON.stringify(program, null, 4))
-
-		logger.result(evaluate(program))
-	} catch (e) {
-		logger.log(e.message)
-	}
-}
+commander.parse(process.argv)

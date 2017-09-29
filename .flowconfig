@@ -2,6 +2,7 @@
 /dist/.*
 
 [include]
+flow-typed
 
 [libs]
 
