@@ -1,11 +1,7 @@
 // @flow
 import test from 'ava'
+import { parse } from '../../src'
 import {
-	parse,
-	createParser,
-} from '../src'
-import {
-	arrToLoc,
 	varDecls,
 	eq,
 	binary,
@@ -14,7 +10,7 @@ import {
 	num,
 	identifer,
 	item,
-	func,
+	call,
 	nodeToJson,
 } from './nodes'
 
@@ -40,7 +36,7 @@ const expressions = [
 	)],
 
 	['max(3, PI)', expr(
-		func('max', [0, 3], [0, 10],
+		call('max', [0, 3], [0, 10],
 			num([4, 5], 3),
 			identifer([7, 9], 'PI'),
 		),
@@ -53,10 +49,12 @@ const expressions = [
 		),
 	)],
 
-	['x=3', expr(eq([0, 3],
-		identifer([0, 1], 'x'),
-		num([2, 3], 3),
-	))],
+	['x=3', expr(
+		eq([0, 3],
+			identifer([0, 1], 'x'),
+			num([2, 3], 3),
+		),
+	)],
 
 	['x x x', expr(
 		binary('*', [0, 5],
@@ -77,15 +75,13 @@ const expressions = [
 	)],
 ]
 
-test('should parse fine', (t) => {
-	const generatedParse = createParser()
-
+test('should parse expressions fine', (t) => {
 	for (const [input, tree] of expressions) {
 		const program = parse(input)
 		const expression = program.body[0]
 
+		t.deepEqual(program.loc, expression.loc)
 		t.deepEqual(tree, nodeToJson(expression), `parsing ${input}`)
-		// t.deepEqual(generatedParse(input), program, `parsing ${input} with 'generatedParse'`)
 	}
 })
 

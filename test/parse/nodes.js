@@ -1,11 +1,11 @@
 // @flow
-import * as N from '../src/types'
-import type { SourceLocation } from '../src/utils/location'
-import { has } from '../src/utils'
+import * as N from '../../src/types'
+import type { SourceLocation } from '../../src/utils/location'
+import { has } from '../../src/utils'
 
-type ArrayLocation = [number, number]
+type Location = [number, number]
 
-export const arrToLoc = (loc: ArrayLocation) => ({
+const arrToLoc = (loc: Location) => ({
 	start: loc[0],
 	end: loc[1],
 
@@ -18,11 +18,11 @@ export const arrToLoc = (loc: ArrayLocation) => ({
 			line: 0,
 			column: loc[1],
 		},
-	}: any): SourceLocation)
+	}: any): SourceLocation),
 })
 
 export const varDecls = (
-	loc: ArrayLocation,
+	loc: Location,
 	decls: Array<[string, N.Node]>,
 	expression: N.Node,
 ): N.VariableDeclerations => ({
@@ -48,7 +48,7 @@ export const varDecl = (name: string, init: N.Node): N.VariableDeclerator => {
 }
 
 export const eq = (
-	loc: ArrayLocation,
+	loc: Location,
 	left: N.Node,
 	right: N.Node,
 ): N.Equation => ({
@@ -61,7 +61,7 @@ export const eq = (
 
 export const binary = (
 	operator: N.BinaryOperator,
-	loc: ArrayLocation,
+	loc: Location,
 	left: N.Node,
 	right: N.Node,
 ): N.BinaryExpression => ({
@@ -74,7 +74,7 @@ export const binary = (
 
 export const unary = (
 	operator: string,
-	loc: ArrayLocation,
+	loc: Location,
 	prefix: bool,
 	argument: N.Node,
 ) => ({
@@ -87,7 +87,7 @@ export const unary = (
 
 export const item = (
 	type: string,
-	loc: ArrayLocation,
+	loc: Location,
 	key: string,
 	value: mixed,
 ): N.AnyNode => ({
@@ -104,18 +104,18 @@ export const expr = (body: N.AnyNode): N.Expression => ({
 	type: 'Expression',
 })
 
-export const num = (loc: ArrayLocation, value: number): N.Identifier => (
+export const num = (loc: Location, value: number): N.Identifier => (
 	item('Literal', loc, 'value', value)
 )
 
-export const identifer = (loc: ArrayLocation, name: string): N.Identifier => (
+export const identifer = (loc: Location, name: string): N.Identifier => (
 	item('Identifier', loc, 'name', name)
 )
 
-export const func = (
+export const call = (
 	name: string,
-	calleLoc: ArrayLocation,
-	loc: ArrayLocation,
+	calleLoc: Location,
+	loc: Location,
 	...args: N.Node[]
 ) => ({
 	...arrToLoc(loc),
