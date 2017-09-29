@@ -11,9 +11,7 @@ export default class UtilParser extends Tokenizer {
 			type,
 		} = this.state
 
-		throw new SyntaxError(
-			`${start} - '${value || type.label}'${error}`
-		)
+		throw new SyntaxError(`${start} - '${value || type.label}'${error}`)
 	}
 
 	expect(type: TokenType): void {

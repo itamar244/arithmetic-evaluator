@@ -10,12 +10,12 @@ export class Position {
 }
 
 export class SourceLocation {
-  start: Position;
-  end: Position;
+	start: Position;
+	end: Position;
 
-  constructor(start: Position, end?: Position) {
-    this.start = start;
-    // $FlowIgnore (may start as null, but initialized later)
-    this.end = end;
-  }
+	constructor(start: Position, end?: Position) {
+		this.start = start
+		// $FlowIgnore (may start as null, but initialized later)
+		this.end = end
+	}
 }

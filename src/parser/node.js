@@ -1,5 +1,5 @@
 // @flow
-import { SourceLocation, type Position } from '../utils/location';
+import { SourceLocation, type Position } from '../utils/location'
 import type {
 	AnyNode,
 	NodeType,

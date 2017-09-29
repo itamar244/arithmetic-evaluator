@@ -1,13 +1,12 @@
 // @flow
 import type {
-	Params,
 	Node,
 	VariableDeclerations,
 	FunctionDeclaration,
 } from '../types'
 import evaluateNode from './eval'
 
-export type Scope = Params
+export type Scope = { [string]: ?Node }
 
 export const getFunctionDeclaration = (func: ?Node): ?FunctionDeclaration => (
 	func != null && func.type === 'FunctionDeclaration'
@@ -15,7 +14,7 @@ export const getFunctionDeclaration = (func: ?Node): ?FunctionDeclaration => (
 	: null
 )
 
-export const variableDeclarationsToObject = (node: VariableDeclerations): Params => (
+export const variableDeclarationsToObject = (node: VariableDeclerations): Scope => (
 	node.declarations.reduce((scope, declaration) => {
 		scope[declaration.id.name] = declaration.init
 		return scope
