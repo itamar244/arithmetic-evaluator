@@ -6,4 +6,10 @@ export default class Parser extends StatementParser {
 		this.state.init(input)
 		return this.parseTopLevel(this.startNode())
 	}
+
+	parseSingleLine(input: string) {
+		this.state.init(input)
+		this.nextToken()
+		return this.parseStatement()
+	}
 }

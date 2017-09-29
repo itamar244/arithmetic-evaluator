@@ -3,6 +3,7 @@ import { readFileSync } from 'fs'
 
 import {
 	createParser,
+	parseStatement,
 	evaluate,
 	createEvaluateStatement,
 } from '../src'
@@ -10,9 +11,7 @@ import {
 	createRepl,
 	benchmark,
 } from './utils'
-import * as logger from './logger'
-
-const parse = createParser()
+import logger from './logger'
 
 export async function runRepl() {
 	const repl = createRepl()
@@ -25,11 +24,11 @@ export async function runRepl() {
 
 		if (line.length > 0) {
 			try {
-				const expression = parse(line)
+				const expression = parseStatement(line)
 
-				logger.result(evaluateStatement(expression.body[0]))
+				logger(evaluateStatement(expression))
 			} catch (e) {
-				logger.result(e.message)
+				logger(e.message)
 			}
 		} else {
 			emptyLine = true
@@ -38,7 +37,8 @@ export async function runRepl() {
 	}
 }
 
-export function runWithFileGiven(file: string, options: { [string]: boolean }) {
+export function runWithFileGiven(file: string, options: Object) {
+	const parse = createParser()
 	const input = String(readFileSync(file))
 
 	try {
@@ -50,22 +50,24 @@ export function runWithFileGiven(file: string, options: { [string]: boolean }) {
 				[input],
 				3000,
 			)
+
+			logger(`parsing operations per second: ${parseTime}`)
+
 			const evaluateTime = benchmark(
 				evaluate,
 				[program],
 				3000,
 			)
 
-			logger.result(`parsing operations per second: ${parseTime}`)
-			logger.result(`evaluating operations per second: ${evaluateTime}`)
+			logger(`evaluating operations per second: ${evaluateTime}`)
 		}
 
 		if (options.tree) {
-			logger.result(JSON.stringify(program, null, 4))
+			logger(JSON.stringify(program, null, 4))
 		}
 
-		logger.result(evaluate(program))
+		logger(evaluate(program))
 	} catch (e) {
-		logger.log(e.message)
+		logger(e.message)
 	}
 }

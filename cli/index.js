@@ -1,22 +1,26 @@
 // @flow
-import commander from 'commander'
+import yargs, { argv } from 'yargs'
 
 import {
 	runRepl,
 	runWithFileGiven,
 } from './run'
 
-commander
+yargs
 	.version('0.0.1')
-	.arguments('<type> [file]')
-	.option('--benchmark', 'benchmark the speed of parsing and running')
-	.option('-t, --tree', 'print the output program in JSON')
-	.action((cmd, file, options) => {
-		if (cmd === 'run') {
-			runWithFileGiven(file, options)
-		} else if (cmd === 'repl') {
-			runRepl()
-		}
+	.usage('[file]')
+	.option('benchmark', {
+		type: 'boolean',
+		describe: 'benchmark the speed of parsing and running',
+	})
+	.option('tree', {
+		alias: 't',
+		type: 'boolean',
+		describe: 'print the output program in JSON',
 	})
 
-commander.parse(process.argv)
+if (argv._[0] != null) {
+	runWithFileGiven(argv._[0], argv)
+} else {
+	runRepl()
+}

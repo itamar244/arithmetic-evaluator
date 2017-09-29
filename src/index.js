@@ -25,6 +25,10 @@ export const parse = (input: string) => (
 	new Parser().parse(input)
 )
 
+export const parseStatement = (input: string) => (
+	new Parser().parseSingleLine(input)
+)
+
 export const run = (input: string) => (
 	evaluate(parse(input))
 )
