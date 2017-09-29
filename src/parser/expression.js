@@ -123,12 +123,10 @@ export default class ExpressionParser extends NodeUtils {
 		node.args = []
 
 		this.next()
-		let inFunction = true
-		while (inFunction) {
+		while (!this.eat(tt.parenR)) {
 			node.args.push(this.parseExpressionBody(false))
-			if (!this.eat(tt.comma)) {
-				this.expect(tt.parenR)
-				inFunction = false
+			if (!this.eat(tt.comma) && !this.match(tt.parenR)) {
+				this.unexpected()
 			}
 		}
 
@@ -138,7 +136,7 @@ export default class ExpressionParser extends NodeUtils {
 	parseMaybeCallExpression(node: N.Identifier): N.Identifier | N.CallExpression {
 		this.parseIdentifier(node)
 
-		if (this.state.type === tt.parenL && this.state.prevSpacePadding === 0) {
+		if (this.match(tt.parenL) && this.state.prevSpacePadding === 0) {
 			return this.parseCallExpression(node)
 		}
 

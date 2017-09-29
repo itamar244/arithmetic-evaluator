@@ -15,16 +15,12 @@ export default class Tokenizer {
 	+unexpected: () => void
 	state: State = new State()
 
-	expectNext(type: TokenType) {
-		this.next()
-		if (!this.match(type)) this.unexpected()
-	}
-
 	next(): void {
 		this.state.prevStart = this.state.start
 		this.state.prevEnd = this.state.end
 		this.state.prevStartLoc = this.state.startLoc
 		this.state.prevEndLoc = this.state.endLoc
+
 		this.nextToken()
 	}
 

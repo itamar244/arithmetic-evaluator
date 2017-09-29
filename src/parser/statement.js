@@ -61,17 +61,16 @@ export default class StatementParser extends ExpressionParser {
 
 	parseFunction(node: N.FunctionDeclaration) {
 		node.params = []
-		this.expectNext(tt.name)
+		this.next()
+		if (!this.match(tt.name)) this.unexpected('need a name for func declaration')
 		node.id = this.parseIdentifier(this.startNode())
 
 		let end = false
 		this.expect(tt.parenL)
-		while (!end) {
+		while (!this.eat(tt.parenR)) {
 			if (!this.match(tt.name)) this.unexpected()
 			node.params.push(this.parseIdentifier(this.startNode()))
-			if (this.eat(tt.parenR)) {
-				end = true
-			} else {
+			if (!this.match(tt.parenR)) {
 				this.expect(tt.comma)
 			}
 		}
