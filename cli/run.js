@@ -2,7 +2,7 @@
 import { readFileSync } from 'fs'
 
 import {
-	createParser,
+	parse,
 	evaluate,
 	createRepl,
 } from '../src'
@@ -35,7 +35,6 @@ export async function runRepl() {
 }
 
 export function runWithFileGiven(file: string, options: Object) {
-	const parse = createParser()
 	const input = String(readFileSync(file))
 
 	try {

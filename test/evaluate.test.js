@@ -1,8 +1,6 @@
 // @flow
 import test from 'ava'
-import { run, createRunner } from '../src'
-
-const generatedRun = createRunner()
+import { run, createRepl } from '../src'
 
 test('programs should work', (t) => {
 	const inputs = [
@@ -23,7 +21,6 @@ test('programs should work', (t) => {
 
 	for (const [input, val] of inputs) {
 		t.is(run(input), val, `running ${input}`)
-		t.is(generatedRun(input), val, `running generatedRun ${input}`)
 	}
 })
 
@@ -39,22 +36,16 @@ test('progams should throw', (t) => {
 	}
 })
 
-// const equations = [
-// 	['2x=x+2', 2],
-// 	['x=sqrt(2)', Math.sqrt(2)],
-// ]
-//
-// test('should equations work', (t) => {
-// 	for (const [expr, val] of equations) {
-// 		const program = parse(expr)
-// 		const expression = program.body[0]
-//
-// 		t.truthy(expression)
-// 		if (expression.type === 'Expression') {
-// 			t.is(expression.body.type, 'Equation')
-// 			if (expression.body.type === 'Equation') {
-// 				t.is(evaluate(program), val)
-// 			}
-// 		}
-// 	}
-// })
+test('repl should work', (t) => {
+	const repl = createRepl()
+	const lines = [
+		['func root(x) x^2', null],
+		['func pow(x, y) x^y', null],
+		['root(2)', 4],
+		['pow(10, 2)', 100],
+	]
+
+	for (const [line, value] of lines) {
+		t.is(repl(line), value, `running '${line}' on repl`)
+	}
+})
