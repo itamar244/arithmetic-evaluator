@@ -175,7 +175,7 @@ export default class Tokenizer {
 		const { state } = this
 		let code = state.input.charCodeAt(state.pos)
 
-		while (code !== 10 /* '\n' */ || state.pos >= state.input.length) {
+		while (code !== 10 /* '\n' */ && state.pos < state.input.length) {
 			state.pos += 1
 			code = state.input.charCodeAt(state.pos)
 		}
