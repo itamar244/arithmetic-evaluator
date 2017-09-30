@@ -3,8 +3,6 @@
  * All rights reserved.
  *
  * Main export from from internal modules.
- * exports `parse`, `evaluateEquation` and `evaluate`
- * also exports `PREDEFINED_IDENTIFIERS` to let the client know if an identifier is defined
  *
  * @flow
  */

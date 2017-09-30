@@ -138,11 +138,12 @@ export default class Tokenizer {
 		while (code !== type) {
 			this.state.pos += 1
 			code = state.input.charCodeAt(state.pos)
-			if (code === 10 /* '\n' */ || this.state.pos >= this.state.input.length) {
+			if (code === 10 /* '\n' */ || state.pos >= state.input.length) {
+				this.finishWithValue(tt.error)
 				this.unexpected('unterminated string')
 			}
 		}
-		this.state.pos += 1
+		state.pos += 1
 
 		this.finishToken(tt.string, state.input.slice(state.start + 1, state.pos - 1))
 	}
