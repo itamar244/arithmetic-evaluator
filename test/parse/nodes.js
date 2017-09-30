@@ -124,6 +124,10 @@ export const call = (
 	type: 'CallExpression',
 })
 
+export const imp = (loc: Location, path: string) => (
+	item('Import', loc, 'path', path)
+)
+
 export const nodeToJson = (obj: mixed) => {
 	if (!(obj instanceof Object)) return obj
 	const next = {}

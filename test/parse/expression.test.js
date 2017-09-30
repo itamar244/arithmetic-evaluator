@@ -11,6 +11,7 @@ import {
 	identifer,
 	item,
 	call,
+	imp,
 	nodeToJson,
 } from './nodes'
 
@@ -73,6 +74,8 @@ const expressions = [
 			identifer([13, 14], 'i'),
 		),
 	)],
+
+	['import "index"', imp([0, 14], 'index')],
 ]
 
 test('should parse expressions fine', (t) => {
@@ -85,17 +88,31 @@ test('should parse expressions fine', (t) => {
 	}
 })
 
+test('should parse comments fine', (t) => {
+	const input = `
+		func root(x) x ^ 2;
+		# asdfasdf
+		# asdfasdf
+		root(x);
+	`
+
+	t.is(parse(input).body.length, 2)
+})
+
 const throwables = [
 	['(', "1 - 'eof': unexpected token"],
+	['@', "0 - '@': unexpected token"],
 	['*3', "0 - '*' can't be an unary operator"],
 	['(x=3)', "2 - '=': unexpected token"],
 	['3)', "1 - ')': unexpected token"],
 	['func y(x x) x ^ 2', "9 - 'x': unexpected token"],
 	['(3|', "2 - '|': unexpected token"],
+	['"333', "0 - '\"333' unterminated string"],
+	['import', '6 - expected a string after import'],
 ]
 
 test('should throw execptions', (t) => {
 	for (const [blob, error] of throwables) {
-		t.throws(() => parse(blob), error, error)
+		t.throws(() => parse(blob), `anonymous: ${error}`, error)
 	}
 })
