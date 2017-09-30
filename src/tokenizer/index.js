@@ -13,7 +13,11 @@ export default class Tokenizer {
 	// forward declarations:
 	// parser/util.js
 	+unexpected: (void | string) => void
-	state: State = new State()
+	state: State
+
+	constructor(input: string) {
+		this.state = new State(input)
+	}
 
 	next() {
 		this.state.prevStart = this.state.start

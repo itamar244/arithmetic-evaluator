@@ -38,7 +38,7 @@ export function runWithFileGiven(file: string, options: Object) {
 	const input = String(readFileSync(file))
 
 	try {
-		const program = parse(input)
+		const program = parse(input, { filename: file })
 
 		if (options.benchmark) {
 			const parseTime = benchmark(

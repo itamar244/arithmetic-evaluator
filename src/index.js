@@ -11,16 +11,28 @@
 
 import Parser from './parser'
 import {
+	defaultOptions,
+	getOptions,
+	type Options,
+} from './options';
+import {
 	evaluate,
 	evaluateStatement,
 } from './evaluator'
 
-export { evaluate }
+export {
+	evaluate,
+	Parser,
+	evaluateStatement,
+}
 
-const parser = new Parser()
+export function parse(input: string, options?: Options) {
+	return new Parser(input, getOptions(options)).parse()
+}
 
-export const parse = parser.parse.bind(parser)
-export const parseStatement = parser.parseSingleLine.bind(parser)
+export function parseStatement(input: string) {
+	return new Parser(input, defaultOptions).getStatement()
+}
 
 export const run = (input: string) => (
 	evaluate(parse(input))
@@ -28,6 +40,7 @@ export const run = (input: string) => (
 
 export function createRepl() {
 	const scope = {}
+
 	return (input: string) => evaluateStatement(
 		parseStatement(input),
 		scope,

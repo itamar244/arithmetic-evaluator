@@ -7,6 +7,7 @@ export default class StatementParser extends ExpressionParser {
 	parseTopLevel(program: N.Program): N.Program {
 		this.nextToken()
 
+		program.filename = this.options.filename
 		program.body = []
 		while (!this.match(tt.eof)) {
 			program.body.push(this.parseStatement())
@@ -32,7 +33,7 @@ export default class StatementParser extends ExpressionParser {
 
 	parseImport(node: N.Import): N.Import {
 		this.next()
-		if (!this.match(tt.string)) this.unexpected('expected a string after import')
+		if (!this.match(tt.string)) this.unexpected('expected a string after import', false)
 		node.path = this.state.value
 		this.next()
 

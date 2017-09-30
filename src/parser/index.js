@@ -1,14 +1,18 @@
 // @flow
+import { type Options } from '../options';
 import StatementParser from './statement'
 
 export default class Parser extends StatementParser {
-	parse(input: string) {
-		this.state.init(input)
+	constructor(input: string, options: Options) {
+		super(input)
+		this.options = options
+	}
+
+	parse() {
 		return this.parseTopLevel(this.startNode())
 	}
 
-	parseSingleLine(input: string) {
-		this.state.init(input)
+	getStatement() {
 		this.nextToken()
 		return this.parseStatement()
 	}

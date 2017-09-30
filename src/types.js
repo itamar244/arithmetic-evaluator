@@ -47,6 +47,7 @@ export type NodeType =
 export type Program = NodeBase & {
 	type: 'Program';
 	body: Statement[];
+	filename: string;
 }
 
 export type Expression = NodeBase & {

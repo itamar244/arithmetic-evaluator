@@ -25,7 +25,7 @@ export default class State {
 	value: any
 	input: string
 
-	init(input: string) {
+	constructor(input: string) {
 		const pos = new Position(0, 0)
 
 		this.input = input

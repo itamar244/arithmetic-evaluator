@@ -1,17 +1,23 @@
 // @flow
 import { types as tt, type TokenType } from '../tokenizer/types'
+import type { Options } from '../options'
 import Tokenizer from '../tokenizer'
 
 export default class UtilParser extends Tokenizer {
-	unexpected(_error?: string) {
-		const error =	_error != null ? ` ${_error}` : ': unexpected token'
+	options: Options
+
+	unexpected(_error?: string, showValue: bool = true) {
+		const error =	_error || ': unexpected token'
+		const { filename } = this.options
 		const {
 			start,
 			value,
 			type,
 		} = this.state
+		const prefix = showValue ? `'${value || type.label}'` : ''
+		const padding = showValue && _error != null ? ' ' : ''
 
-		throw new SyntaxError(`${start} - '${value || type.label}'${error}`)
+		throw new SyntaxError(`${filename}: ${start} - ${prefix}${padding}${error}`)
 	}
 
 	expect(type: TokenType): void {
