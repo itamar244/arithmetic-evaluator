@@ -12,7 +12,7 @@ const isLetter = (code: number) => (
 export default class Tokenizer {
 	// forward declarations:
 	// parser/util.js
-	+unexpected: () => void
+	+unexpected: (void | string) => void
 	state: State = new State()
 
 	next(): void {
@@ -126,19 +126,40 @@ export default class Tokenizer {
 
 	skipSpace() {
 		const { state } = this
-		let cur = state.input.charCodeAt(state.pos)
-		let padding = 0
+		const startPos = state.pos
+		let isSpaceCode = true
 
-		while (cur === 32 /* ' ' */ || cur === 10 /* '\n' */ || cur === 9 /* '\t' */) {
-			padding += 1
-			if (cur === 10 /* '\n' */) {
-				this.state.line += 1
-				this.state.lineStart = this.state.pos + padding
+		while (isSpaceCode) {
+			switch (state.input.charCodeAt(state.pos)) {
+				case 32: // ' '
+				case 9: // '\t'
+					state.pos += 1
+					break
+				case 10: // '\n'
+					state.pos += 1
+					state.line += 1
+					state.lineStart = state.pos
+					break
+				case 35: // '#'
+					state.pos += 1
+					this.skipLineComment()
+					break
+				default:
+					isSpaceCode = false
 			}
-			cur = state.input.charCodeAt(state.pos + padding)
 		}
-		state.prevSpacePadding = padding
-		state.pos += padding
+
+		state.prevSpacePadding = state.pos - startPos
+	}
+
+	skipLineComment() {
+		const { state } = this
+		let cur = state.input.charCodeAt(state.pos)
+
+		while (cur !== 10 /* '\n' */ || state.pos >= state.input.length) {
+			state.pos += 1
+			cur = state.input.charCodeAt(state.pos)
+		}
 	}
 
 	finishWithValue(type: TokenType) {
