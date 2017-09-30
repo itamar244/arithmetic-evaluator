@@ -84,6 +84,9 @@ export default class Tokenizer {
 				return this.finishToken(tt.crotchet)
 			case 59: // ';'
 				return this.finishToken(tt.semi)
+			case 34: // '"'
+			case 39: // "'"
+				return this.readString(code)
 			default:
 				this.finishWithValue(tt.error)
 				return this.unexpected()
@@ -122,6 +125,22 @@ export default class Tokenizer {
 		} else {
 			this.finishToken(tt.name, word)
 		}
+	}
+
+	readString(type: number) {
+		const { state } = this
+		let code = state.input.charCodeAt(state.pos)
+
+		while (code !== type) {
+			this.state.pos += 1
+			code = state.input.charCodeAt(state.pos)
+			if (code === 10 /* '\n' */ || this.state.pos >= this.state.input.length) {
+				this.unexpected('unterminated string')
+			}
+		}
+		this.state.pos += 1
+
+		this.finishToken(tt.string, state.input.slice(state.start + 1, state.pos - 1))
 	}
 
 	skipSpace() {

@@ -19,6 +19,8 @@ export default class StatementParser extends ExpressionParser {
 		const node = this.startNode()
 
 		switch (this.state.type) {
+			case tt.import:
+				return this.parseImport(node)
 			case tt.let:
 				return this.parseVariableDeclarations(node)
 			case tt.func:
@@ -26,6 +28,15 @@ export default class StatementParser extends ExpressionParser {
 			default:
 				return this.parseExpressionStatement(node)
 		}
+	}
+
+	parseImport(node: N.Import): N.Import {
+		this.next()
+		if (!this.match(tt.string)) this.unexpected('expected a string after import')
+		node.path = this.state.value
+		this.next()
+
+		return this.finishNode(node, 'Import')
 	}
 
 	parseExpressionStatement(node: N.Expression) {

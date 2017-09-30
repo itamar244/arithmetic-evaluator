@@ -37,14 +37,17 @@ export const keywords = {
 	let: new TokenType('let'),
 	in: new TokenType('in'),
 	func: new TokenType('func'),
+	import: new TokenType('import'),
 }
 
 export const types = {
 	...keywords,
 	num: new TokenType('num', { afterOp }),
 	error: new TokenType('error'),
+	string: new TokenType('string'),
 	name: new TokenType('name', { afterOp }),
 	eof: new TokenType('eof'),
+
 	bang: new TokenType('!', { postfix }),
 	crotchet: new TokenType('|'),
 	comma: new TokenType(','),

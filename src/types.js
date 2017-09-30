@@ -11,6 +11,7 @@ export type AnyNode = NodeBase & { [string]: any }
 export type Node =
 	| Program
 	| Expression
+	| Import
 	| UnaryExpression
 	| BinaryExpression
 	| VariableDeclerations
@@ -24,12 +25,14 @@ export type Node =
 
 export type Statement =
 	| Expression
+	| Import
 	| VariableDeclerations
 	| FunctionDeclaration
 
 export type NodeType =
 	| 'Program'
 	| 'Expression'
+	| 'Import'
 	| 'UnaryExpression'
 	| 'BinaryExpression'
 	| 'VariableDeclerations'
@@ -51,6 +54,10 @@ export type Expression = NodeBase & {
 	body: Node;
 }
 
+export type Import = NodeBase & {
+	type: 'Import';
+	path: string;
+}
 
 export type UnaryExpression = NodeBase & {
 	type: 'UnaryExpression';
