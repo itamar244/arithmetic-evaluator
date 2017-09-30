@@ -35,7 +35,7 @@ export default class ExpressionParser extends NodeUtils {
 
 				return this.parseBinary(body, -1)
 			case tt.num:
-				return this.parseLiteral(node)
+				return this.parseNumeric(node)
 			case tt.parenL:
 				return this.parseParenthesized(node, tt.parenR)
 			case tt.crotchet:
@@ -60,10 +60,10 @@ export default class ExpressionParser extends NodeUtils {
 		)
 	}
 
-	parseLiteral(node: N.Literal): N.Literal {
+	parseNumeric(node: N.NumericLiteral): N.NumericLiteral {
 		node.value = Number(this.state.value)
 		this.next()
-		return this.finishNode(node, 'Literal')
+		return this.finishNode(node, 'NumericLiteral')
 	}
 
 	parseMaybeUnary(topLevel: ?bool, body: ?N.Node) {

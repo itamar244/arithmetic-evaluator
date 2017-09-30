@@ -17,7 +17,7 @@ export type Node =
 	| VariableDeclerator
 	| FunctionDeclaration
 	| Equation
-	| Literal
+	| NumericLiteral
 	| Identifier
 	| AbsParentheses
 	| CallExpression
@@ -36,7 +36,7 @@ export type NodeType =
 	| 'VariableDeclerator'
 	| 'FunctionDeclaration'
 	| 'Equation'
-	| 'Literal'
+	| 'NumericLiteral'
 	| 'Identifier'
 	| 'AbsParentheses'
 	| 'CallExpression'
@@ -105,8 +105,8 @@ export type Equation = BinNode & {
 	type: 'Equation';
 }
 
-export type Literal = NodeBase & {
-	type: 'Literal';
+export type NumericLiteral = NodeBase & {
+	type: 'NumericLiteral';
 	value: number;
 }
 

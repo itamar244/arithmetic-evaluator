@@ -10,7 +10,7 @@ import * as operators from './operator-functions'
 
 export default function evaluateNode(node: Node, scopes: Scope[]) {
 	switch (node.type) {
-		case 'Literal':
+		case 'NumericLiteral':
 			return node.value
 		case 'BinaryExpression':
 			return operators.BINARY[node.operator](
