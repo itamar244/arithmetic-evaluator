@@ -15,7 +15,7 @@ export default class Tokenizer {
 	+unexpected: (void | string) => void
 	state: State = new State()
 
-	next(): void {
+	next() {
 		this.state.prevStart = this.state.start
 		this.state.prevEnd = this.state.end
 		this.state.prevStartLoc = this.state.startLoc
@@ -38,20 +38,20 @@ export default class Tokenizer {
 
 	nextToken(): void {
 		this.skipSpace()
-		const code = this.state.input.charCodeAt(this.state.pos)
+		const { state } = this
+		const code = state.input.charCodeAt(state.pos)
 
-		this.state.start = this.state.pos
-		this.state.startLoc = this.state.position()
-		if (this.state.pos >= this.state.input.length) {
-			return this.finishToken(tt.eof)
+		state.start = state.pos
+		state.startLoc = state.position()
+		if (state.pos >= state.input.length) {
+			this.finishToken(tt.eof)
+		} else if (isNumber(code) || code === 46 /* . */) {
+			this.readNumber()
+		} else if (isLetter(code)) {
+			this.readIdentifier()
+		} else {
+			this.getTokenFromCode(code)
 		}
-		if (isNumber(code) || code === 46 /* . */) {
-			return this.readNumber()
-		}
-		if (isLetter(code)) {
-			return this.readIdentifier()
-		}
-		return this.getTokenFromCode(code)
 	}
 
 	getTokenFromCode(code: number): void {
@@ -154,11 +154,11 @@ export default class Tokenizer {
 
 	skipLineComment() {
 		const { state } = this
-		let cur = state.input.charCodeAt(state.pos)
+		let code = state.input.charCodeAt(state.pos)
 
-		while (cur !== 10 /* '\n' */ || state.pos >= state.input.length) {
+		while (code !== 10 /* '\n' */ || state.pos >= state.input.length) {
 			state.pos += 1
-			cur = state.input.charCodeAt(state.pos)
+			code = state.input.charCodeAt(state.pos)
 		}
 	}
 
