@@ -104,8 +104,8 @@ export const expr = (body: N.AnyNode): N.Expression => ({
 	type: 'Expression',
 })
 
-export const num = (loc: Location, value: number): N.Identifier => (
-	item('Literal', loc, 'value', value)
+export const num = (loc: Location, value: number): N.NumericLiteral => (
+	item('NumericLiteral', loc, 'value', value)
 )
 
 export const identifer = (loc: Location, name: string): N.Identifier => (

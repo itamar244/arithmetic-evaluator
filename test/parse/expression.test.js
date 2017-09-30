@@ -86,7 +86,6 @@ test('should parse expressions fine', (t) => {
 })
 
 const throwables = [
-	['#', "0 - '#': unexpected token"],
 	['(', "1 - 'eof': unexpected token"],
 	['*3', "0 - '*' can't be an unary operator"],
 	['(x=3)', "2 - '=': unexpected token"],
