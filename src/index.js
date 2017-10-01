@@ -12,7 +12,7 @@ import {
 	defaultOptions,
 	getOptions,
 	type Options,
-} from './options';
+} from './options'
 import {
 	evaluate,
 	evaluateStatement,
