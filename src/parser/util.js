@@ -7,17 +7,18 @@ export default class UtilParser extends Tokenizer {
 	options: Options
 
 	unexpected(_error?: string, showValue: bool = true) {
-		const error =	_error || ': unexpected token'
 		const { filename } = this.options
 		const {
-			start,
+			startLoc,
 			value,
 			type,
 		} = this.state
+		const position = `${startLoc.line}:${startLoc.column}`
 		const prefix = showValue ? `'${value || type.label}'` : ''
-		const padding = showValue && _error != null ? ' ' : ''
+		const padding = showValue ? ' ' : ''
+		const error =	_error || 'unexpected token'
 
-		throw new SyntaxError(`${filename}: ${start} - ${prefix}${padding}${error}`)
+		throw new SyntaxError(`at ${filename}, ${position} - ${prefix}${padding}${error}`)
 	}
 
 	expect(type: TokenType): void {
@@ -28,6 +29,7 @@ export default class UtilParser extends Tokenizer {
 		return (
 			this.state.type.afterOp
 			&& this.state.prevType != null && this.state.prevType.binop === null
+			&& !this.isLineTerminator()
 		)
 	}
 

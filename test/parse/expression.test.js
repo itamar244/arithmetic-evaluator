@@ -100,19 +100,21 @@ test('should parse comments fine', (t) => {
 })
 
 const throwables = [
-	['(', "1 - 'eof': unexpected token"],
-	['@', "0 - '@': unexpected token"],
-	['*3', "0 - '*' can't be an unary operator"],
-	['(x=3)', "2 - '=': unexpected token"],
-	['3)', "1 - ')': unexpected token"],
-	['func y(x x) x ^ 2', "9 - 'x': unexpected token"],
-	['(3|', "2 - '|': unexpected token"],
-	['"333', "0 - '\"333' unterminated string"],
-	['import', '6 - expected a string after import'],
+	['(', 1, "'eof' unexpected token"],
+	['@', 0, "'@' unexpected token"],
+	['*3', 0, "'*' can't be an unary operator"],
+	['(x=3)', 2, "'=' unexpected token"],
+	['3)', 1, "')' unexpected token"],
+	['func y(x x) x ^ 2', 9, "'x' unexpected token"],
+	['(3|', 2, "'|' unexpected token"],
+	['"333', 0, "'\"333' unterminated string"],
+	['import', 6, 'expected a string after import'],
 ]
 
 test('should throw execptions', (t) => {
-	for (const [blob, error] of throwables) {
-		t.throws(() => parse(blob), `anonymous: ${error}`, error)
+	for (const [input, pos, _error] of throwables) {
+		const error = `at anonymous, 0:${pos} - ${_error}`
+
+		t.throws(() => parse(input), error, error)
 	}
 })
