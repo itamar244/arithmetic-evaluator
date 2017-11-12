@@ -6,19 +6,26 @@ import {
 	getItemFromScopes,
 	type Scope,
 } from './utils'
-import * as operators from './operator-functions'
+import {
+	evaluateBinary,
+	evaluateUnary,
+} from './operators'
 
 export default function evaluateNode(node: Node, scopes: Scope[]) {
 	switch (node.type) {
 		case 'NumericLiteral':
 			return node.value
 		case 'BinaryExpression':
-			return operators.BINARY[node.operator](
+			return evaluateBinary(
+				node.operator,
 				evaluateNode(node.left, scopes),
 				evaluateNode(node.right, scopes),
 			)
 		case 'UnaryExpression':
-			return operators.UNARY[node.operator](evaluateNode(node.argument, scopes))
+			return evaluateUnary(
+				node.operator,
+				evaluateNode(node.argument, scopes),
+			)
 		case 'Expression':
 			return evaluateNode(node.body, scopes)
 		case 'CallExpression':
