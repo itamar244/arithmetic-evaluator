@@ -22,5 +22,5 @@ yargs
 if (argv._[0] != null) {
 	runWithFileGiven(argv._[0], argv)
 } else {
-	runRepl()
+	runRepl(argv)
 }

@@ -12,7 +12,27 @@ import {
 	benchmark,
 } from './utils'
 
-export async function runRepl() {
+function debugInput(input: string, toBenchmarkEvaluate: bool = true) {
+	const parseTime = benchmark(
+		parse,
+		[input],
+		3000,
+	)
+
+	log(`parsing operations per second: ${parseTime}`)
+
+	if (toBenchmarkEvaluate) {
+		const evaluateTime = benchmark(
+			evaluate,
+			[parse(input)],
+			3000,
+		)
+
+		log(`evaluating operations per second: ${evaluateTime}`)
+	}
+}
+
+export async function runRepl(options: Object) {
 	const rl = createInterface()
 	const repl = createRepl()
 	let emptyLine = false
@@ -23,15 +43,21 @@ export async function runRepl() {
 
 		if (line.length > 0) {
 			try {
-				logger(repl(line))
+				const result = repl(line)
+
+				log(result)
+				if (options.benchmark) {
+					debugInput(line, typeof result === 'number')
+				}
 			} catch (e) {
-				logger(e.message)
+				log(e, true)
 			}
 		} else {
 			emptyLine = true
-			rl.close()
 		}
 	}
+
+	rl.close()
 }
 
 export function runWithFileGiven(file: string, options: Object) {
@@ -41,29 +67,15 @@ export function runWithFileGiven(file: string, options: Object) {
 		const program = parse(input, { filename: file })
 
 		if (options.benchmark) {
-			const parseTime = benchmark(
-				parse,
-				[input],
-				3000,
-			)
-
-			logger(`parsing operations per second: ${parseTime}`)
-
-			const evaluateTime = benchmark(
-				evaluate,
-				[program],
-				3000,
-			)
-
-			logger(`evaluating operations per second: ${evaluateTime}`)
+			debugInput(input)
 		}
 
 		if (options.tree) {
-			logger(JSON.stringify(program, null, 4))
+			log(JSON.stringify(program, null, 4))
 		}
 
-		logger(evaluate(program))
+		log(evaluate(program))
 	} catch (e) {
-		logger(e.message)
+		log(e, true)
 	}
 }
