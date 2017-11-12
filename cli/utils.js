@@ -15,6 +15,11 @@ export function createInterface() {
 	}
 }
 
+export function log(str: mixed, error: bool = false) {
+	// eslint-disable-next-line no-console
+	(error ? console.error : console.log)(str)
+}
+
 export function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: number = 1000) {
 	const bindFunc = func.bind(null, ...args)
 	let times = 0

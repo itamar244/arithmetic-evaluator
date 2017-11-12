@@ -8,9 +8,9 @@ import {
 } from '../src'
 import {
 	createInterface,
+	log,
 	benchmark,
 } from './utils'
-import logger from './logger'
 
 export async function runRepl() {
 	const rl = createInterface()
