@@ -1,9 +1,9 @@
 // @flow
 type TokenTypeOptions = {
-	binop?: number;
-	prefix?: bool;
-	postfix?: bool;
-	afterOp?: bool;
+	binop?: number,
+	prefix?: bool,
+	postfix?: bool,
+	afterOp?: bool,
 }
 
 const prefix = true

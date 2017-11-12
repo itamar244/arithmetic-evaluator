@@ -2,7 +2,7 @@
 import { has } from './utils'
 
 export type Options = {
-	filename: string;
+	filename: string,
 }
 
 export const defaultOptions: Options = {
