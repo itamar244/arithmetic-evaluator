@@ -212,5 +212,5 @@ declare module 'yargs' {
     wrap(columns: number | null): this;
   }
 
-  declare var exports: Yargs;
+  declare module.exports: Yargs;
 }

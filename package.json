@@ -24,7 +24,7 @@
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-plugin-flowtype": "^2.33.0",
     "eslint-plugin-import": "^2.2.0",
-    "flow-bin": "^0.55.0",
+    "flow-bin": "^0.64.0",
     "nyc": "^11.2.1"
   },
   "ava": {
