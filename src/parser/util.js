@@ -1,4 +1,5 @@
 // @flow
+import type { Node } from '../types'
 import { types as tt, type TokenType } from '../tokenizer/types'
 import type { Options } from '../options'
 import Tokenizer from '../tokenizer'
@@ -25,10 +26,10 @@ export default class UtilParser extends Tokenizer {
 		if (!this.eat(type)) this.unexpected()
 	}
 
-	needMultiplierShortcut() {
+	needMultiplierShortcut(prevNode: Node) {
 		return (
 			this.state.type.afterOp
-			&& this.state.prevType != null && this.state.prevType.binop === null
+			&& (prevNode.type !== 'BinaryExpression' || prevNode.type !== 'UnaryExpression')
 			&& !this.isLineTerminator()
 		)
 	}

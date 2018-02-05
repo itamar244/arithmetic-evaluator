@@ -194,8 +194,6 @@ export default class Tokenizer {
 	}
 
 	finishToken(type: TokenType, value?: any) {
-		this.state.prevType = this.state.type
-
 		this.state.value = value
 		this.state.type = type
 		this.state.end = this.state.pos

@@ -18,7 +18,6 @@ export default class State {
 	prevStartLoc: Position
 	prevEndLoc: Position
 
-	prevType: ?TokenType
 	type: TokenType
 
 	prevSpacePadding: number
@@ -40,7 +39,6 @@ export default class State {
 		this.prevEnd = 0
 		this.prevStartLoc = pos
 		this.prevEndLoc = pos
-		this.prevType = null
 		this.type = tt.eof
 		this.prevSpacePadding = 0
 	}

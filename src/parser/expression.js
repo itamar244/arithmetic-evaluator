@@ -6,7 +6,7 @@ import NodeUtils from './node'
 export default class ExpressionParser extends NodeUtils {
 	parseExpressionBody(topLevel: bool): N.Node {
 		const node = this.parseMaybeUnary(topLevel)
-		if (this.needMultiplierShortcut()) {
+		if (this.needMultiplierShortcut(node)) {
 			return this.parseBinary(node, -1, false, tt.star, '*')
 		}
 		if (this.state.type.binop !== null) {
@@ -77,7 +77,7 @@ export default class ExpressionParser extends NodeUtils {
 		return maybeArgument
 	}
 
-	parseUnary(node: N.AnyNode): N.UnaryExpression {
+	parseUnary(node: N.UnaryExpression): N.UnaryExpression {
 		node.operator = this.state.value
 		node.prefix = this.state.type.prefix
 
@@ -105,7 +105,7 @@ export default class ExpressionParser extends NodeUtils {
 			if (toMoveNext) this.next()
 			const right = this.parseMaybeUnary()
 			node.right =
-				this.needMultiplierShortcut()
+				this.needMultiplierShortcut(right)
 				? this.parseBinary(right, minPrec, false, tt.star, '*')
 				: this.parseBinary(right, prec)
 
