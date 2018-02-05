@@ -1,36 +1,31 @@
 // @flow
 import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import { resolve, dirname } from 'path'
 
 import type { Program, Statement } from '../types'
 import { parse } from '../index'
 
-const resolveImportPath = (path: string) => (
-	resolve(path.endsWith('.ari') ? path : `${path}.ari`)
-)
+export default function link(
+	program: Program,
+	imports: Set<string> = new Set(),
+): Statement[] {
+	const statements = []
 
-export default function link(program: Program): Statement[] {
-	const imports: Set<string> = new Set()
-	const linkBody = (body: Statement[]) => {
-		const statements = []
+	for (const statement of program.body) {
+		if (statement.type === 'Import') {
+			const filename = resolve(dirname(program.filename), statement.path)
 
-		for (const statement of body) {
-			if (statement.type === 'Import') {
-				const resolvedPath = resolveImportPath(statement.path)
+			if (!imports.has(filename)) {
+				const file = String(readFileSync(filename))
+				const importedProgram = parse(file, { filename })
 
-				if (!imports.has(resolvedPath)) {
-					const importedProgram = parse(String(readFileSync(resolvedPath)))
-
-					imports.add(resolvedPath)
-					statements.push(...linkBody(importedProgram.body))
-				}
-			} else {
-				statements.push(statement)
+				imports.add(filename)
+				statements.push(...link(importedProgram))
 			}
+		} else {
+			statements.push(statement)
 		}
-
-		return statements
 	}
 
-	return linkBody(program.body)
+	return statements
 }
