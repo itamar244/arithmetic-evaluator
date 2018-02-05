@@ -1,8 +1,8 @@
 // @flow
 import type { Program, Statement } from '../types'
 import {
-	variableDeclarationsToObject,
 	type Scope,
+	variableDeclarationsToObject,
 } from './utils'
 import link from './linker'
 import evaluateNode from './eval'

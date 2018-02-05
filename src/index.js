@@ -32,9 +32,9 @@ export function parseStatement(input: string) {
 	return new Parser(input, defaultOptions).getStatement()
 }
 
-export const run = (input: string) => (
-	evaluate(parse(input))
-)
+export function run(input: string) {
+	return evaluate(parse(input))
+}
 
 export function createRepl() {
 	const scope = {}

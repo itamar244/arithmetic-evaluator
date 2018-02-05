@@ -1,7 +1,6 @@
 // @flow
 import type { Node } from '../types'
 import {
-	getFunctionDeclaration,
 	callFunction,
 	getItemFromScopes,
 	type Scope,
@@ -41,18 +40,17 @@ export default function evaluateNode(node: Node, scopes: Scope[]) {
 
 const evaluateCallExpression = (node, scopes) => {
 	const name = node.callee.name
-	const func = getFunctionDeclaration(getItemFromScopes(scopes, name))
+	const func = getItemFromScopes(scopes, name)
 	const args = node.args.map(arg => evaluateNode(arg, scopes))
 
-	if (func == null && typeof Math[name] !== 'function') {
-		throw new ReferenceError(`${name} is not a function`)
+	if (func != null && func.type === 'FunctionDeclaration') {
+		return callFunction(func, args, scopes)
+	}
+	if (typeof Math[name] === 'function') {
+		return Math[name](...args)
 	}
 
-	return (
-		func
-		? callFunction(func, args, scopes)
-		: Math[name](...args)
-	)
+	throw new ReferenceError(`${name} is not a function`)
 }
 
 const evaluateIdentifier = (node, scopes) => {

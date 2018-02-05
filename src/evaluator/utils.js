@@ -8,12 +8,6 @@ import evaluateNode from './eval'
 
 export type Scope = { [string]: ?Node }
 
-export const getFunctionDeclaration = (func: ?Node): ?FunctionDeclaration => (
-	func != null && func.type === 'FunctionDeclaration'
-	? func
-	: null
-)
-
 export const variableDeclarationsToObject = (node: VariableDeclerations): Scope => (
 	node.declarations.reduce((scope, declaration) => {
 		scope[declaration.id.name] = declaration.init
@@ -47,5 +41,5 @@ export function callFunction(
 	args.forEach((arg, i) => {
 		scope[func.params[i].name] = arg
 	})
-	return evaluateNode(func.body, [scope].concat(scopes))
+	return evaluateNode(func.body, [scope, ...scopes])
 }
