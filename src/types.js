@@ -2,9 +2,9 @@
 import type { SourceLocation } from './utils/location'
 
 export interface NodeBase {
-	loc: SourceLocation,
-	start: number,
-	end: number,
+	loc: SourceLocation;
+	start: number;
+	end: number;
 }
 
 export type AnyNode = NodeBase & { [string]: any }
@@ -44,27 +44,27 @@ export type NodeType =
 	| 'AbsParentheses'
 	| 'CallExpression'
 
-export type Program = NodeBase & {
-	type: 'Program',
-	body: Statement[],
-	filename: string,
+export interface Program extends NodeBase {
+	type: 'Program';
+	body: Statement[];
+	filename: string;
 }
 
-export type Expression = NodeBase & {
-	type: 'Expression',
-	body: Node,
+export interface Expression extends NodeBase {
+	type: 'Expression';
+	body: Node;
 }
 
-export type Import = NodeBase & {
-	type: 'Import',
-	path: string,
+export interface Import extends NodeBase {
+	type: 'Import';
+	path: string;
 }
 
-export type UnaryExpression = NodeBase & {
-	type: 'UnaryExpression',
-	operator: UnaryOperator,
-	argument: Node,
-	prefix: bool,
+export interface UnaryExpression extends NodeBase {
+	type: 'UnaryExpression';
+	operator: UnaryOperator;
+	argument: Node;
+	prefix: bool;
 }
 
 export type UnaryOperator =
@@ -72,14 +72,14 @@ export type UnaryOperator =
 	| '-'
 	| '!'
 
-type BinNode = NodeBase & {
-	left: Node,
-	right: Node,
+interface BinNode extends NodeBase {
+	left: Node;
+	right: Node;
 }
 
-export type BinaryExpression = BinNode & {
-	type: 'BinaryExpression',
-	operator: BinaryOperator,
+export interface BinaryExpression extends BinNode {
+	type: 'BinaryExpression';
+	operator: BinaryOperator;
 }
 
 export type BinaryOperator =
@@ -90,46 +90,46 @@ export type BinaryOperator =
 	| '^'
 	| '%'
 
-export type VariableDeclerations = NodeBase & {
-	type: 'VariableDeclerations',
-	declarations: VariableDeclerator[],
-	expression: Expression,
+export interface VariableDeclerations extends NodeBase {
+	type: 'VariableDeclerations';
+	declarations: VariableDeclerator[];
+	expression: Expression;
 }
 
-export type VariableDeclerator = NodeBase & {
-	type: 'VariableDeclerator',
-	id: Identifier,
-	init: Node,
+export interface VariableDeclerator extends NodeBase {
+	type: 'VariableDeclerator';
+	id: Identifier;
+	init: Node;
 }
 
-export type FunctionDeclaration = NodeBase & {
-	type: 'FunctionDeclaration',
-	params: Identifier[],
-	id: Identifier,
-	body: Node,
+export interface FunctionDeclaration extends NodeBase {
+	type: 'FunctionDeclaration';
+	params: Identifier[];
+	id: Identifier;
+	body: Node;
 }
 
-export type Equation = BinNode & {
-	type: 'Equation',
+export interface Equation extends BinNode {
+	type: 'Equation';
 }
 
-export type NumericLiteral = NodeBase & {
-	type: 'NumericLiteral',
-	value: number,
+export interface NumericLiteral extends NodeBase {
+	type: 'NumericLiteral';
+	value: number;
 }
 
-export type Identifier = NodeBase & {
-	type: 'Identifier',
-	name: string,
+export interface Identifier extends NodeBase {
+	type: 'Identifier';
+	name: string;
 }
 
-export type AbsParentheses = NodeBase & {
-	type: 'AbsParentheses',
-	body: Node,
+export interface AbsParentheses extends NodeBase {
+	type: 'AbsParentheses';
+	body: Node;
 }
 
-export type CallExpression = NodeBase & {
-	type: 'CallExpression',
-	callee: Identifier,
-	args: Array<Node>,
+export interface CallExpression extends NodeBase {
+	type: 'CallExpression';
+	callee: Identifier;
+	args: Node[];
 }
