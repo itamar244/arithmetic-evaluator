@@ -4,7 +4,6 @@ import type {
 	VariableDeclerations,
 	FunctionDeclaration,
 } from '../types'
-import evaluateNode from './evaluate-node'
 
 export type Scope = { [string]: ?Node }
 

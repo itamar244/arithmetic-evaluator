@@ -1,5 +1,6 @@
 // @flow
 import type { UnaryOperator, BinaryOperator } from '../types'
+import { fact } from './functions'
 
 export function evaluateBinary(
 	operator: BinaryOperator,
@@ -7,37 +8,21 @@ export function evaluateBinary(
 	right: number,
 ) {
 	switch (operator) {
-		case '+':
-			return left + right
-		case '-':
-			return left - right
-		case '*':
-			return left * right
-		case '/':
-			return left / right
-		case '^':
-			return left ** right
-		case '%':
-			return left % right
-		default:
-			throw TypeError(`${operator} isn't supported binary operator`)
+		case '+': return left + right
+		case '-': return left - right
+		case '*': return left * right
+		case '/': return left / right
+		case '^': return left ** right
+		case '%': return left % right
+		default: return 0
 	}
 }
 
 export function evaluateUnary(operator: UnaryOperator, argument: number) {
 	switch (operator) {
-		case '+':
-			return +argument
-		case '-':
-			return -argument
-		case '!': {
-			let result = 1
-			for (let i = 1; i <= argument; i += 1) {
-				result *= i
-			}
-			return result
-		}
-		default:
-			throw TypeError(`${operator} isn't supported unary operator`)
+		case '+': return +argument
+		case '-': return -argument
+		case '!': return fact(argument)
+		default: return 0
 	}
 }

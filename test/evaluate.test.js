@@ -17,6 +17,9 @@ test('programs should work', (t) => {
 		['let x = 10 in 3x', 3 * 10],
 		['x=3', NaN],
 		['let x = 3 in 3x+3', 12],
+		// tests for custom builtin functions
+		['fib(10)', 89],
+		['fact(4)', 24],
 	]
 
 	for (const [input, val] of inputs) {

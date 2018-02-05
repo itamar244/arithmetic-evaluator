@@ -1,5 +1,6 @@
 // @flow
 import type { Node } from '../types'
+import * as customFunctions from './functions'
 import {
 	getFunctionScope,
 	getItemFromScopes,
@@ -10,7 +11,7 @@ import {
 	evaluateUnary,
 } from './operators'
 
-const evaluateCallExpression = (node, scopes) => {
+function evaluateCallExpression(node, scopes) {
 	const name = node.callee.name
 	const func = getItemFromScopes(scopes, name)
 	const args = node.args.map(arg => evaluateNode(arg, scopes))
@@ -21,14 +22,16 @@ const evaluateCallExpression = (node, scopes) => {
 			[getFunctionScope(func, args), ...scopes],
 		)
 	}
-	if (typeof Math[name] === 'function') {
-		return Math[name](...args)
+
+	const builtin = Math[name] || customFunctions[name]
+	if (typeof builtin === 'function') {
+		return builtin(...args)
 	}
 
 	throw new ReferenceError(`${name} is not a function`)
 }
 
-const evaluateIdentifier = (node, scopes) => {
+function evaluateIdentifier(node, scopes) {
 	const item = getItemFromScopes(scopes, node.name)
 
 	if (item == null && typeof Math[node.name] !== 'number') {
