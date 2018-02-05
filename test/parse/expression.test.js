@@ -94,8 +94,8 @@ test('should parse comments fine', (t) => {
 		# asdfasdf
 		# asdfasdf
 		root(x);
+		# asdfasdf
 	`
-
 	t.is(parse(input).body.length, 2)
 })
 
