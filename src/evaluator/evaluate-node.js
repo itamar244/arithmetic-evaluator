@@ -1,7 +1,7 @@
 // @flow
 import type { Node } from '../types'
 import {
-	callFunction,
+	getFunctionScope,
 	getItemFromScopes,
 	type Scope,
 } from './utils'
@@ -9,6 +9,39 @@ import {
 	evaluateBinary,
 	evaluateUnary,
 } from './operators'
+
+const evaluateCallExpression = (node, scopes) => {
+	const name = node.callee.name
+	const func = getItemFromScopes(scopes, name)
+	const args = node.args.map(arg => evaluateNode(arg, scopes))
+
+	if (func != null && func.type === 'FunctionDeclaration') {
+		return evaluateNode(
+			func.body,
+			[getFunctionScope(func, args), ...scopes],
+		)
+	}
+	if (typeof Math[name] === 'function') {
+		return Math[name](...args)
+	}
+
+	throw new ReferenceError(`${name} is not a function`)
+}
+
+const evaluateIdentifier = (node, scopes) => {
+	const item = getItemFromScopes(scopes, node.name)
+
+	if (item == null && typeof Math[node.name] !== 'number') {
+		throw new ReferenceError(`${node.name} is undefined`)
+	}
+	return (
+		item == null
+		? Math[node.name]
+		: typeof item === 'number'
+		? item
+		: evaluateNode(item, scopes)
+	)
+}
 
 export default function evaluateNode(node: Node, scopes: Scope[]) {
 	switch (node.type) {
@@ -36,34 +69,4 @@ export default function evaluateNode(node: Node, scopes: Scope[]) {
 		default:
 			return NaN
 	}
-}
-
-const evaluateCallExpression = (node, scopes) => {
-	const name = node.callee.name
-	const func = getItemFromScopes(scopes, name)
-	const args = node.args.map(arg => evaluateNode(arg, scopes))
-
-	if (func != null && func.type === 'FunctionDeclaration') {
-		return callFunction(func, args, scopes)
-	}
-	if (typeof Math[name] === 'function') {
-		return Math[name](...args)
-	}
-
-	throw new ReferenceError(`${name} is not a function`)
-}
-
-const evaluateIdentifier = (node, scopes) => {
-	const item = getItemFromScopes(scopes, node.name)
-
-	if (item == null && typeof Math[node.name] !== 'number') {
-		throw new ReferenceError(`${node.name} is undefined`)
-	}
-	return (
-		item == null
-		? Math[node.name]
-		: typeof item === 'number'
-		? item
-		: evaluateNode(item, scopes)
-	)
 }

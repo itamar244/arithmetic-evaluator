@@ -4,7 +4,7 @@ import type {
 	VariableDeclerations,
 	FunctionDeclaration,
 } from '../types'
-import evaluateNode from './eval'
+import evaluateNode from './evaluate-node'
 
 export type Scope = { [string]: ?Node }
 
@@ -24,10 +24,9 @@ export function getItemFromScopes(scopes: Scope[], name: string) {
 	return null
 }
 
-export function callFunction(
+export function getFunctionScope(
 	func: FunctionDeclaration,
 	args: number[],
-	scopes: Scope[],
 ) {
 	if (func.params.length !== args.length) {
 		throw RangeError(
@@ -41,5 +40,5 @@ export function callFunction(
 	args.forEach((arg, i) => {
 		scope[func.params[i].name] = arg
 	})
-	return evaluateNode(func.body, [scope, ...scopes])
+	return scope
 }

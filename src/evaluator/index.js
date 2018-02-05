@@ -5,7 +5,7 @@ import {
 	variableDeclarationsToObject,
 } from './utils'
 import link from './linker'
-import evaluateNode from './eval'
+import evaluateNode from './evaluate-node'
 
 export function evaluateStatement(
 	statement: Statement,
