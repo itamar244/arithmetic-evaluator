@@ -1,90 +1,73 @@
 // @flow
 import test from 'ava'
 import { parse } from '../../src'
-import {
-	varDecls,
-	eq,
-	binary,
-	unary,
-	expr,
-	num,
-	identifer,
-	item,
-	call,
-	imp,
-	nodeToJson,
-} from './nodes'
+import * as n from './nodes'
 
 const expressions = [
-	['3+3', expr(
-		binary('+', [0, 3],
-			num([0, 1], 3),
-			num([2, 3], 3),
-		),
+	['3+3', n.BinaryExpression([0, 3], '+',
+		n.NumericLiteral([0, 1], 3),
+		n.NumericLiteral([2, 3], 3),
 	)],
 
-	['x+x*x^x', expr(
-		binary('+', [0, 7],
-			identifer([0, 1], 'x'),
-			binary('*', [2, 7],
-				identifer([2, 3], 'x'),
-				binary('^', [4, 7],
-					identifer([4, 5], 'x'),
-					identifer([6, 7], 'x'),
-				),
+	['x+x*x^x', n.BinaryExpression([0, 7], '+',
+		n.Identifier([0, 1], 'x'),
+		n.BinaryExpression([2, 7], '*',
+			n.Identifier([2, 3], 'x'),
+			n.BinaryExpression([4, 7], '^',
+				n.Identifier([4, 5], 'x'),
+				n.Identifier([6, 7], 'x'),
 			),
 		),
 	)],
 
-	['max(3, PI)', expr(
-		call('max', [0, 3], [0, 10],
-			num([4, 5], 3),
-			identifer([7, 9], 'PI'),
-		),
+	['max(3, PI)', n.CallExpression('max', [0, 3], [0, 10],
+		n.NumericLiteral([4, 5], 3),
+		n.Identifier([7, 9], 'PI'),
 	)],
 
-	['| - 3 |', expr(
-		item('AbsParentheses', [0, 7],
-			'body',
-			unary('-', [2, 5], true, num([4, 5], 3)),
-		),
+	['| - 3 |', n.AbsParentheses([0, 7],
+		n.UnaryExpression([2, 5], '-', true, n.NumericLiteral([4, 5], 3)),
 	)],
 
-	['x=3', expr(
-		eq([0, 3],
-			identifer([0, 1], 'x'),
-			num([2, 3], 3),
-		),
+	['x=3', n.Equation([0, 3],
+		n.Identifier([0, 1], 'x'),
+		n.NumericLiteral([2, 3], 3),
 	)],
 
-	['x x x', expr(
-		binary('*', [0, 5],
-			identifer([0, 1], 'x'),
-			binary('*', [2, 5],
-				identifer([2, 3], 'x'),
-				identifer([4, 5], 'x'),
-			),
+	['x x x', n.BinaryExpression([0, 5], '*',
+		n.Identifier([0, 1], 'x'),
+		n.BinaryExpression([2, 5], '*',
+			n.Identifier([2, 3], 'x'),
+			n.Identifier([4, 5], 'x'),
 		),
 	)],
-
-	['let i=3 in i+i', varDecls([0, 14],
-		[['i', num([6, 7], 3)]],
-		binary('+', [11, 14],
-			identifer([11, 12], 'i'),
-			identifer([13, 14], 'i'),
-		),
-	)],
-
-	['import "index"', imp([0, 14], 'index')],
 ]
 
-test('should parse expressions fine', (t) => {
-	for (const [input, tree] of expressions) {
+const statements = [
+	['let i=3 in i+i', n.VariableDeclerations([0, 14],
+		[['i', n.NumericLiteral([6, 7], 3)]],
+		n.BinaryExpression([11, 14], '+',
+			n.Identifier([11, 12], 'i'),
+			n.Identifier([13, 14], 'i'),
+		),
+	)],
+
+	['import "index"', n.Import([0, 14], 'index')],
+]
+
+test('should parse expressions and statements fine', (t) => {
+	// wrap expressions in Expression and concat them with statements
+	// to run all parse checks
+	const toCheck = expressions
+		.map((item) => [item[0], n.Expression(item[1])])
+		.concat(statements)
+
+	for (const [input, tree] of toCheck) {
 		const program = parse(input)
 		const expression = program.body[0]
 
 		t.deepEqual(program.loc, expression.loc)
-		t.deepEqual(tree, nodeToJson(expression), `parsing ${input}`)
+		t.deepEqual(tree, expression, `parsing ${input}`)
 	}
 })
 

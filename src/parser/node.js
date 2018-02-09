@@ -8,7 +8,7 @@ import type {
 } from '../types'
 import UtilParser from './util'
 
-class Node implements NodeBase {
+export class Node implements NodeBase {
 	start: number
 	end: number
 	loc: SourceLocation

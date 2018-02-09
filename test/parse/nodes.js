@@ -1,150 +1,103 @@
 // @flow
 import * as N from '../../src/types'
-import type { SourceLocation } from '../../src/utils/location'
+import {
+	Position,
+	SourceLocation,
+} from '../../src/utils/location'
 import { has } from '../../src/utils'
+import { Node } from '../../src/parser/node'
 
 type Location = [number, number]
 
-const arrToLoc = (loc: Location) => ({
-	start: loc[0],
-	end: loc[1],
-
-	loc: (({
-		start: {
-			line: 0,
-			column: loc[0],
-		},
-		end: {
-			line: 0,
-			column: loc[1],
-		},
-	}: any): SourceLocation),
-})
-
-export const varDecls = (
+function createNode<T: N.Node>(
+	type: N.NodeType,
 	loc: Location,
-	decls: Array<[string, N.Node]>,
-	expression: N.Node,
-): N.VariableDeclerations => ({
-	...arrToLoc(loc),
-	declarations: decls.map(decl => varDecl(...decl)),
-	expression: expr(expression),
-	type: 'VariableDeclerations',
-})
+	extra: Object,
+): T {
+	const start = new Position(0, loc[0])
+	const end = new Position(0, loc[1])
+	const node: T = (Object.assign(new Node(start, loc[0]), extra): any)
 
-export const varDecl = (name: string, init: N.Node): N.VariableDeclerator => {
-	const id = item('Identifier',
-		[init.start - 1 - name.length, init.start - 1],
-		'name',
-		name,
-	)
+	node.type = (type: any)
+	node.end = loc[1]
+	node.loc.end = end
 
-	return {
-		...arrToLoc([init.start - 1 - name.length, init.end]),
-		id,
-		init,
-		type: 'VariableDeclerator',
-	}
+	return node
 }
 
-export const eq = (
-	loc: Location,
-	left: N.Node,
-	right: N.Node,
-): N.Equation => ({
-	...arrToLoc(loc),
-	left,
-	right,
-	operator: '=',
-	type: 'Equation',
-})
+const nodeCreator =
+	(type: N.NodeType, propNames: string[]) =>
+		(loc: Location, ...props: mixed[]) => {
+			const extra = {}
+			for (let i = 0; i < propNames.length; i += 1) {
+				extra[propNames[i]] = props[i]
+			}
+			return createNode(type, loc, extra)
+		}
 
-export const binary = (
-	operator: N.BinaryOperator,
-	loc: Location,
-	left: N.Node,
-	right: N.Node,
-): N.BinaryExpression => ({
-	...arrToLoc(loc),
-	operator,
-	left,
-	right,
-	type: 'BinaryExpression',
-})
+export const Import = nodeCreator('Import', ['path'])
+export const BinaryExpression = nodeCreator(
+	'BinaryExpression',
+	['operator', 'left', 'right'],
+)
+export const UnaryExpression = nodeCreator(
+	'UnaryExpression',
+	['operator', 'prefix', 'argument'],
+)
+export const Identifier = nodeCreator('Identifier', ['name'])
+export const NumericLiteral = nodeCreator('NumericLiteral', ['value'])
+export const AbsParentheses = nodeCreator('AbsParentheses', ['body'])
 
-export const unary = (
-	operator: string,
-	loc: Location,
-	prefix: bool,
-	argument: N.Node,
-) => ({
-	...arrToLoc(loc),
-	operator,
-	prefix,
-	argument,
-	type: 'UnaryExpression',
-})
-
-export const item = (
-	type: string,
-	loc: Location,
-	key: string,
-	value: mixed,
-): N.AnyNode => ({
-	...arrToLoc(loc),
-	type,
-	[key]: value,
-})
-
-export const expr = (body: N.AnyNode): N.Expression => ({
-	body,
-	start: body.start,
-	end: body.end,
-	loc: body.loc,
-	type: 'Expression',
-})
-
-export const num = (loc: Location, value: number): N.NumericLiteral => (
-	item('NumericLiteral', loc, 'value', value)
+export const Expression = (body: N.AnyNode): N.Expression => createNode(
+	'Expression',
+	[body.start, body.end],
+	{ body },
 )
 
-export const identifer = (loc: Location, name: string): N.Identifier => (
-	item('Identifier', loc, 'name', name)
-)
-
-export const call = (
+export const CallExpression = (
 	name: string,
 	calleLoc: Location,
 	loc: Location,
 	...args: N.Node[]
-) => ({
-	...arrToLoc(loc),
-	args,
-	callee: item('Identifier', calleLoc, 'name', name),
-	type: 'CallExpression',
-})
-
-export const imp = (loc: Location, path: string) => (
-	item('Import', loc, 'path', path)
+) => createNode(
+	'CallExpression',
+	loc,
+	{ args, callee: Identifier(calleLoc, name) },
 )
 
-export const nodeToJson = (obj: mixed) => {
-	if (!(obj instanceof Object)) return obj
-	const next = {}
+export const VariableDeclerations = (
+	loc: Location,
+	decls: Array<[string, N.Node]>,
+	expression: N.Node,
+): N.VariableDeclerations => createNode(
+	'VariableDeclerations',
+	loc,
+	{
+		declarations: decls.map(decl => VariableDeclerator(...decl)),
+		expression: Expression(expression),
+	}
+)
 
-	for (const key in obj) {
-		if (has(obj, key)) {
-			if (obj[key] instanceof Object) {
-				if (Array.isArray(obj[key])) {
-					next[key] = obj[key].map(nodeToJson)
-				} else {
-					next[key] = nodeToJson(obj[key])
-				}
-			} else {
-				next[key] = obj[key]
-			}
-		}
+export const VariableDeclerator =
+	(name: string, init: N.Node): N.VariableDeclerator => {
+		const id = Identifier(
+			[init.start - 1 - name.length, init.start - 1],
+			name,
+		)
+
+		return createNode(
+			'VariableDeclerator',
+			[init.start - 1 - name.length, init.end],
+			{ id, init },
+		)
 	}
 
-	return next
-}
+export const Equation = (
+	loc: Location,
+	left: N.Node,
+	right: N.Node,
+): N.Equation => createNode(
+	'Equation',
+	loc,
+	{ left, right, operator: '=' }
+)
