@@ -7,8 +7,8 @@ import {
 	type Scope,
 } from './utils'
 import {
-	evaluateBinary,
-	evaluateUnary,
+	binaryOperator,
+	unaryOperator,
 } from './operators'
 
 function evaluateCallExpression(node, scopes) {
@@ -46,18 +46,21 @@ function evaluateIdentifier(node, scopes) {
 	)
 }
 
-export default function evaluateNode(node: Node, scopes: Scope[]) {
+export default function evaluateNode(
+	node: Node,
+	scopes: Scope[],
+): number {
 	switch (node.type) {
 		case 'NumericLiteral':
 			return node.value
 		case 'BinaryExpression':
-			return evaluateBinary(
+			return binaryOperator(
 				node.operator,
 				evaluateNode(node.left, scopes),
 				evaluateNode(node.right, scopes),
 			)
 		case 'UnaryExpression':
-			return evaluateUnary(
+			return unaryOperator(
 				node.operator,
 				evaluateNode(node.argument, scopes),
 			)

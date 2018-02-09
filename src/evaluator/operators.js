@@ -2,7 +2,7 @@
 import type { UnaryOperator, BinaryOperator } from '../types'
 import { fact } from './functions'
 
-export function evaluateBinary(
+export function binaryOperator(
 	operator: BinaryOperator,
 	left: number,
 	right: number,
@@ -14,15 +14,20 @@ export function evaluateBinary(
 		case '/': return left / right
 		case '^': return left ** right
 		case '%': return left % right
-		default: return 0
+		default:
+			throw TypeError(`${operator} isn't supported as a binary operator`)
 	}
 }
 
-export function evaluateUnary(operator: UnaryOperator, argument: number) {
+export function unaryOperator(
+	operator: UnaryOperator,
+	argument: number,
+) {
 	switch (operator) {
 		case '+': return +argument
 		case '-': return -argument
 		case '!': return fact(argument)
-		default: return 0
+		default:
+			throw TypeError(`${operator} isn't supported as an unary operator`)
 	}
 }
