@@ -6,7 +6,11 @@ flow-typed
 
 [libs]
 
+[lints]
+all=error
+unclear-type=off
+
 [options]
 suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore
 suppress_comment= \\(.\\|\n\\)*\\$FlowFixMe
-experimental.strict_call_arity=true
+module.use_strict=true
