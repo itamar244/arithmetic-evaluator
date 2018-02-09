@@ -1,7 +1,7 @@
 // @flow
 export class Position {
-	line: number
-	column: number
+	+line: number
+	+column: number
 
 	constructor(line: number, column: number) {
 		this.line = line
@@ -10,7 +10,7 @@ export class Position {
 }
 
 export class SourceLocation {
-	start: Position;
+	+start: Position;
 	end: Position;
 
 	constructor(start: Position, end?: Position) {
