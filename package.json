@@ -7,6 +7,7 @@
     "start": "babel-node cli/index",
     "test": "ava --verbose",
     "coverage": "nyc ava",
+		"report": "nyc report --reporter=html",
     "build": "babel src --out-dir=\"dist/src\" && babel cli --out-dir \"dist/cli\""
   },
   "author": "Itamar Yatom",
@@ -28,7 +29,7 @@
     "nyc": "^11.2.1"
   },
   "ava": {
-    "files": "test/**/*.test.js",
+    "files": ["test/**/*.test.js", "src/**/*.test.js"],
     "require": [
       "babel-register"
     ],
