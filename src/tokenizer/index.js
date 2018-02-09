@@ -1,9 +1,13 @@
 // @flow
 import { has } from '../utils'
-import { types as tt, keywords, type TokenType } from './types'
+import {
+	types as tt,
+	keywords,
+	type TokenType,
+} from './types'
 import State from './state'
 
-const isNumber = (code: number) => code >= 48 && code <= 57
+const isNumber = (code: number) => (code >= 48 && code <= 57)
 const isLetter = (code: number) => (
 	code >= 65 && code <= 90
 	|| code >= 97 && code <= 122
@@ -13,7 +17,7 @@ export default class Tokenizer {
 	// forward declarations:
 	// parser/util.js
 	+unexpected: (void | string) => void
-	state: State
+	+state: State
 
 	constructor(input: string) {
 		this.state = new State(input)
@@ -40,7 +44,7 @@ export default class Tokenizer {
 		return false
 	}
 
-	nextToken(): void {
+	nextToken() {
 		this.skipSpace()
 		const { state } = this
 		const code = state.input.charCodeAt(state.pos)
@@ -93,7 +97,7 @@ export default class Tokenizer {
 				return this.readString(code)
 			default:
 				this.finishWithValue(tt.error)
-				return this.unexpected()
+				throw this.unexpected()
 		}
 	}
 

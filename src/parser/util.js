@@ -7,7 +7,10 @@ import Tokenizer from '../tokenizer'
 export default class UtilParser extends Tokenizer {
 	options: Options
 
-	unexpected(_error?: string, showValue: bool = true) {
+	unexpected(
+		error: string = 'unexpected token',
+		showValue: bool = true,
+	) {
 		const { filename } = this.options
 		const {
 			startLoc,
@@ -17,7 +20,6 @@ export default class UtilParser extends Tokenizer {
 		const position = `${startLoc.line}:${startLoc.column}`
 		const prefix = showValue ? `'${value || type.label}'` : ''
 		const padding = showValue ? ' ' : ''
-		const error =	_error || 'unexpected token'
 
 		throw new SyntaxError(`at ${filename}, ${position} - ${prefix}${padding}${error}`)
 	}

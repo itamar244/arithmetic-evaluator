@@ -11,7 +11,7 @@ export const defaultOptions: Options = {
 
 export function getOptions(partial: ?$Shape<Options>): Options {
 	if (partial == null) return defaultOptions
-	const options: any = {}
+	const options: Object = {}
 
 	for (const key in defaultOptions) {
 		if (has(defaultOptions, key)) {

@@ -20,11 +20,10 @@ import {
 
 export {
 	evaluate,
-	Parser,
 	evaluateStatement,
 }
 
-export function parse(input: string, options?: Options) {
+export function parse(input: string, options?: $Shape<Options>) {
 	return new Parser(input, getOptions(options)).parse()
 }
 

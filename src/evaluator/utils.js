@@ -26,7 +26,7 @@ export function getItemFromScopes(scopes: Scope[], name: string) {
 export function getFunctionScope(
 	func: FunctionDeclaration,
 	args: number[],
-) {
+): Scope {
 	if (func.params.length !== args.length) {
 		throw RangeError(
 			`wrong number of arguments: '${func.id.name}'`

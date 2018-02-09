@@ -22,7 +22,7 @@ export default class State {
 
 	prevSpacePadding: number
 	value: any
-	input: string
+	+input: string
 
 	constructor(input: string) {
 		const pos = new Position(0, 0)

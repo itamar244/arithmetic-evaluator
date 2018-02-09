@@ -19,7 +19,7 @@ export class TokenType {
 
 	constructor(label: string, options: TokenTypeOptions = {}) {
 		this.label = label
-		this.binop = options.binop || null
+		this.binop = options.binop != null ? options.binop : null
 		this.prefix = !!options.prefix
 		this.postfix = !!options.postfix
 		this.afterOp = !!options.afterOp
@@ -43,10 +43,11 @@ export const keywords = {
 export const types = {
 	...keywords,
 	num: new TokenType('num', { afterOp }),
-	error: new TokenType('error'),
 	string: new TokenType('string'),
 	name: new TokenType('name', { afterOp }),
 	eof: new TokenType('eof'),
+	// used when the tokenizer finds an error
+	error: new TokenType('error'),
 
 	bang: new TokenType('!', { postfix }),
 	crotchet: new TokenType('|'),
