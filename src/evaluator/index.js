@@ -1,5 +1,5 @@
 // @flow
-import type { Program, Statement } from '../types'
+import type { Program, Statement } from '../nodes'
 import {
 	type Scope,
 	variableDeclarationsToObject,

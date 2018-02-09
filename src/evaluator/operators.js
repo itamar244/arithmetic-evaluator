@@ -1,5 +1,5 @@
 // @flow
-import type { UnaryOperator, BinaryOperator } from '../types'
+import type { UnaryOperator, BinaryOperator } from '../nodes'
 import { fact } from './functions'
 
 export function binaryOperator(

@@ -1,5 +1,5 @@
 // @flow
-import { type Options } from '../options'
+import type { Options } from '../options'
 import StatementParser from './statement'
 
 export default class Parser extends StatementParser {
@@ -9,7 +9,7 @@ export default class Parser extends StatementParser {
 	}
 
 	parse() {
-		return this.parseTopLevel(this.startNode())
+		return this.parseTopLevel()
 	}
 
 	getStatement() {

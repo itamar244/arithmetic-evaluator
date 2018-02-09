@@ -2,7 +2,7 @@
 import { readFileSync } from 'fs'
 import { resolve, dirname } from 'path'
 
-import type { Program, Statement } from '../types'
+import type { Program, Statement } from '../nodes'
 import { parse } from '../index'
 
 export default function link(

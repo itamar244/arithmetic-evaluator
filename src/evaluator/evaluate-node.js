@@ -1,5 +1,5 @@
 // @flow
-import type { Node } from '../types'
+import * as n from '../nodes'
 import * as customFunctions from './functions'
 import {
 	getFunctionScope,
@@ -11,7 +11,7 @@ import {
 	unaryOperator,
 } from './operators'
 
-function evaluateCallExpression(node, scopes) {
+function evaluateCallExpression(node: n.CallExpression, scopes: Scope[]) {
 	const name = node.callee.name
 	const func = getItemFromScopes(scopes, name)
 	const args = node.args.map(arg => evaluateNode(arg, scopes))
@@ -31,7 +31,7 @@ function evaluateCallExpression(node, scopes) {
 	throw new ReferenceError(`${name} is not a function`)
 }
 
-function evaluateIdentifier(node, scopes) {
+function evaluateIdentifier(node: n.Identifier, scopes: Scope[]) {
 	const item = getItemFromScopes(scopes, node.name)
 
 	if (item == null && typeof Math[node.name] !== 'number') {
@@ -47,7 +47,7 @@ function evaluateIdentifier(node, scopes) {
 }
 
 export default function evaluateNode(
-	node: Node,
+	node: n.Node,
 	scopes: Scope[],
 ): number {
 	switch (node.type) {
@@ -65,11 +65,11 @@ export default function evaluateNode(
 				evaluateNode(node.argument, scopes),
 			)
 		case 'Expression':
-			return evaluateNode(node.body, scopes)
+			return node.isAbs
+				? Math.abs(evaluateNode(node.body, scopes))
+				: evaluateNode(node.body, scopes)
 		case 'CallExpression':
 			return evaluateCallExpression(node, scopes)
-		case 'AbsParentheses':
-			return Math.abs(evaluateNode(node.body, scopes))
 		case 'Identifier':
 			return evaluateIdentifier(node, scopes)
 		default:

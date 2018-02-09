@@ -1,94 +1,98 @@
 // @flow
-import * as N from '../types'
 import { types as tt } from '../tokenizer/types'
+import * as n from '../nodes'
 import ExpressionParser from './expression'
 
 export default class StatementParser extends ExpressionParser {
-	parseTopLevel(program: N.Program): N.Program {
+	parseTopLevel(): n.Program {
 		this.nextToken()
 
-		program.filename = this.options.filename
-		program.body = []
+		const filename = this.options.filename
+		const body = []
 		while (!this.match(tt.eof)) {
-			program.body.push(this.parseStatement())
+			body.push(this.parseStatement())
 			this.semicolon()
 		}
-		return this.finishNode(program, 'Program')
+		return new n.Program(body, filename)
 	}
 
 	parseStatement() {
-		const node = this.startNode()
-
 		switch (this.state.type) {
 			case tt.import:
-				return this.parseImport(node)
+				return this.parseImport()
 			case tt.let:
-				return this.parseVariableDeclarations(node)
+				return this.parseVariableDeclarations()
 			case tt.func:
-				return this.parseFunction(node)
+				return this.parseFunction()
 			default:
-				return this.parseExpressionStatement(node)
+				return this.parseExpressionStatement()
 		}
 	}
 
-	parseImport(node: N.Import): N.Import {
+	parseImport(): n.Import {
 		this.next()
 		if (!this.match(tt.string)) this.unexpected('expected a string after import', false)
-		node.path = this.state.value
+		const path = this.state.value
 		this.next()
 
-		return this.finishNode(node, 'Import')
+		return new n.Import(path)
 	}
 
-	parseExpressionStatement(node: N.Expression) {
-		node.body = this.parseExpressionBody(true)
-		return this.finishNode(node, 'Expression')
+	parseExpressionStatement() {
+		return new n.Expression(this.parseExpressionBody(true))
 	}
 
-	parseVariableDeclarations(node: N.VariableDeclerations) {
-		node.declarations = []
+	parseVariableDeclarations() {
+		const declarations = []
 
 		let end = false
 		this.next()
 		while (!end) {
-			node.declarations.push(this.parseVarDeclarator())
+			declarations.push(this.parseVarDeclarator())
 			if (this.eat(tt.in)) {
 				end = true
 			} else {
 				this.expect(tt.comma)
 			}
 		}
-		node.expression = this.parseExpressionStatement(this.startNode())
-		return this.finishNode(node, 'VariableDeclerations')
+		return new n.VariableDeclerations(
+			declarations,
+			this.parseExpressionStatement(),
+		)
 	}
 
-	parseVarDeclarator(): N.VariableDeclerator {
+	parseVarDeclarator(): n.VariableDeclerator {
 		if (!this.match(tt.name)) this.unexpected()
-		const node: N.VariableDeclerator = this.startNode()
-		node.id = this.parseIdentifier(this.startNode())
+		const id = this.parseIdentifier()
 		this.expect(tt.eq)
-		node.init = this.parseExpressionBody(false)
-		return this.finishNode(node, 'VariableDeclerator')
+
+		return new n.VariableDeclerator(
+			id,
+			this.parseExpressionBody(false),
+		)
 	}
 
-	parseFunction(node: N.FunctionDeclaration) {
-		node.params = []
+	parseFunction(): n.FunctionDeclaration {
+		const params = []
 
 		this.next()
 		if (!this.match(tt.name)) this.unexpected('need a name for func declaration')
-		node.id = this.parseIdentifier(this.startNode())
+		const id = this.parseIdentifier()
 
 		this.expect(tt.parenL)
 		while (!this.eat(tt.parenR)) {
 			if (!this.match(tt.name)) this.unexpected()
-			node.params.push(this.parseIdentifier(this.startNode()))
+			params.push(this.parseIdentifier())
 			if (!this.match(tt.parenR)) {
 				this.expect(tt.comma)
 			}
 		}
 
-		node.body = this.parseExpressionBody(false)
 
-		return this.finishNode(node, 'FunctionDeclaration')
+		return new n.FunctionDeclaration(
+			id,
+			params,
+			this.parseExpressionBody(false),
+		)
 	}
 }

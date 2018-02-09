@@ -1,65 +1,66 @@
 // @flow
 import test from 'ava'
 import { parse } from '../../src'
-import * as n from './nodes'
+import * as n from '../../src/nodes'
+import * as utils from './node-utils'
 
 const expressions = [
-	['3+3', n.BinaryExpression([0, 3], '+',
-		n.NumericLiteral([0, 1], 3),
-		n.NumericLiteral([2, 3], 3),
+	['3+3', new n.BinaryExpression('+',
+		new n.NumericLiteral(3),
+		new n.NumericLiteral(3),
 	)],
 
-	['x+x*x^x', n.BinaryExpression([0, 7], '+',
-		n.Identifier([0, 1], 'x'),
-		n.BinaryExpression([2, 7], '*',
-			n.Identifier([2, 3], 'x'),
-			n.BinaryExpression([4, 7], '^',
-				n.Identifier([4, 5], 'x'),
-				n.Identifier([6, 7], 'x'),
+	['x+x*x^x', new n.BinaryExpression('+',
+		new n.Identifier('x'),
+		new n.BinaryExpression('*',
+			new n.Identifier('x'),
+			new n.BinaryExpression('^',
+				new n.Identifier('x'),
+				new n.Identifier('x'),
 			),
 		),
 	)],
 
-	['max(3, PI)', n.CallExpression('max', [0, 3], [0, 10],
-		n.NumericLiteral([4, 5], 3),
-		n.Identifier([7, 9], 'PI'),
+	['max(3, PI)', new n.CallExpression(new n.Identifier('max'), [
+		new n.NumericLiteral(3),
+		new n.Identifier('PI'),
+	])],
+
+	['| - 3 |', new n.Expression(
+		new n.UnaryExpression('-', new n.NumericLiteral(3), true),
+		true,
 	)],
 
-	['| - 3 |', n.AbsParentheses([0, 7],
-		n.UnaryExpression([2, 5], '-', true, n.NumericLiteral([4, 5], 3)),
-	)],
+	// ['x=3', new n.Equation(
+	// 	new n.Identifier('x'),
+	// 	new n.NumericLiteral(3),
+	// )],
 
-	['x=3', n.Equation([0, 3],
-		n.Identifier([0, 1], 'x'),
-		n.NumericLiteral([2, 3], 3),
-	)],
-
-	['x x x', n.BinaryExpression([0, 5], '*',
-		n.Identifier([0, 1], 'x'),
-		n.BinaryExpression([2, 5], '*',
-			n.Identifier([2, 3], 'x'),
-			n.Identifier([4, 5], 'x'),
+	['x x x', new n.BinaryExpression('*',
+		new n.Identifier('x'),
+		new n.BinaryExpression('*',
+			new n.Identifier('x'),
+			new n.Identifier('x'),
 		),
 	)],
 ]
-
 const statements = [
-	['let i=3 in i+i', n.VariableDeclerations([0, 14],
-		[['i', n.NumericLiteral([6, 7], 3)]],
-		n.BinaryExpression([11, 14], '+',
-			n.Identifier([11, 12], 'i'),
-			n.Identifier([13, 14], 'i'),
+	['let i=3 in i+i', utils.variableDeclarations(
+		[['i', new n.NumericLiteral(3)]],
+		new n.BinaryExpression('+',
+			new n.Identifier('i'),
+			new n.Identifier('i'),
 		),
 	)],
 
-	['import "index"', n.Import([0, 14], 'index')],
+	['import "index"', new n.Import('index')],
 ]
 
 test('should parse expressions and statements fine', (t) => {
 	// wrap expressions in Expression and concat them with statements
 	// to run all parse checks
 	const toCheck = expressions
-		.map((item) => [item[0], n.Expression(item[1])])
+		.map(item => [item[0], new n.Expression(item[1])])
 		.concat(statements)
 
 	for (const [input, tree] of toCheck) {

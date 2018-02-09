@@ -3,7 +3,7 @@ import type {
 	Node,
 	VariableDeclerations,
 	FunctionDeclaration,
-} from '../types'
+} from '../nodes'
 
 export type Scope = { [string]: ?Node }
 
