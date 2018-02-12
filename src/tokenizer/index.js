@@ -55,7 +55,7 @@ export default class Tokenizer {
 			this.finishToken(tt.eof)
 		} else if (isNumber(code) || code === 46 /* . */) {
 			this.readNumber()
-		} else if (isLetter(code)) {
+		} else if (isLetter(code) || code === 95 /* _ */) {
 			this.readIdentifier()
 		} else {
 			this.getTokenFromCode(code)
@@ -124,11 +124,20 @@ export default class Tokenizer {
 		this.finishWithValue(tt.num)
 	}
 
+	/* reads identifier in current position from input
+	 * rules are letters and underscore are allowed,
+	 * also numbers are allowed but not at first character.
+	 * some checks if first character isn't number should be done
+	 * but they are done in already in `nextToken`
+	 */
 	readIdentifier() {
 		const { state } = this
-		while (isLetter(state.input.charCodeAt(state.pos))) {
+		let code
+
+		do {
 			state.pos += 1
-		}
+			code = state.input.charCodeAt(state.pos)
+		} while (isLetter(code) || code === 95 /* _ */ || isNumber(code))
 
 		const word = state.input.slice(state.start, state.pos)
 		if (has(keywords, word)) {
