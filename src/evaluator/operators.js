@@ -1,19 +1,26 @@
 // @flow
-import type { UnaryOperator, BinaryOperator } from '../types'
+import type {
+	UnaryOperator,
+	BinaryOperator,
+} from '../types'
 import { fact } from './functions'
+import {
+	EvalNumber,
+	type EvalValue,
+} from './values'
 
 export function binaryOperator(
 	operator: BinaryOperator,
-	left: number,
-	right: number,
+	lhs: EvalValue,
+	rhs: EvalValue,
 ) {
 	switch (operator) {
-		case '+': return left + right
-		case '-': return left - right
-		case '*': return left * right
-		case '/': return left / right
-		case '^': return left ** right
-		case '%': return left % right
+		case '+': return lhs.add(rhs)
+		case '-': return lhs.substract(rhs)
+		case '*': return lhs.multiply(rhs)
+		case '/': return lhs.divide(rhs)
+		case '^': return lhs.pow(rhs)
+		case '%': return lhs.modulo(rhs)
 		default:
 			throw TypeError(`${operator} isn't supported as a binary operator`)
 	}
@@ -21,13 +28,25 @@ export function binaryOperator(
 
 export function unaryOperator(
 	operator: UnaryOperator,
-	argument: number,
+	argument: EvalValue,
 ) {
-	switch (operator) {
-		case '+': return +argument
-		case '-': return -argument
-		case '!': return fact(argument)
+	switch (argument.type) {
+		case 'Number':
+			switch (operator) {
+				case '+': return argument
+				case '-': return new EvalNumber(-argument.value)
+				case '!': return new EvalNumber(fact(argument.value))
+				default:
+					throw TypeError(`${operator} isn't supported as an unary operator for number`)
+			}
+		case 'Vector':
+			switch (operator) {
+				case '+': return argument
+				case '-': return argument.negate()
+				default:
+					throw TypeError(`${operator} isn't supported as an unary operator for vector`)
+			}
 		default:
-			throw TypeError(`${operator} isn't supported as an unary operator`)
+			throw TypeError(`${argument.type} isn't support EvalValue type`)
 	}
 }

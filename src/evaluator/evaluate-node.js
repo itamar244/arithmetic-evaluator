@@ -4,15 +4,31 @@ import * as customFunctions from './functions'
 import {
 	getFunctionScope,
 	getItemFromScopes,
+	validateArgs,
 	type Scope,
 } from './utils'
 import {
 	binaryOperator,
 	unaryOperator,
 } from './operators'
+import {
+	EvalVector,
+	EvalNumber,
+	type EvalValue,
+} from './values'
+
+function evaluateVector(vector, scopes) {
+	const x = evaluateNode(vector.x, scopes)
+	const y = evaluateNode(vector.y, scopes)
+
+	if (x.type !== 'Number' || y.type !== 'Number') {
+		throw Error("vector's coordinates must be numbers")
+	}
+	return new EvalVector(x, y)
+}
 
 function evaluateCallExpression(node, scopes) {
-	const name = node.callee.name
+	const { name } = node.callee
 	const func = getItemFromScopes(scopes, name)
 	const args = node.args.map(arg => evaluateNode(arg, scopes))
 
@@ -23,9 +39,12 @@ function evaluateCallExpression(node, scopes) {
 		)
 	}
 
-	const builtin = Math[name] || customFunctions[name]
+	const builtin = customFunctions[name]
 	if (typeof builtin === 'function') {
-		return builtin(...args)
+		validateArgs(name, builtin.length, args.length, true)
+		return new EvalNumber(builtin(...args))
+	} else if (typeof Math[name] === 'function') {
+		return new EvalNumber(Math[name](...args))
 	}
 
 	throw new ReferenceError(`${name} is not a function`)
@@ -39,7 +58,7 @@ function evaluateIdentifier(node, scopes) {
 	}
 	return (
 		item == null
-		? Math[node.name]
+		? new EvalNumber(Math[node.name])
 		: typeof item === 'number'
 		? item
 		: evaluateNode(item, scopes)
@@ -49,10 +68,12 @@ function evaluateIdentifier(node, scopes) {
 export default function evaluateNode(
 	node: Node,
 	scopes: Scope[],
-): number {
+): EvalValue {
 	switch (node.type) {
 		case 'NumericLiteral':
-			return node.value
+			return new EvalNumber(node.value)
+		case 'VectorExpression':
+			return evaluateVector(node, scopes)
 		case 'BinaryExpression':
 			return binaryOperator(
 				node.operator,
@@ -68,13 +89,13 @@ export default function evaluateNode(
 			return evaluateNode(node.body, scopes)
 		case 'Parenthesized': {
 			const value = evaluateNode(node.body, scopes)
-			return node.abs ? Math.abs(value) : value
+			return node.abs ? value.abs() : value
 		}
 		case 'CallExpression':
 			return evaluateCallExpression(node, scopes)
 		case 'Identifier':
 			return evaluateIdentifier(node, scopes)
 		default:
-			return NaN
+			return new EvalNumber(NaN)
 	}
 }

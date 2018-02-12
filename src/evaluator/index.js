@@ -5,6 +5,10 @@ import {
 	variableDeclarationsToObject,
 } from './utils'
 import link from './linker'
+import {
+	EvalNull,
+	type EvalValue,
+} from './values'
 import evaluateNode from './evaluate-node'
 
 export function evaluateStatement(
@@ -16,7 +20,7 @@ export function evaluateStatement(
 			throw new Error(`function ${statement.id.name} is already defined`)
 		}
 		scope[statement.id.name] = statement
-		return null
+		return new EvalNull()
 	}
 
 	if (statement.type === 'VariableDeclerations') {
@@ -32,8 +36,8 @@ export function evaluateStatement(
 export function evaluate(
 	program: Program,
 	scope: Scope = {},
-): null | number {
-	let value = null
+): EvalValue {
+	let value = new EvalNull()
 
 	for (const statement of link(program)) {
 		value = evaluateStatement(statement, scope)

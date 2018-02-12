@@ -45,9 +45,9 @@ export async function runRepl(options: Object) {
 			try {
 				const result = repl(line)
 
-				log(result)
+				log(result.toString())
 				if (options.benchmark) {
-					debugInput(line, typeof result === 'number')
+					debugInput(line, result.type !== 'Null')
 				}
 			} catch (e) {
 				log(e, true)

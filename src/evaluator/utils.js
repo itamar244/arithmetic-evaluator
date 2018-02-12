@@ -4,6 +4,7 @@ import type {
 	VariableDeclerations,
 	FunctionDeclaration,
 } from '../types'
+import type { EvalValue } from './values'
 
 export type Scope = { [string]: ?Node }
 
@@ -23,17 +24,26 @@ export function getItemFromScopes(scopes: Scope[], name: string) {
 	return null
 }
 
-export function getFunctionScope(
-	func: FunctionDeclaration,
-	args: number[],
-): Scope {
-	if (func.params.length !== args.length) {
+export function validateArgs(
+	name: string,
+	funcParams: number,
+	providedArgs: number,
+	allowInfinite: bool,
+) {
+	if (funcParams !== providedArgs && (!allowInfinite || funcParams > 0)) {
 		throw RangeError(
-			`wrong number of arguments: '${func.id.name}'`
-			+ ` needed ${func.params.length}`
-			+ `, intead of ${args.length}`,
+			`wrong number of arguments: '${name}'`
+			+ ` needed ${funcParams}`
+			+ `, intead of ${providedArgs}`,
 		)
 	}
+}
+
+export function getFunctionScope(
+	func: FunctionDeclaration,
+	args: EvalValue[],
+): Scope {
+	validateArgs(func.id.name, func.params.length, args.length, false)
 
 	const scope = {}
 	args.forEach((arg, i) => {
