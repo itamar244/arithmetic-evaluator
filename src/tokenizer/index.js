@@ -107,10 +107,9 @@ export default class Tokenizer {
 
 	readNumber() {
 		const { state } = this
-		let toBreak = false
 		let hasDot = false
 
-		while (!toBreak) {
+		for (;;) {
 			const code = state.input.charCodeAt(state.pos)
 			if (isNumber(code)) {
 				this.state.pos += 1
@@ -118,7 +117,7 @@ export default class Tokenizer {
 				this.state.pos += 1
 				hasDot = true
 			} else {
-				toBreak = true
+				break
 			}
 		}
 
