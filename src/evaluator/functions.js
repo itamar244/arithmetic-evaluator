@@ -1,4 +1,7 @@
 /**
+ * Copyright 2017-present, Itamar Yatom.
+ * All rights reserved.
+ *
  * Useful mathemtical functions that aren't defined in Math object.
  * They are being used as builtin functions alongside Math's functions.
  *
@@ -25,4 +28,19 @@ export function fib(n: number) {
 	}
 
 	return cur
+}
+
+// normalized trigonometrical functions
+export function cos(angle: number) {
+	if (Math.abs(angle) === Math.PI / 2) {
+		return 0
+	}
+	return Math.cos(angle)
+}
+
+export function tan(angle: number) {
+	if (angle === Math.PI / 2) return Infinity
+	if (angle === Math.PI) return 0
+	if (angle === Math.PI * 1.5) return -Infinity
+	return Math.tan(angle)
 }
