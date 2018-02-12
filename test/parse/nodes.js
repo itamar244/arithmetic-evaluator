@@ -1,10 +1,6 @@
 // @flow
 import * as N from '../../src/types'
-import {
-	Position,
-	SourceLocation,
-} from '../../src/utils/location'
-import { has } from '../../src/utils'
+import { Position } from '../../src/utils/location'
 import { Node } from '../../src/parser/node'
 
 type Location = [number, number]
@@ -46,7 +42,7 @@ export const UnaryExpression = nodeCreator(
 )
 export const Identifier = nodeCreator('Identifier', ['name'])
 export const NumericLiteral = nodeCreator('NumericLiteral', ['value'])
-export const AbsParentheses = nodeCreator('AbsParentheses', ['body'])
+export const Parenthesized = nodeCreator('Parenthesized', ['abs', 'body'])
 
 export const Expression = (body: N.AnyNode): N.Expression => createNode(
 	'Expression',
@@ -75,7 +71,7 @@ export const VariableDeclerations = (
 	{
 		declarations: decls.map(decl => VariableDeclerator(...decl)),
 		expression: Expression(expression),
-	}
+	},
 )
 
 export const VariableDeclerator =
@@ -99,5 +95,5 @@ export const Equation = (
 ): N.Equation => createNode(
 	'Equation',
 	loc,
-	{ left, right, operator: '=' }
+	{ left, right, operator: '=' },
 )

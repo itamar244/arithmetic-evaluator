@@ -38,6 +38,8 @@ export default class ExpressionParser extends NodeUtils {
 				return this.parseNumeric(node)
 			case tt.parenL:
 				return this.parseParenthesized(node, tt.parenR)
+			case tt.bracketL:
+				return this.parseVector(node)
 			case tt.crotchet:
 				return this.parseParenthesized(node, tt.crotchet)
 			case tt.name:
@@ -48,16 +50,16 @@ export default class ExpressionParser extends NodeUtils {
 	}
 
 	parseParenthesized(
-		node: N.Expression,
+		node: N.Parenthesized,
 		end: TokenType,
-	): N.Expression {
+	): N.Parenthesized {
 		this.next()
 		node.body = this.parseExpressionBody(false)
+		node.abs = end === tt.crotchet
+
 		this.expect(end)
-		return this.finishNode(
-			node,
-			end === tt.crotchet ? 'AbsParentheses' : 'Expression',
-		)
+
+		return this.finishNode(node, 'Parenthesized')
 	}
 
 	parseNumeric(node: N.NumericLiteral): N.NumericLiteral {
@@ -120,17 +122,23 @@ export default class ExpressionParser extends NodeUtils {
 	parseCallExpression(callee: N.Identifier): N.CallExpression {
 		const node: N.CallExpression = this.startNodeAtNode(callee)
 		node.callee = callee
-		node.args = []
+		node.args = this.parseArgsList(tt.parenR)
+
+		return this.finishNode(node, 'CallExpression')
+	}
+
+	parseArgsList(end: TokenType): N.Node[] {
+		const args = []
 
 		this.next()
-		while (!this.eat(tt.parenR)) {
-			node.args.push(this.parseExpressionBody(false))
-			if (!this.eat(tt.comma) && !this.match(tt.parenR)) {
+		while (!this.eat(end)) {
+			args.push(this.parseExpressionBody(false))
+			if (!this.eat(tt.comma) && !this.match(end)) {
 				this.unexpected()
 			}
 		}
 
-		return this.finishNode(node, 'CallExpression')
+		return args
 	}
 
 	parseMaybeCallExpression(node: N.Identifier): N.Identifier | N.CallExpression {
@@ -147,5 +155,18 @@ export default class ExpressionParser extends NodeUtils {
 		node.name = this.state.value
 		this.next()
 		return this.finishNode(node, 'Identifier')
+	}
+
+	parseVector(node: N.VectorExpression): N.VectorExpression {
+		const coordinates = this.parseArgsList(tt.bracketR)
+
+		if (coordinates.length !== 2) {
+			this.unexpected('vector should have two dimensions', false)
+		}
+
+		node.x = coordinates[0]
+		node.y = coordinates[1]
+
+		return this.finishNode(node, 'VectorExpression')
 	}
 }

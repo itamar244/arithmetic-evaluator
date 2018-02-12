@@ -54,6 +54,8 @@ export const types = {
 	comma: new TokenType(','),
 	parenL: new TokenType('(', { afterOp }),
 	parenR: new TokenType(')'),
+	bracketL: new TokenType('{'),
+	bracketR: new TokenType('}'),
 	semi: new TokenType(';'),
 
 	eq: new BinopTokenType('=', 1),

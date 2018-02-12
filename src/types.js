@@ -20,8 +20,9 @@ export type Node =
 	| Equation
 	| NumericLiteral
 	| Identifier
-	| AbsParentheses
+	| Parenthesized
 	| CallExpression
+	| VectorExpression
 
 export type Statement =
 	| Expression
@@ -41,8 +42,9 @@ export type NodeType =
 	| 'Equation'
 	| 'NumericLiteral'
 	| 'Identifier'
-	| 'AbsParentheses'
+	| 'Parenthesized'
 	| 'CallExpression'
+	| 'VectorExpression'
 
 export interface Program extends NodeBase {
 	type: 'Program';
@@ -123,13 +125,20 @@ export interface Identifier extends NodeBase {
 	name: string;
 }
 
-export interface AbsParentheses extends NodeBase {
-	type: 'AbsParentheses';
+export interface Parenthesized extends NodeBase {
+	type: 'Parenthesized';
 	body: Node;
+	abs: bool;
 }
 
 export interface CallExpression extends NodeBase {
 	type: 'CallExpression';
 	callee: Identifier;
 	args: Node[];
+}
+
+export interface VectorExpression extends NodeBase {
+	type: 'VectorExpression';
+	x: Node;
+	y: Node;
 }

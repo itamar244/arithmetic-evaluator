@@ -66,10 +66,12 @@ export default function evaluateNode(
 			)
 		case 'Expression':
 			return evaluateNode(node.body, scopes)
+		case 'Parenthesized': {
+			const value = evaluateNode(node.body, scopes)
+			return node.abs ? Math.abs(value) : value
+		}
 		case 'CallExpression':
 			return evaluateCallExpression(node, scopes)
-		case 'AbsParentheses':
-			return Math.abs(evaluateNode(node.body, scopes))
 		case 'Identifier':
 			return evaluateIdentifier(node, scopes)
 		default:

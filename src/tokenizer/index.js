@@ -90,6 +90,10 @@ export default class Tokenizer {
 				return this.finishToken(tt.parenR)
 			case 124: // '|'
 				return this.finishToken(tt.crotchet)
+			case 123: // '{'
+				return this.finishToken(tt.bracketL)
+			case 125: // '}'
+				return this.finishToken(tt.bracketR)
 			case 59: // ';'
 				return this.finishToken(tt.semi)
 			case 34: // '"'

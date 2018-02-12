@@ -25,7 +25,7 @@ const expressions = [
 		n.Identifier([7, 9], 'PI'),
 	)],
 
-	['| - 3 |', n.AbsParentheses([0, 7],
+	['| - 3 |', n.Parenthesized([0, 7], true,
 		n.UnaryExpression([2, 5], '-', true, n.NumericLiteral([4, 5], 3)),
 	)],
 
@@ -59,7 +59,7 @@ test('should parse expressions and statements fine', (t) => {
 	// wrap expressions in Expression and concat them with statements
 	// to run all parse checks
 	const toCheck = expressions
-		.map((item) => [item[0], n.Expression(item[1])])
+		.map(item => [item[0], n.Expression(item[1])])
 		.concat(statements)
 
 	for (const [input, tree] of toCheck) {
