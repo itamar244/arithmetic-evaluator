@@ -44,6 +44,9 @@ export default class ExpressionParser extends NodeUtils {
 				return this.parseParenthesized(node, tt.crotchet)
 			case tt.name:
 				return this.parseMaybeCallExpression(node)
+			case tt.null:
+			case tt.inf:
+				return this.parseConstLiteral(node)
 			default:
 				throw this.unexpected()
 		}
@@ -117,6 +120,13 @@ export default class ExpressionParser extends NodeUtils {
 			)
 		}
 		return left
+	}
+
+	parseConstLiteral(node: N.ConstLiteral): N.ConstLiteral {
+		// the label is of type string but const literals match their label
+		node.name = (this.state.type.label: any)
+		this.next()
+		return this.finishNode(node, 'ConstLiteral')
 	}
 
 	parseCallExpression(callee: N.Identifier): N.CallExpression {

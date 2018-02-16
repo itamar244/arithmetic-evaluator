@@ -16,6 +16,7 @@ export type Node =
 	| BinaryExpression
 	| VariableDeclerations
 	| VariableDeclerator
+	| ConstLiteral
 	| FunctionDeclaration
 	| Equation
 	| NumericLiteral
@@ -38,6 +39,7 @@ export type NodeType =
 	| 'BinaryExpression'
 	| 'VariableDeclerations'
 	| 'VariableDeclerator'
+	| 'ConstLiteral'
 	| 'FunctionDeclaration'
 	| 'Equation'
 	| 'NumericLiteral'
@@ -102,6 +104,12 @@ export interface VariableDeclerator extends NodeBase {
 	type: 'VariableDeclerator';
 	id: Identifier;
 	init: Node;
+}
+
+export interface ConstLiteral extends NodeBase {
+	type: 'ConstLiteral';
+	// should have all possible values for const literals
+	name: 'null' | 'inf';
 }
 
 export interface FunctionDeclaration extends NodeBase {

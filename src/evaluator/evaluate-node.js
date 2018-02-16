@@ -70,13 +70,12 @@ function evaluateIdentifier(node, scopes) {
 	)
 }
 
-export default function evaluateNode(
-	node: Node,
-	scopes: Scope[],
-): EvalValue {
+export default function evaluateNode(node: Node, scopes: Scope[]): EvalValue {
 	switch (node.type) {
 		case 'NumericLiteral':
 			return new EvalNumber(node.value)
+		case 'ConstLiteral':
+			return runtimeValues.CONST_LITERALS[node.name]
 		case 'VectorExpression':
 			return evaluateVector(node, scopes)
 		case 'BinaryExpression':

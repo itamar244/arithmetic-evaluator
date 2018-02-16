@@ -38,6 +38,9 @@ export const keywords = {
 	in: new TokenType('in'),
 	func: new TokenType('func'),
 	import: new TokenType('import'),
+	// const literals
+	null: new TokenType('null'),
+	inf: new TokenType('inf'),
 }
 
 export const types = {

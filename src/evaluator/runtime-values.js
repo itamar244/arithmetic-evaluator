@@ -22,6 +22,10 @@ import {
 	tan as normalizedTan,
 } from './math';
 
+export const CONST_LITERALS = {
+	null: new EvalNull(),
+	inf: new EvalNumber(Infinity),
+}
 
 export function fact(n: EvalValue) {
 	if (n.type !== 'Number') throw n.unexpected('number')
