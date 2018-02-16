@@ -21,8 +21,13 @@ export class Value {
 	+pow: RhsHandler;
 	+modulo: RhsHandler;
 
+
 	unspportedOperator(operator: string) {
 		return Error(`'${this.type}' doesn't support ${operator} operator`)
+	}
+
+	unexpected(type: string) {
+		return Error(`expected value of type '${type}', not '${this.type}'`)
 	}
 
 	rhsValueError(operator: string, rhs: EvalValue) {
@@ -103,7 +108,7 @@ export class EvalNumber extends Value implements ValueBase {
 
 	divide(rhs: EvalValue) {
 		if (rhs.type !== 'Number') throw this.rhsValueError('/', rhs)
-		return new EvalNumber(this.value - rhs.value)
+		return new EvalNumber(this.value / rhs.value)
 	}
 
 	toString() {

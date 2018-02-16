@@ -1,7 +1,7 @@
 // @flow
 export const ln = Math.log
 export const log = (base: number, x: number) => (
-	Math.log(x) /  Math.log(base)
+	Math.log(x) / Math.log(base)
 )
 
 const CIRCLE_PERIMETER = Math.PI * 2
