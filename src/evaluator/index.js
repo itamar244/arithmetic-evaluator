@@ -4,7 +4,7 @@ import { type Scope } from './utils'
 import link from './linker'
 import {
 	EvalNull,
-	EvalReference,
+	EvalFunction,
 	type EvalValue,
 } from './values'
 import evaluateNode from './evaluate-node'
@@ -24,7 +24,7 @@ export function evaluateStatement(
 		if (scope[statement.id.name] != null) {
 			throw new Error(`function ${statement.id.name} is already defined`)
 		}
-		scope[statement.id.name] = new EvalReference(statement, statement.id.name)
+		scope[statement.id.name] = new EvalFunction(statement, statement.id.name)
 		return new EvalNull()
 	}
 

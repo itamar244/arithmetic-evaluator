@@ -1,6 +1,6 @@
 // @flow
 import { cos } from './math'
-import type { Node } from '../types'
+import type { FunctionDeclaration } from '../types'
 
 type RhsHandler = (rhs: EvalValue) => EvalValue
 
@@ -41,7 +41,7 @@ export class Value {
 
 export type EvalValue =
 	| EvalNull
-	| EvalReference
+	| EvalFunction
 	| EvalNumber
 	| EvalVector
 
@@ -52,19 +52,18 @@ export class EvalNull extends Value implements ValueBase {
 	toString() { return 'null' }
 }
 
-export class EvalReference extends Value implements ValueBase {
-	+value: Node
-	// used for debugging
-	+name: string
-	+type: 'Reference' = 'Reference'
+export class EvalFunction extends Value implements ValueBase {
+	+value: FunctionDeclaration
+	+type: 'Function' = 'Function'
 
-	constructor(value: Node, name: string) {
+	constructor(value: FunctionDeclaration, name: string) {
 		super()
 		this.value = value
-		this.name = name
 	}
 
-	toString() { return `Reference(${this.name})` }
+	toString() {
+		return `Function(${this.value.id.name})`
+	}
 }
 
 export class EvalNumber extends Value implements ValueBase {

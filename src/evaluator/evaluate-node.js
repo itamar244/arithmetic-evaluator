@@ -35,7 +35,7 @@ function evaluateCallExpression(node, scopes) {
 	const item = getItemFromScopes(scopes, name)
 	const args = node.args.map(arg => evaluateNode(arg, scopes))
 
-	if (item.type === 'Reference' && item.value.type === 'FunctionDeclaration') {
+	if (item.type === 'Function') {
 		return evaluateNode(
 			item.value.body,
 			[getFunctionScope(item.value, args), ...scopes],
@@ -64,7 +64,7 @@ function evaluateIdentifier(node, scopes) {
 	if (item === CONST_LITERALS.null && typeof Math[node.name] !== 'number') {
 		throw new ReferenceError(`${node.name} is undefined`)
 	}
-	
+
 	return item === CONST_LITERALS.null
 		? new EvalNumber(Math[node.name]) : item
 }
