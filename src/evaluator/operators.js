@@ -3,7 +3,7 @@ import type {
 	UnaryOperator,
 	BinaryOperator,
 } from '../types'
-import { fact } from './functions'
+import { fact } from './runtime-values'
 import {
 	EvalNumber,
 	type EvalValue,
@@ -35,7 +35,7 @@ export function unaryOperator(
 			switch (operator) {
 				case '+': return argument
 				case '-': return new EvalNumber(-argument.value)
-				case '!': return new EvalNumber(fact(argument.value))
+				case '!': return fact(argument)
 				default:
 					throw TypeError(`${operator} isn't supported as an unary operator for number`)
 			}

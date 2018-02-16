@@ -1,6 +1,6 @@
 // @flow
 import type { Node } from '../types'
-import * as customFunctions from './functions'
+import * as runtimeValues from './runtime-values'
 import {
 	getFunctionScope,
 	getItemFromScopes,
@@ -39,12 +39,17 @@ function evaluateCallExpression(node, scopes) {
 		)
 	}
 
-	const builtin = customFunctions[name]
-	if (typeof builtin === 'function') {
-		validateArgs(name, builtin.length, args.length, true)
-		return new EvalNumber(builtin(...args))
+	const runtimeFunc = runtimeValues[name]
+	if (typeof runtimeFunc === 'function') {
+		validateArgs(name, runtimeFunc.length, args.length, true)
+		return runtimeFunc(...args)
 	} else if (typeof Math[name] === 'function') {
-		return new EvalNumber(Math[name](...args))
+		return new EvalNumber(Math[name](...args.map((arg) => {
+			if (arg.type !== 'Number') {
+				throw TypeError(`native ${name} function expects only numbers as arguments`)
+			}
+			return arg.value
+		})))
 	}
 
 	throw new ReferenceError(`${name} is not a function`)

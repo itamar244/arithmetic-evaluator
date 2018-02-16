@@ -1,5 +1,5 @@
 // @flow
-import { cos } from './functions'
+import { cos } from './math'
 
 type RhsHandler = (rhs: EvalValue) => EvalValue
 
