@@ -60,6 +60,7 @@ export const types = {
 	bracketL: new TokenType('{'),
 	bracketR: new TokenType('}'),
 	semi: new TokenType(';'),
+	colon: new TokenType(':'),
 
 	eq: new BinopTokenType('=', 1),
 	plus: new BinopTokenType('+', 2, { prefix }),

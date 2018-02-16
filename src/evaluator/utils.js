@@ -43,11 +43,19 @@ export function getFunctionScope(
 	func: FunctionDeclaration,
 	args: EvalValue[],
 ): Scope {
+	const scope = {}
+
 	validateArgs(func.id.name, func.params.length, args.length, false)
 
-	const scope = {}
-	args.forEach((arg, i) => {
-		scope[func.params[i].name] = arg
-	})
+	for (let i = 0; i < args.length; i++) {
+		const { id, declType } = func.params[i]
+		if (
+			declType !== null
+			&& declType.name !== 'any' && declType.name !== args[i].type
+		) {
+			throw TypeError(`expected ${declType.name} for ${id.name}, not ${args[i].type}`)
+		}
+		scope[id.name] = args[i]
+	}
 	return scope
 }

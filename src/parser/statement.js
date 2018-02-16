@@ -81,7 +81,7 @@ export default class StatementParser extends ExpressionParser {
 		this.expect(tt.parenL)
 		while (!this.eat(tt.parenR)) {
 			if (!this.match(tt.name)) this.unexpected()
-			node.params.push(this.parseIdentifier(this.startNode()))
+			node.params.push(this.parseFunctionParam())
 			if (!this.match(tt.parenR)) {
 				this.expect(tt.comma)
 			}
@@ -90,5 +90,18 @@ export default class StatementParser extends ExpressionParser {
 		node.body = this.parseExpressionBody(false)
 
 		return this.finishNode(node, 'FunctionDeclaration')
+	}
+
+	parseFunctionParam(): N.FunctionParamDeclaration {
+		const node: N.FunctionParamDeclaration = this.startNode()
+
+		node.id = this.parseIdentifier(this.startNode())
+		if (this.eat(tt.colon)) {
+			node.declType = this.parseIdentifier(this.startNode())
+		} else {
+			node.declType = null
+		}
+
+		return this.finishNode(node, 'FunctionParamDeclaration')
 	}
 }

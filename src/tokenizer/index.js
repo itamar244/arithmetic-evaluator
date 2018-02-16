@@ -94,6 +94,8 @@ export default class Tokenizer {
 				return this.finishToken(tt.bracketL)
 			case 125: // '}'
 				return this.finishToken(tt.bracketR)
+			case 58: // ';'
+				return this.finishToken(tt.colon)
 			case 59: // ';'
 				return this.finishToken(tt.semi)
 			case 34: // '"'

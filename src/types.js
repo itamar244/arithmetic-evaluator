@@ -18,6 +18,7 @@ export type Node =
 	| VariableDeclerator
 	| ConstLiteral
 	| FunctionDeclaration
+	| FunctionParamDeclaration
 	| Equation
 	| NumericLiteral
 	| Identifier
@@ -30,6 +31,7 @@ export type Statement =
 	| Import
 	| VariableDeclerations
 	| FunctionDeclaration
+	| FunctionParamDeclaration
 
 export type NodeType =
 	| 'Program'
@@ -41,6 +43,7 @@ export type NodeType =
 	| 'VariableDeclerator'
 	| 'ConstLiteral'
 	| 'FunctionDeclaration'
+	| 'FunctionParamDeclaration'
 	| 'Equation'
 	| 'NumericLiteral'
 	| 'Identifier'
@@ -108,15 +111,21 @@ export interface VariableDeclerator extends NodeBase {
 
 export interface ConstLiteral extends NodeBase {
 	type: 'ConstLiteral';
-	// should have all possible values for const literals
+	// should all names of const literals
 	name: 'null' | 'inf';
 }
 
 export interface FunctionDeclaration extends NodeBase {
 	type: 'FunctionDeclaration';
-	params: Identifier[];
+	params: FunctionParamDeclaration[];
 	id: Identifier;
 	body: Node;
+}
+
+export interface FunctionParamDeclaration extends NodeBase {
+	type: 'FunctionParamDeclaration';
+	id: Identifier;
+	declType: null | Identifier;
 }
 
 export interface Equation extends BinNode {
