@@ -61,7 +61,7 @@ export class EvalFunction extends Value implements ValueBase {
 	+value: FunctionDeclaration
 	+type: 'Function' = 'Function'
 
-	constructor(value: FunctionDeclaration, name: string) {
+	constructor(value: FunctionDeclaration) {
 		super()
 		this.value = value
 	}

@@ -25,7 +25,7 @@ export default class StatementParser extends ExpressionParser {
 			case tt.let:
 				return this.parseVariableDeclarations(node)
 			case tt.func:
-				return this.parseFunction(node)
+				return this.parseFunction(node, true)
 			default:
 				return this.parseExpressionStatement(node)
 		}
@@ -71,37 +71,47 @@ export default class StatementParser extends ExpressionParser {
 		return this.finishNode(node, 'VariableDeclerator')
 	}
 
-	parseFunction(node: N.FunctionDeclaration) {
-		node.params = []
-
+	parseFunction(node: N.FunctionDeclaration, topLevel: bool) {
 		this.next()
-		if (!this.match(tt.name)) this.unexpected('need a name for func declaration')
-		node.id = this.parseIdentifier(this.startNode())
-
-		this.expect(tt.parenL)
-		while (!this.eat(tt.parenR)) {
-			if (!this.match(tt.name)) this.unexpected()
-			node.params.push(this.parseFunctionParam())
-			if (!this.match(tt.parenR)) {
-				this.expect(tt.comma)
+		if (!this.match(tt.name)) {
+			if (topLevel) {
+				this.unexpected('need a name for func declaration')
+			} else {
+				const id: N.Identifier = this.startNode()
+				id.name = 'Anonymous'
+				node.id = this.finishNode(id, 'Identifier')
 			}
+		} else {
+			node.id = this.parseIdentifier(this.startNode())
 		}
 
+		node.params = this.parseFunctionParams()
 		node.body = this.parseExpressionBody(false)
 
 		return this.finishNode(node, 'FunctionDeclaration')
 	}
 
-	parseFunctionParam(): N.FunctionParamDeclaration {
-		const node: N.FunctionParamDeclaration = this.startNode()
+	parseFunctionParams(): N.ParameterDeclaration[] {
+		const params = []
 
-		node.id = this.parseIdentifier(this.startNode())
-		if (this.eat(tt.colon)) {
-			node.declType = this.parseIdentifier(this.startNode())
-		} else {
-			node.declType = null
+		this.expect(tt.parenL)
+		while (!this.eat(tt.parenR)) {
+			if (!this.match(tt.name)) this.unexpected()
+			const node: N.ParameterDeclaration = this.startNode()
+
+			node.id = this.parseIdentifier(this.startNode())
+			if (this.eat(tt.colon)) {
+				node.declType = this.parseIdentifier(this.startNode())
+			} else {
+				node.declType = null
+			}
+
+			params.push(this.finishNode(node, 'ParameterDeclaration'))
+			if (!this.match(tt.parenR)) {
+				this.expect(tt.comma)
+			}
 		}
 
-		return this.finishNode(node, 'FunctionParamDeclaration')
+		return params
 	}
 }

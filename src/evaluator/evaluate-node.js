@@ -15,6 +15,7 @@ import {
 	unaryOperator,
 } from './operators'
 import {
+	EvalFunction,
 	EvalNumber,
 	EvalVector,
 	type EvalValue,
@@ -77,6 +78,8 @@ export default function evaluateNode(node: Node, scopes: Scope[]): EvalValue {
 			return CONST_LITERALS[node.name]
 		case 'VectorExpression':
 			return evaluateVector(node, scopes)
+		case 'FunctionDeclaration':
+			return new EvalFunction(node)
 		case 'BinaryExpression':
 			return binaryOperator(
 				node.operator,

@@ -4,6 +4,13 @@ import { types as tt, type TokenType } from '../tokenizer/types'
 import NodeUtils from './node'
 
 export default class ExpressionParser extends NodeUtils {
+	// forward declarations:
+	// parser/statement.js
+	+parseFunction: (
+		node: N.FunctionDeclaration,
+		topLevel: bool,
+	) => N.FunctionDeclaration
+
 	parseExpressionBody(topLevel: bool): N.Node {
 		const node = this.parseMaybeUnary(topLevel)
 		if (this.needMultiplierShortcut(node)) {
@@ -47,6 +54,8 @@ export default class ExpressionParser extends NodeUtils {
 			case tt.null:
 			case tt.inf:
 				return this.parseConstLiteral(node)
+			case tt.func:
+				return this.parseFunction(node, false)
 			default:
 				throw this.unexpected()
 		}

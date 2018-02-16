@@ -24,7 +24,7 @@ export function evaluateStatement(
 		if (scope[statement.id.name] != null) {
 			throw new Error(`function ${statement.id.name} is already defined`)
 		}
-		scope[statement.id.name] = new EvalFunction(statement, statement.id.name)
+		scope[statement.id.name] = new EvalFunction(statement)
 		return new EvalNull()
 	}
 
