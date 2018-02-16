@@ -1,15 +1,20 @@
 // @flow
 import type { Program, Statement } from '../types'
-import {
-	type Scope,
-	variableDeclarationsToObject,
-} from './utils'
+import { type Scope } from './utils'
 import link from './linker'
 import {
 	EvalNull,
+	EvalReference,
 	type EvalValue,
 } from './values'
 import evaluateNode from './evaluate-node'
+
+const variableDeclarationsToScope = (node, scopes) => (
+	node.declarations.reduce((scope, declaration) => {
+		scope[declaration.id.name] = evaluateNode(declaration.init, scopes)
+		return scope
+	}, {})
+)
 
 export function evaluateStatement(
 	statement: Statement,
@@ -19,14 +24,14 @@ export function evaluateStatement(
 		if (scope[statement.id.name] != null) {
 			throw new Error(`function ${statement.id.name} is already defined`)
 		}
-		scope[statement.id.name] = statement
+		scope[statement.id.name] = new EvalReference(statement, statement.id.name)
 		return new EvalNull()
 	}
 
 	if (statement.type === 'VariableDeclerations') {
 		return evaluateNode(
 			statement.expression,
-			[variableDeclarationsToObject(statement), scope],
+			[variableDeclarationsToScope(statement, [scope]), scope],
 		)
 	}
 

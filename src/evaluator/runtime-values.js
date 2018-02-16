@@ -14,17 +14,21 @@ import {
 	EvalVector,
 	EvalNull,
 	type EvalValue,
-} from './values';
+} from './values'
 import {
 	log as normalizedLog,
 	ln as normalizedLn,
 	cos as normalizedCos,
 	tan as normalizedTan,
-} from './math';
+} from './math'
 
 export const CONST_LITERALS = {
 	null: new EvalNull(),
 	inf: new EvalNumber(Infinity),
+}
+
+export const RUNTIME_FUNCTIONS = {
+	fact, fib, cos, tan, abs, vec, log, ln,
 }
 
 export function fact(n: EvalValue) {

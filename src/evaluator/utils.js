@@ -1,27 +1,20 @@
 // @flow
-import type {
-	Node,
-	VariableDeclerations,
-	FunctionDeclaration,
-} from '../types'
+import type {	FunctionDeclaration } from '../types'
+import { CONST_LITERALS } from './runtime-values'
 import type { EvalValue } from './values'
 
-export type Scope = { [string]: ?Node }
+export type Scope = { [string]: ?EvalValue }
 
-export const variableDeclarationsToObject = (node: VariableDeclerations): Scope => (
-	node.declarations.reduce((scope, declaration) => {
-		scope[declaration.id.name] = declaration.init
-		return scope
-	}, {})
-)
-
-export function getItemFromScopes(scopes: Scope[], name: string) {
+export function getItemFromScopes(
+	scopes: Scope[],
+	name: string,
+): EvalValue {
 	for (const scope of scopes) {
-		if (scope[name] !== undefined) {
+		if (scope[name] != null) {
 			return scope[name]
 		}
 	}
-	return null
+	return CONST_LITERALS.null
 }
 
 export function validateArgs(
@@ -47,7 +40,7 @@ export function getFunctionScope(
 
 	validateArgs(func.id.name, func.params.length, args.length, false)
 
-	for (let i = 0; i < args.length; i++) {
+	for (let i = 0; i < args.length; i += 1) {
 		const { id, declType } = func.params[i]
 		if (
 			declType !== null

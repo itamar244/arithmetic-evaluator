@@ -1,6 +1,9 @@
 // @flow
 import type { Node } from '../types'
-import * as runtimeValues from './runtime-values'
+import {
+	CONST_LITERALS,
+	RUNTIME_FUNCTIONS,
+} from './runtime-values'
 import {
 	getFunctionScope,
 	getItemFromScopes,
@@ -12,8 +15,8 @@ import {
 	unaryOperator,
 } from './operators'
 import {
-	EvalVector,
 	EvalNumber,
+	EvalVector,
 	type EvalValue,
 } from './values'
 
@@ -29,17 +32,17 @@ function evaluateVector(vector, scopes) {
 
 function evaluateCallExpression(node, scopes) {
 	const { name } = node.callee
-	const func = getItemFromScopes(scopes, name)
+	const item = getItemFromScopes(scopes, name)
 	const args = node.args.map(arg => evaluateNode(arg, scopes))
 
-	if (func != null && func.type === 'FunctionDeclaration') {
+	if (item.type === 'Reference' && item.value.type === 'FunctionDeclaration') {
 		return evaluateNode(
-			func.body,
-			[getFunctionScope(func, args), ...scopes],
+			item.value.body,
+			[getFunctionScope(item.value, args), ...scopes],
 		)
 	}
 
-	const runtimeFunc = runtimeValues[name]
+	const runtimeFunc = RUNTIME_FUNCTIONS[name]
 	if (typeof runtimeFunc === 'function') {
 		validateArgs(name, runtimeFunc.length, args.length, true)
 		return runtimeFunc(...args)
@@ -58,16 +61,12 @@ function evaluateCallExpression(node, scopes) {
 function evaluateIdentifier(node, scopes) {
 	const item = getItemFromScopes(scopes, node.name)
 
-	if (item == null && typeof Math[node.name] !== 'number') {
+	if (item === CONST_LITERALS.null && typeof Math[node.name] !== 'number') {
 		throw new ReferenceError(`${node.name} is undefined`)
 	}
-	return (
-		item == null
-		? new EvalNumber(Math[node.name])
-		: typeof item === 'number'
-		? item
-		: evaluateNode(item, scopes)
-	)
+	
+	return item === CONST_LITERALS.null
+		? new EvalNumber(Math[node.name]) : item
 }
 
 export default function evaluateNode(node: Node, scopes: Scope[]): EvalValue {
@@ -75,7 +74,7 @@ export default function evaluateNode(node: Node, scopes: Scope[]): EvalValue {
 		case 'NumericLiteral':
 			return new EvalNumber(node.value)
 		case 'ConstLiteral':
-			return runtimeValues.CONST_LITERALS[node.name]
+			return CONST_LITERALS[node.name]
 		case 'VectorExpression':
 			return evaluateVector(node, scopes)
 		case 'BinaryExpression':

@@ -1,5 +1,6 @@
 // @flow
 import { cos } from './math'
+import type { Node } from '../types'
 
 type RhsHandler = (rhs: EvalValue) => EvalValue
 
@@ -40,6 +41,7 @@ export class Value {
 
 export type EvalValue =
 	| EvalNull
+	| EvalReference
 	| EvalNumber
 	| EvalVector
 
@@ -48,6 +50,21 @@ export class EvalNull extends Value implements ValueBase {
 
 	// eslint-disable-next-line class-methods-use-this
 	toString() { return 'null' }
+}
+
+export class EvalReference extends Value implements ValueBase {
+	+value: Node
+	// used for debugging
+	+name: string
+	+type: 'Reference' = 'Reference'
+
+	constructor(value: Node, name: string) {
+		super()
+		this.value = value
+		this.name = name
+	}
+
+	toString() { return `Reference(${this.name})` }
 }
 
 export class EvalNumber extends Value implements ValueBase {
