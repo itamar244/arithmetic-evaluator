@@ -15,12 +15,10 @@ export default class State {
 
 	prevStart: number
 	prevEnd: number
-	prevStartLoc: Position
 	prevEndLoc: Position
 
 	type: TokenType
 
-	prevSpacePadding: number
 	value: any
 	+input: string
 
@@ -37,10 +35,8 @@ export default class State {
 		this.endLoc = pos
 		this.prevStart = 0
 		this.prevEnd = 0
-		this.prevStartLoc = pos
 		this.prevEndLoc = pos
 		this.type = tt.eof
-		this.prevSpacePadding = 0
 	}
 
 	position() {

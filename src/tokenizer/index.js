@@ -26,7 +26,6 @@ export default class Tokenizer {
 	next() {
 		this.state.prevStart = this.state.start
 		this.state.prevEnd = this.state.end
-		this.state.prevStartLoc = this.state.startLoc
 		this.state.prevEndLoc = this.state.endLoc
 
 		this.nextToken()
@@ -190,8 +189,6 @@ export default class Tokenizer {
 					isSpaceCode = false
 			}
 		}
-
-		state.prevSpacePadding = state.pos - startPos
 	}
 
 	skipLineComment() {
