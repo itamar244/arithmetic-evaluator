@@ -16,8 +16,8 @@ const isLetter = (code: number) => (
 export default class Tokenizer {
 	// forward declarations:
 	// parser/util.js
-	+unexpected: (void | string) => void
-	+state: State
+	+unexpected: (void | string) => void;
+	+state: State;
 
 	constructor(input: string) {
 		this.state = new State(input)
@@ -167,7 +167,6 @@ export default class Tokenizer {
 
 	skipSpace() {
 		const { state } = this
-		const startPos = state.pos
 		let isSpaceCode = true
 
 		while (isSpaceCode) {

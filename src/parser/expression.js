@@ -9,7 +9,7 @@ export default class ExpressionParser extends NodeUtils {
 	+parseFunction: (
 		node: N.FunctionDeclaration,
 		topLevel: bool,
-	) => N.FunctionDeclaration
+	) => N.FunctionDeclaration;
 
 	parseExpressionBody(topLevel: bool): N.Node {
 		const node = this.parseMaybeUnary(topLevel)

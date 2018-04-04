@@ -4,10 +4,10 @@
   "description": "receices string and evaluates it for numerical value",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node cli/index",
+    "start": "babel-node cli/index.mjs",
     "test": "ava --verbose",
     "coverage": "nyc ava",
-		"report": "nyc report --reporter=html",
+    "report": "nyc report --reporter=html",
     "build": "babel src --out-dir=\"dist/src\" && babel cli --out-dir \"dist/cli\""
   },
   "author": "Itamar Yatom",
@@ -25,11 +25,14 @@
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-plugin-flowtype": "^2.33.0",
     "eslint-plugin-import": "^2.2.0",
-    "flow-bin": "^0.64.0",
+    "flow-bin": "^0.66.0",
     "nyc": "^11.2.1"
   },
   "ava": {
-    "files": ["test/**/*.test.js", "src/**/*.test.js"],
+    "files": [
+      "test/**/*.test.js",
+      "src/**/*.test.js"
+    ],
     "require": [
       "babel-register"
     ],

@@ -51,15 +51,15 @@ export type EvalValue =
 	| EvalVector
 
 export class EvalNull extends Value implements ValueBase {
-	+type: 'Null' = 'Null'
+	+type: 'Null' = 'Null';
 
 	// eslint-disable-next-line class-methods-use-this
 	toString() { return 'null' }
 }
 
 export class EvalFunction extends Value implements ValueBase {
-	+value: FunctionDeclaration
-	+type: 'Function' = 'Function'
+	+value: FunctionDeclaration;
+	+type: 'Function' = 'Function';
 
 	constructor(value: FunctionDeclaration) {
 		super()
@@ -72,8 +72,8 @@ export class EvalFunction extends Value implements ValueBase {
 }
 
 export class EvalNumber extends Value implements ValueBase {
-	+value: number
-	+type: 'Number' = 'Number'
+	+value: number;
+	+type: 'Number' = 'Number';
 
 	constructor(value: number) {
 		super()
@@ -117,9 +117,9 @@ export class EvalNumber extends Value implements ValueBase {
 }
 
 export class EvalVector extends Value implements ValueBase {
-	+x: EvalNumber
-	+y: EvalNumber
-	+type: 'Vector' = 'Vector'
+	+x: EvalNumber;
+	+y: EvalNumber;
+	+type: 'Vector' = 'Vector';
 
 	constructor(x: EvalNumber, y: EvalNumber) {
 		super()

@@ -5,7 +5,7 @@ import type { Options } from '../options'
 import Tokenizer from '../tokenizer'
 
 export default class UtilParser extends Tokenizer {
-	options: Options
+	options: Options;
 
 	unexpected(
 		error: string = 'unexpected token',

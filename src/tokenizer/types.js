@@ -11,11 +11,11 @@ const postfix = true
 const afterOp = true
 
 export class TokenType {
-	label: string
-	binop: number | null
-	prefix: bool
-	postfix: bool
-	afterOp: bool
+	label: string;
+	binop: number | null;
+	prefix: bool;
+	postfix: bool;
+	afterOp: bool;
 
 	constructor(label: string, options: TokenTypeOptions = {}) {
 		this.label = label

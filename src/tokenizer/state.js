@@ -3,24 +3,24 @@ import { Position } from '../utils/location'
 import { types as tt, type TokenType } from './types'
 
 export default class State {
-	pos: number
-	line: number
-	lineStart: number
+	pos: number;
+	line: number;
+	lineStart: number;
 
-	start: number
-	end: number
+	start: number;
+	end: number;
 
-	startLoc: Position
-	endLoc: Position
+	startLoc: Position;
+	endLoc: Position;
 
-	prevStart: number
-	prevEnd: number
-	prevEndLoc: Position
+	prevStart: number;
+	prevEnd: number;
+	prevEndLoc: Position;
 
-	type: TokenType
+	type: TokenType;
 
-	value: any
-	+input: string
+	value: any;
+	+input: string;
 
 	constructor(input: string) {
 		const pos = new Position(0, 0)

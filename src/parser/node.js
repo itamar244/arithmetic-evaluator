@@ -9,9 +9,9 @@ import type {
 import UtilParser from './util'
 
 export class Node implements NodeBase {
-	start: number
-	end: number
-	loc: SourceLocation
+	start: number;
+	end: number;
+	loc: SourceLocation;
 
 	constructor(start: Position, pos: number) {
 		this.start = pos
