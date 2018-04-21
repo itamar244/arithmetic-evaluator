@@ -22,7 +22,7 @@ export class Node implements NodeBase {
 
 export default class NodeUtils extends UtilParser {
 	startNode(): AnyNode {
-		return (new Node(this.state.startLoc, this.state.pos): any)
+		return (new Node(this.state.startLoc, this.state.start): any)
 	}
 
 	// eslint-disable-next-line class-methods-use-this
