@@ -3,6 +3,7 @@ import { readFileSync } from 'fs'
 
 import {
 	parse,
+	parseStatement,
 	evaluate,
 	createRepl,
 } from '../src'
@@ -12,9 +13,14 @@ import {
 	benchmark,
 } from './utils'
 
-function debugInput(input: string, toBenchmarkEvaluate: bool = true) {
+function benchmarkInput<ParseFunc: Function, EvaluateFunc: Function>(
+	input: string,
+	parseFunc: ParseFunc,
+	evaluateFunc: EvaluateFunc,
+	toBenchmarkEvaluate: bool = true,
+) {
 	const parseTime = benchmark(
-		parse,
+		parseFunc,
 		[input],
 		3000,
 	)
@@ -23,8 +29,8 @@ function debugInput(input: string, toBenchmarkEvaluate: bool = true) {
 
 	if (toBenchmarkEvaluate) {
 		const evaluateTime = benchmark(
-			evaluate,
-			[parse(input)],
+			evaluateFunc,
+			[parseFunc(input)],
 			3000,
 		)
 
@@ -43,11 +49,16 @@ export async function runRepl(options: Object) {
 
 		if (line.length > 0) {
 			try {
-				const result = repl(line)
+				const result = repl.run(line)
 
 				log(result.toString())
 				if (options.benchmark) {
-					debugInput(line, result.type !== 'Null')
+					benchmarkInput(
+						line,
+						parseStatement,
+						repl.evaluate,
+						result.type !== 'Null',
+					)
 				}
 			} catch (e) {
 				log(e, true)
@@ -67,7 +78,7 @@ export function runWithFileGiven(file: string, options: Object) {
 		const program = parse(input, { filename: file })
 
 		if (options.benchmark) {
-			debugInput(input)
+			benchmarkInput(input, parse, evaluate)
 		}
 
 		if (options.tree) {

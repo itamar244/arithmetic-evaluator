@@ -53,6 +53,6 @@ test('repl should work', (t) => {
 	]
 
 	for (const [line, value] of lines) {
-		t.is(repl(line), value, `running '${line}' on repl`)
+		t.is(repl.run(line), value, `running '${line}' on repl`)
 	}
 })

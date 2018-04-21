@@ -2,11 +2,10 @@
  * Copyright 2017-present, Itamar Yatom.
  * All rights reserved.
  *
- * Main export from from internal modules.
- *
  * @flow
  */
 
+import type { Statement } from './types'
 import Parser from './parser'
 import {
 	defaultOptions,
@@ -36,11 +35,17 @@ export function run(input: string) {
 	return evaluate(parse(input))
 }
 
+export function runStatement(input: string, scope: Scope) {
+	return evaluateStatement(parseStatement(input), scope)
+}
+
 export function createRepl() {
 	const scope: Scope = new Map()
 
-	return (input: string) => evaluateStatement(
-		parseStatement(input),
-		scope,
-	)
+	return {
+		evaluate: (statement: Statement) =>
+			evaluateStatement(statement, scope),
+		run: (input: string) =>
+			runStatement(input, scope),
+	}
 }
