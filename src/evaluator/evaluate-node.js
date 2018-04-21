@@ -39,7 +39,7 @@ function evaluateCallExpression(node, scopes) {
 	if (item.type === 'Function') {
 		return evaluateNode(
 			item.value.body,
-			[getFunctionScope(item.value, args), ...scopes],
+			[getFunctionScope(item.value, node.typeArgs, args), ...scopes],
 		)
 	}
 
