@@ -3,15 +3,16 @@ import type {	FunctionDeclaration } from '../types'
 import { CONST_LITERALS } from './runtime-values'
 import type { EvalValue } from './values'
 
-export type Scope = { [string]: ?EvalValue }
+export type Scope = Map<string, EvalValue>
 
 export function getItemFromScopes(
 	scopes: Scope[],
 	name: string,
 ): EvalValue {
 	for (const scope of scopes) {
-		if (scope[name] != null) {
-			return scope[name]
+		const value = scope.get(name);
+		if (value != null) {
+			return value
 		}
 	}
 	return CONST_LITERALS.null
@@ -32,11 +33,12 @@ export function validateArgs(
 	}
 }
 
+
 export function getFunctionScope(
 	func: FunctionDeclaration,
 	args: EvalValue[],
 ): Scope {
-	const scope = {}
+	const scope = new Map()
 
 	validateArgs(func.id.name, func.params.length, args.length, false)
 
@@ -48,7 +50,8 @@ export function getFunctionScope(
 		) {
 			throw TypeError(`expected ${declType.name} for ${id.name}, not ${args[i].type}`)
 		}
-		scope[id.name] = args[i]
+		scope.set(param.id.name, args[i])
 	}
+
 	return scope
 }

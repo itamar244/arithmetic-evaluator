@@ -16,6 +16,7 @@ import {
 import {
 	evaluate,
 	evaluateStatement,
+	type Scope,
 } from './evaluator'
 
 export {
@@ -36,7 +37,7 @@ export function run(input: string) {
 }
 
 export function createRepl() {
-	const scope = {}
+	const scope: Scope = new Map()
 
 	return (input: string) => evaluateStatement(
 		parseStatement(input),
