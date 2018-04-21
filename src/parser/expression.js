@@ -141,17 +141,30 @@ export default class ExpressionParser extends NodeUtils {
 	parseCallExpression(callee: N.Identifier): N.CallExpression {
 		const node: N.CallExpression = this.startNodeAtNode(callee)
 		node.callee = callee
+
+		if (this.eat(tt.relationalL)) {
+			node.typeArgs = this.parseArgsList(
+				tt.relationalR,
+				() => this.parseIdentifier(this.startNode()),
+			)
+		} else {
+			node.typeArgs = null
+		}
+		this.expect(tt.parenL)
 		node.args = this.parseArgsList(tt.parenR)
 
 		return this.finishNode(node, 'CallExpression')
 	}
 
-	parseArgsList(end: TokenType): N.Node[] {
+	parseArgsList<T: N.Node>(
+		end: TokenType,
+		_getNode?: () => T,
+	): T[] {
 		const args = []
+		const getNode = _getNode || (() => (this.parseExpressionBody(false): any))
 
-		this.next()
 		while (!this.eat(end)) {
-			args.push(this.parseExpressionBody(false))
+			args.push(getNode())
 			if (!this.eat(tt.comma) && !this.match(end)) {
 				this.unexpected()
 			}
@@ -163,7 +176,7 @@ export default class ExpressionParser extends NodeUtils {
 	parseMaybeCallExpression(node: N.Identifier): N.Identifier | N.CallExpression {
 		this.parseIdentifier(node)
 
-		if (this.match(tt.parenL) && this.state.prevSpacePadding === 0) {
+		if (this.match(tt.parenL) || this.match(tt.relationalL)) {
 			return this.parseCallExpression(node)
 		}
 

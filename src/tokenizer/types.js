@@ -63,10 +63,12 @@ export const types = {
 	colon: new TokenType(':'),
 
 	eq: new BinopTokenType('=', 1),
-	plus: new BinopTokenType('+', 2, { prefix }),
-	minus: new BinopTokenType('-', 2, { prefix }),
-	star: new BinopTokenType('*', 3),
-	slash: new BinopTokenType('/', 3),
-	modulo: new BinopTokenType('%', 3),
-	exponent: new BinopTokenType('^', 4),
+	relationalL: new BinopTokenType('<', 2),
+	relationalR: new BinopTokenType('>', 2),
+	plus: new BinopTokenType('+', 3, { prefix }),
+	minus: new BinopTokenType('-', 3, { prefix }),
+	star: new BinopTokenType('*', 4),
+	slash: new BinopTokenType('/', 4),
+	modulo: new BinopTokenType('%', 4),
+	exponent: new BinopTokenType('^', 5),
 }

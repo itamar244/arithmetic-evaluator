@@ -117,6 +117,7 @@ export interface ConstLiteral extends NodeBase {
 
 export interface FunctionDeclaration extends NodeBase {
 	type: 'FunctionDeclaration';
+	typeDefinitions: null | Identifier[];
 	params: ParameterDeclaration[];
 	id: Identifier;
 	body: Node;
@@ -151,6 +152,7 @@ export interface Parenthesized extends NodeBase {
 export interface CallExpression extends NodeBase {
 	type: 'CallExpression';
 	callee: Identifier;
+	typeArgs: null | Identifier[];
 	args: Node[];
 }
 

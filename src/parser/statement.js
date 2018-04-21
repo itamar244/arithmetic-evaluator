@@ -1,6 +1,6 @@
 // @flow
 import * as N from '../types'
-import { types as tt } from '../tokenizer/types'
+import { types as tt, type TokenType } from '../tokenizer/types'
 import ExpressionParser from './expression'
 
 export default class StatementParser extends ExpressionParser {
@@ -73,41 +73,48 @@ export default class StatementParser extends ExpressionParser {
 
 	parseFunction(node: N.FunctionDeclaration, topLevel: bool) {
 		this.next()
+
+		let id: N.Identifier
 		if (!this.match(tt.name)) {
 			if (topLevel) {
 				this.unexpected('need a name for func declaration')
-			} else {
-				const id: N.Identifier = this.startNode()
-				id.name = 'Anonymous'
-				node.id = this.finishNode(id, 'Identifier')
 			}
+			id = this.startNode()
+			id.name = 'Anonymous'
+			this.finishNode(id, 'Identifier')
 		} else {
-			node.id = this.parseIdentifier(this.startNode())
+			id = this.parseIdentifier(this.startNode())
 		}
 
-		node.params = this.parseFunctionParams()
+		node.id = id
+		node.typeDefinitions =
+			this.eat(tt.relationalL)
+			? this.parseArgsList(
+					tt.relationalR,
+					() => this.parseIdentifier(this.startNode()),
+				)
+			: null
+
+		this.expect(tt.parenL)
+		node.params = this.parseFunctionParams(tt.parenR)
 		node.body = this.parseExpressionBody(false)
 
 		return this.finishNode(node, 'FunctionDeclaration')
 	}
 
-	parseFunctionParams(): N.ParameterDeclaration[] {
+	parseFunctionParams(end: TokenType): N.ParameterDeclaration[] {
 		const params = []
 
-		this.expect(tt.parenL)
-		while (!this.eat(tt.parenR)) {
+		while (!this.eat(end)) {
 			if (!this.match(tt.name)) this.unexpected()
 			const node: N.ParameterDeclaration = this.startNode()
 
 			node.id = this.parseIdentifier(this.startNode())
-			if (this.eat(tt.colon)) {
-				node.declType = this.parseIdentifier(this.startNode())
-			} else {
-				node.declType = null
-			}
+			node.declType = this.eat(tt.colon) ?
+				this.parseIdentifier(this.startNode()) : null
 
 			params.push(this.finishNode(node, 'ParameterDeclaration'))
-			if (!this.match(tt.parenR)) {
+			if (!this.match(end)) {
 				this.expect(tt.comma)
 			}
 		}

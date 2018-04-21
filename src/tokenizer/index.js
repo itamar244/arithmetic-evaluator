@@ -65,6 +65,10 @@ export default class Tokenizer {
 		this.state.pos += 1
 
 		switch (code) {
+			case 60: // '<'
+				return this.finishToken(tt.relationalL)
+			case 62: // '>'
+				return this.finishToken(tt.relationalR)
 			case 43: // '+'
 				return this.finishToken(tt.plus, '+')
 			case 45: // '-'
@@ -101,7 +105,7 @@ export default class Tokenizer {
 			case 39: // "'"
 				return this.readString(code)
 			default:
-				this.finishWithValue(tt.error)
+				this.finishTokenWithValue(tt.error)
 				throw this.unexpected()
 		}
 	}
@@ -122,7 +126,7 @@ export default class Tokenizer {
 			}
 		}
 
-		this.finishWithValue(tt.num)
+		this.finishTokenWithValue(tt.num)
 	}
 
 	/* reads identifier in current position from input
@@ -156,7 +160,7 @@ export default class Tokenizer {
 			this.state.pos += 1
 			code = state.input.charCodeAt(state.pos)
 			if (code === 10 /* '\n' */ || state.pos >= state.input.length) {
-				this.finishWithValue(tt.error)
+				this.finishTokenWithValue(tt.error)
 				this.unexpected('unterminated string')
 			}
 		}
@@ -200,7 +204,7 @@ export default class Tokenizer {
 		}
 	}
 
-	finishWithValue(type: TokenType) {
+	finishTokenWithValue(type: TokenType) {
 		this.finishToken(
 			type,
 			this.state.input.slice(this.state.start, this.state.pos),
