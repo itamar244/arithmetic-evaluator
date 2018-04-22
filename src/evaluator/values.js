@@ -4,23 +4,19 @@ import type { FunctionDeclaration } from '../types'
 
 type RhsHandler = (rhs: EvalValue) => EvalValue
 
-interface ValueBase {
-	toString(): string;
-	abs(): EvalValue;
-	negate(): EvalValue;
-}
-
-// polymorphic based class for EvalValue
+// polymorphic based class for EvalValue.
+// each class should implement the functions that can be called by its value type
 export class Value {
-	// all following fields should be implemented by subclasses
+	// should be initialized for each value class
 	+type: string;
+	// all following fields should be implemented by subclasses
+	// if they are supported by class
 	+add: RhsHandler;
 	+substract: RhsHandler;
 	+multiply: RhsHandler;
 	+divide: RhsHandler;
 	+pow: RhsHandler;
 	+modulo: RhsHandler;
-
 
 	unspportedOperator(operator: string) {
 		return Error(`'${this.type}' doesn't support ${operator} operator`)
@@ -34,14 +30,22 @@ export class Value {
 		return Error(`'${this.type}' didn't expected rhs of type '${rhs.type}' from operator ${operator}`)
 	}
 
+	// func '|v|'
 	abs() { throw this.unspportedOperator('abs') }
+	// unary '-'
 	negate() { throw this.unspportedOperator('-') }
+	// binary '+'
 	add() { throw this.unspportedOperator('+') }
+	// binary '-'
 	substract() { throw this.unspportedOperator('-') }
+	// binary '*'
 	multiply() { throw this.unspportedOperator('*') }
+	// binary '/'
 	divide() { throw this.unspportedOperator('/') }
-	pow() { throw this.unspportedOperator('^') }
+	// binary '%'
 	modulo() { throw this.unspportedOperator('%') }
+	// binary '^'
+	pow() { throw this.unspportedOperator('^') }
 }
 
 export type EvalValue =
@@ -50,16 +54,16 @@ export type EvalValue =
 	| EvalNumber
 	| EvalVector
 
-export class EvalNull extends Value implements ValueBase {
-	+type: 'Null' = 'Null';
+export class EvalNull extends Value {
+	+type: 'Null' = 'Null'
 
 	// eslint-disable-next-line class-methods-use-this
 	toString() { return 'null' }
 }
 
-export class EvalFunction extends Value implements ValueBase {
+export class EvalFunction extends Value {
 	+value: FunctionDeclaration;
-	+type: 'Function' = 'Function';
+	+type: 'Function' = 'Function'
 
 	constructor(value: FunctionDeclaration) {
 		super()
@@ -71,21 +75,21 @@ export class EvalFunction extends Value implements ValueBase {
 	}
 }
 
-export class EvalNumber extends Value implements ValueBase {
+export class EvalNumber extends Value {
 	+value: number;
-	+type: 'Number' = 'Number';
+	+type: 'Number' = 'Number'
 
 	constructor(value: number) {
 		super()
 		this.value = value
 	}
 
-	negate() {
-		return new EvalNumber(-this.value)
-	}
-
 	abs() {
 		return new EvalNumber(Math.abs(this.value))
+	}
+
+	negate() {
+		return new EvalNumber(-this.value)
 	}
 
 	add(rhs: EvalValue) {
@@ -116,10 +120,10 @@ export class EvalNumber extends Value implements ValueBase {
 	}
 }
 
-export class EvalVector extends Value implements ValueBase {
-	+x: EvalNumber;
+export class EvalVector extends Value {
 	+y: EvalNumber;
-	+type: 'Vector' = 'Vector';
+	+x: EvalNumber;
+	+type: 'Vector' = 'Vector'
 
 	constructor(x: EvalNumber, y: EvalNumber) {
 		super()
@@ -131,16 +135,16 @@ export class EvalVector extends Value implements ValueBase {
 		return Math.atan2(this.y.value, this.x.value)
 	}
 
-	negate() {
-		return new EvalVector(this.x.negate(), this.y.negate())
-	}
-
 	scale(scalar: EvalNumber) {
 		return new EvalVector(this.x.multiply(scalar), this.y.multiply(scalar))
 	}
 
 	length() {
 		return Math.sqrt(this.x.value ** 2 + this.y.value ** 2)
+	}
+
+	negate() {
+		return new EvalVector(this.x.negate(), this.y.negate())
 	}
 
 	abs() {

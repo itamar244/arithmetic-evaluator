@@ -111,7 +111,7 @@ export interface VariableDeclerator extends NodeBase {
 
 export interface ConstLiteral extends NodeBase {
 	type: 'ConstLiteral';
-	// should all names of const literals
+	// should be all legal names of const literals
 	name: 'null' | 'inf';
 }
 

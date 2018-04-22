@@ -5,7 +5,7 @@ export type Options = {
 	filename: string,
 }
 
-export const defaultOptions: Options = {
+export const defaultOptions = {
 	filename: 'anonymous',
 }
 
