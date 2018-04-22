@@ -6,6 +6,7 @@
  */
 
 import type { Statement } from './types'
+import type { Scope } from './evaluator/scope'
 import Parser from './parser'
 import {
 	defaultOptions,
@@ -15,7 +16,6 @@ import {
 import {
 	evaluate,
 	evaluateStatement,
-	type Scope,
 } from './evaluator'
 
 export {

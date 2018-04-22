@@ -1,13 +1,13 @@
 // @flow
 import type { Program, Statement } from '../types'
-import type { Scope } from './utils'
+import type { Scope } from './scope'
 import link from './linker'
 import {
 	EvalNull,
 	EvalFunction,
 	type EvalValue,
 } from './values'
-import { CONST_LITERALS } from './runtime-values';
+import { CONST_LITERALS } from './runtime-values'
 import evaluateNode from './evaluate-node'
 
 const variableDeclarationsToScope = (node, scopes) => (

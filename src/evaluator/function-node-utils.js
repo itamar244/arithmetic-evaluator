@@ -4,23 +4,8 @@ import type {
 	FunctionDeclaration,
 	ParameterDeclaration,
 } from '../types'
-import { CONST_LITERALS } from './runtime-values'
+import type { Scope } from './scope'
 import type { EvalValue } from './values'
-
-export type Scope = Map<string, EvalValue>
-
-export function getItemFromScopes(
-	scopes: Scope[],
-	name: string,
-): EvalValue {
-	for (const scope of scopes) {
-		const value = scope.get(name);
-		if (value != null) {
-			return value
-		}
-	}
-	return CONST_LITERALS.null
-}
 
 export function validateArgs(
 	name: string,
@@ -37,7 +22,17 @@ export function validateArgs(
 	}
 }
 
-function expectDeclMatchArg(
+function validateTypeArgs(name, funcParams, providedArgs) {
+	if (funcParams !== providedArgs) {
+		throw RangeError(
+			`wrong number of type arguments: '${name}'`
+			+ ` needed ${funcParams}`
+			+ `, intead of ${providedArgs}`,
+		)
+	}
+}
+
+function validateDeclMatchArg(
 	name: string,
 	declTypeName: string,
 	argType: string,
@@ -66,7 +61,7 @@ function validateArgTypeMatch(
 		const definedType = genericDefinitions.get(declTypeName)
 
 		if (definedType !== undefined) {
-			expectDeclMatchArg(
+			validateDeclMatchArg(
 				name,
 				definedType,
 				arg.type,
@@ -76,7 +71,7 @@ function validateArgTypeMatch(
 			genericDefinitions.set(declTypeName, arg.type)
 		}
 	} else {
-		expectDeclMatchArg(name, declTypeName, arg.type)
+		validateDeclMatchArg(name, declTypeName, arg.type)
 	}
 }
 
@@ -87,18 +82,23 @@ export function getFunctionScope(
 ): Scope {
 	const scope = new Map()
 	const genericDefinitions = new Map()
+	const { typeDefinitions } = func
 
 	validateArgs(func.id.name, func.params.length, args.length, false)
 
-	if (func.typeDefinitions !== null && typeArgs !== null) {
+	if (typeArgs !== null) {
+		if (typeDefinitions === null) {
+			throw Error(`generic call types were used but function doesn't accept any`)
+		}
+		validateTypeArgs(func.id.name, typeDefinitions.length, typeArgs.length)
 		for (let i = 0; i < typeArgs.length; i += 1) {
-			genericDefinitions.set(func.typeDefinitions[i].name, typeArgs[i].name)
+			genericDefinitions.set(typeDefinitions[i].name, typeArgs[i].name)
 		}
 	}
 
 	for (let i = 0; i < args.length; i += 1) {
 		validateArgTypeMatch(
-			func.typeDefinitions,
+			typeDefinitions,
 			genericDefinitions,
 			args[i],
 			func.params[i],

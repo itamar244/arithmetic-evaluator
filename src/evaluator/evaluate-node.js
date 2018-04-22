@@ -5,11 +5,13 @@ import {
 	RUNTIME_FUNCTIONS,
 } from './runtime-values'
 import {
-	getFunctionScope,
 	getItemFromScopes,
-	validateArgs,
 	type Scope,
-} from './utils'
+} from './scope'
+import {
+	getFunctionScope,
+	validateArgs,
+} from './function-node-utils'
 import {
 	binaryOperator,
 	unaryOperator,
@@ -44,7 +46,7 @@ function evaluateCallExpression(node, scopes) {
 	}
 
 	const runtimeFunc = RUNTIME_FUNCTIONS[name]
-	if (typeof runtimeFunc === 'function') {
+	if (runtimeFunc !== undefined) {
 		validateArgs(name, runtimeFunc.length, args.length, true)
 		return runtimeFunc(...args)
 	} else if (typeof Math[name] === 'function') {
@@ -62,12 +64,14 @@ function evaluateCallExpression(node, scopes) {
 function evaluateIdentifier(node, scopes) {
 	const item = getItemFromScopes(scopes, node.name)
 
-	if (item === CONST_LITERALS.null && typeof Math[node.name] !== 'number') {
-		throw new ReferenceError(`${node.name} is undefined`)
+	if (item === CONST_LITERALS.null) {
+		if (typeof Math[node.name] !== 'number') {
+			throw new ReferenceError(`${node.name} is undefined`)
+		}
+		return new EvalNumber(Math[node.name])
 	}
-
-	return item === CONST_LITERALS.null
-		? new EvalNumber(Math[node.name]) : item
+	
+	return item
 }
 
 export default function evaluateNode(node: Node, scopes: Scope[]): EvalValue {
