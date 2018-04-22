@@ -190,6 +190,7 @@ export default class ExpressionParser extends NodeUtils {
 	}
 
 	parseVector(node: N.VectorExpression): N.VectorExpression {
+		this.next();
 		const coordinates = this.parseArgsList(tt.bracketR)
 
 		if (coordinates.length !== 2) {
