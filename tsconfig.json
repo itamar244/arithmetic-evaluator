@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "module": "es2015",
+				"target": "es6",
+        /* "noImplicitAny": true, */
+				"strictNullChecks": true,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "outDir": "dist",
+        "baseUrl": ".",
+        "paths": {
+            "*": [
+                "node_modules/*",
+            ]
+        }
+    },
+    "include": [
+        "src/**/*.ts",
+        "cli/**/*.ts",
+        "test/**/*.ts",
+    ]
+}

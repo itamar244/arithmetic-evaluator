@@ -4,41 +4,37 @@
   "description": "receices string and evaluates it for numerical value",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node cli/index.mjs",
-    "test": "ava --verbose",
+    "start": "yarn build && node -r esm dist/cli/index",
+    "test": "yarn build && ava --verbose",
     "coverage": "nyc ava",
     "report": "nyc report --reporter=html",
-    "build": "babel src --out-dir=\"dist/src\" && babel cli --out-dir \"dist/cli\""
+    "build": "tsc"
   },
   "author": "Itamar Yatom",
   "license": "MIT",
   "devDependencies": {
-    "ava": "^0.25.0",
-    "babel-cli": "^6.24.1",
-    "babel-core": "^6.25.0",
-    "babel-eslint": "^7.2.3",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
-    "babel-plugin-transform-flow-strip-types": "^6.22.0",
-    "babel-plugin-transform-object-rest-spread": "^6.23.0",
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb-base": "^11.2.0",
-    "eslint-plugin-flowtype": "^2.33.0",
-    "eslint-plugin-import": "^2.2.0",
-    "flow-bin": "^0.69.0",
-    "nyc": "^11.2.1"
+    "@types/node": "^9.6.6",
+    "@types/yargs": "^11.0.0",
+    "ava": "^1.0.0-beta.4",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.11.0",
+    "nyc": "^11.2.1",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.3",
+    "typescript-eslint-parser": "^15.0.0"
+  },
+  "dependencies": {
+    "esm": "^3.0.26",
+    "yargs": "^11.0.0"
   },
   "ava": {
     "files": [
-      "test/**/*.test.js",
-      "src/**/*.test.js"
+      "dist/test/**/*.test.js",
+      "dist/src/**/*.test.js"
     ],
     "require": [
-      "babel-register"
-    ],
-    "babel": "inherit"
-  },
-  "dependencies": {
-    "yargs": "^9.0.1"
+      "esm"
+    ]
   }
 }
