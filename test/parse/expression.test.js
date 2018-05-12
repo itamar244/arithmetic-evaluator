@@ -73,6 +73,7 @@ test('should parse expressions and statements fine', (t) => {
 
 test('should parse comments fine', (t) => {
 	const input = `
+		# asdfasdf
 		func root(x) x ^ 2;
 		# asdfasdf
 		# asdfasdf

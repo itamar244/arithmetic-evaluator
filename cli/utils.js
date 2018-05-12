@@ -8,9 +8,8 @@ export function createInterface() {
 	})
 
 	return {
-		question: (query: string): Promise<string> => (
-			new Promise(res => rl.question(query, res))
-		),
+		question: (query: string): Promise<string> =>
+			new Promise(res => rl.question(query, res)),
 		close: () => rl.close(),
 	}
 }
@@ -20,7 +19,11 @@ export function log(str: mixed, error: bool = false) {
 	(error ? console.error : console.log)(str)
 }
 
-export function benchmark<T: *[]>(func: (...T) => mixed, args: T, time: number = 1000) {
+export function benchmark<T: any[]>(
+	func: (...T) => mixed,
+	args: T,
+	time: number = 1000,
+) {
 	const bindFunc = func.bind(null, ...args)
 	let times = 0
 	let timeSum = 0

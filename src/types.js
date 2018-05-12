@@ -117,7 +117,7 @@ export interface ConstLiteral extends NodeBase {
 
 export interface FunctionDeclaration extends NodeBase {
 	type: 'FunctionDeclaration';
-	typeDefinitions: null | Identifier[];
+	typeDefinitions: Identifier[] | null;
 	params: ParameterDeclaration[];
 	id: Identifier;
 	body: Node;
@@ -126,7 +126,7 @@ export interface FunctionDeclaration extends NodeBase {
 export interface ParameterDeclaration extends NodeBase {
 	type: 'ParameterDeclaration';
 	id: Identifier;
-	declType: null | Identifier;
+	declType: Identifier | null;
 }
 
 export interface Equation extends BinNode {
@@ -152,7 +152,7 @@ export interface Parenthesized extends NodeBase {
 export interface CallExpression extends NodeBase {
 	type: 'CallExpression';
 	callee: Identifier;
-	typeArgs: null | Identifier[];
+	typeArgs: Identifier[] | null;
 	args: Node[];
 }
 

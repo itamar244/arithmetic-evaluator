@@ -41,41 +41,39 @@ function benchmarkInput<ParseFunc: Function, EvaluateFunc: Function>(
 export async function runRepl(options: Object) {
 	const rl = createInterface()
 	const repl = createRepl()
-	let emptyLine = false
 
-	while (!emptyLine) {
+	for (;;) {
 		// eslint-disable-next-line no-await-in-loop
 		const line = await rl.question('> ')
 
-		if (line.length > 0) {
-			try {
-				const result = repl.run(line)
+		if (line.length === 0) break
 
-				log(result.toString())
-				if (options.benchmark) {
-					benchmarkInput(
-						line,
-						parseStatement,
-						repl.evaluate,
-						result.type !== 'Null',
-					)
-				}
-			} catch (e) {
-				log(e, true)
+		try {
+			const result = repl.run(line)
+
+			log(result.toString())
+
+			if (options.benchmark) {
+				benchmarkInput(
+					line,
+					parseStatement,
+					repl.evaluate,
+					result.type !== 'Null',
+				)
 			}
-		} else {
-			emptyLine = true
+		} catch (e) {
+			log(e, true)
 		}
 	}
 
 	rl.close()
 }
 
-export function runWithFileGiven(file: string, options: Object) {
-	const input = String(readFileSync(file))
+export function runWithFileGiven(filename: string, options: Object) {
+	const input = String(readFileSync(filename))
 
 	try {
-		const program = parse(input, { filename: file })
+		const program = parse(input, { filename })
 
 		if (options.benchmark) {
 			benchmarkInput(input, parse, evaluate)
@@ -85,7 +83,7 @@ export function runWithFileGiven(file: string, options: Object) {
 			log(JSON.stringify(program, null, 4))
 		}
 
-		log(evaluate(program))
+		log(evaluate(program).toString())
 	} catch (e) {
 		log(e, true)
 	}

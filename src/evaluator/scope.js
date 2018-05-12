@@ -10,6 +10,7 @@ export function getItemFromScopes(
 ): EvalValue {
 	for (const scope of scopes) {
 		const value = scope.get(name)
+		
 		if (value !== undefined) {
 			return value
 		}

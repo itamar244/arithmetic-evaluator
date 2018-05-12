@@ -108,13 +108,13 @@ export default class ExpressionParser extends NodeUtils {
 		minPrec: number,
 		toMoveNext: bool = true,
 		type: TokenType = this.state.type,
-		operator?: N.BinaryOperator,
+		operator: N.BinaryOperator = this.state.value,
 	): N.BinaryExpression {
 		const prec = type.binop
 		if (prec !== null && prec > minPrec) {
 			const node: N.BinaryExpression = this.startNodeAtNode(left)
 			node.left = left
-			node.operator = operator || this.state.value
+			node.operator = operator
 
 			if (toMoveNext) this.next()
 			const right = this.parseMaybeUnary()

@@ -58,7 +58,7 @@ export const CallExpression = (
 ) => createNode(
 	'CallExpression',
 	loc,
-	{ args, callee: Identifier(calleLoc, name) },
+	{ args, callee: Identifier(calleLoc, name), typeArgs: null },
 )
 
 export const VariableDeclerations = (

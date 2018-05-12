@@ -70,7 +70,7 @@ function evaluateIdentifier(node, scopes) {
 		}
 		return new EvalNumber(Math[node.name])
 	}
-	
+
 	return item
 }
 
