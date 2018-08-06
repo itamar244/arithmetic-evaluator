@@ -51,23 +51,23 @@ export type NodeType =
 	| 'CallExpression'
 	| 'VectorExpression'
 
-export interface Program extends NodeBase {
+export type Program = NodeBase & {
 	type: 'Program';
 	body: Statement[];
 	filename: string;
 }
 
-export interface Expression extends NodeBase {
+export type Expression = NodeBase & {
 	type: 'Expression';
 	body: Node;
 }
 
-export interface Import extends NodeBase {
+export type Import = NodeBase & {
 	type: 'Import';
 	path: string;
 }
 
-export interface UnaryExpression extends NodeBase {
+export type UnaryExpression = NodeBase & {
 	type: 'UnaryExpression';
 	operator: UnaryOperator;
 	argument: Node;
@@ -79,12 +79,12 @@ export type UnaryOperator =
 	| '-'
 	| '!'
 
-interface BinNode extends NodeBase {
+interface type = NodeBas & {
 	left: Node;
 	right: Node;
 }
 
-export interface BinaryExpression extends BinNode {
+export type BinaryExpression = BinNode & {
 	type: 'BinaryExpression';
 	operator: BinaryOperator;
 }
@@ -97,25 +97,25 @@ export type BinaryOperator =
 	| '^'
 	| '%'
 
-export interface VariableDeclerations extends NodeBase {
+export type VariableDeclerations = NodeBase & {
 	type: 'VariableDeclerations';
 	declarations: VariableDeclerator[];
 	expression: Expression;
 }
 
-export interface VariableDeclerator extends NodeBase {
+export type VariableDeclerator = NodeBase & {
 	type: 'VariableDeclerator';
 	id: Identifier;
 	init: Node;
 }
 
-export interface ConstLiteral extends NodeBase {
+export type ConstLiteral = NodeBase & {
 	type: 'ConstLiteral';
 	// should be all legal names of const literals
 	name: 'null' | 'inf';
 }
 
-export interface FunctionDeclaration extends NodeBase {
+export type FunctionDeclaration = NodeBase & {
 	type: 'FunctionDeclaration';
 	typeDefinitions: Identifier[] | null;
 	params: ParameterDeclaration[];
@@ -123,40 +123,40 @@ export interface FunctionDeclaration extends NodeBase {
 	body: Node;
 }
 
-export interface ParameterDeclaration extends NodeBase {
+export type ParameterDeclaration = NodeBase & {
 	type: 'ParameterDeclaration';
 	id: Identifier;
 	declType: Identifier | null;
 }
 
-export interface Equation extends BinNode {
+export type Equation = BinNode & {
 	type: 'Equation';
 }
 
-export interface NumericLiteral extends NodeBase {
+export type NumericLiteral = NodeBase & {
 	type: 'NumericLiteral';
 	value: number;
 }
 
-export interface Identifier extends NodeBase {
+export type Identifier = NodeBase & {
 	type: 'Identifier';
 	name: string;
 }
 
-export interface Parenthesized extends NodeBase {
+export type Parenthesized = NodeBase & {
 	type: 'Parenthesized';
 	body: Node;
 	abs: bool;
 }
 
-export interface CallExpression extends NodeBase {
+export type CallExpression = NodeBase & {
 	type: 'CallExpression';
 	callee: Identifier;
 	typeArgs: Identifier[] | null;
 	args: Node[];
 }
 
-export interface VectorExpression extends NodeBase {
+export type VectorExpression = NodeBase & {
 	type: 'VectorExpression';
 	x: Node;
 	y: Node;
