@@ -1,67 +1,39 @@
 // @flow
+import { SourceLocation, type Position } from '../utils/location'
 import type {
-	Tree,
-	TreeItemType,
-} from './types'
-import { PARAM } from './types'
-import { orderPosition } from '../operators'
+	AnyNode,
+	NodeType,
+	Node as NodeObject,
+	NodeBase,
+} from '../types'
+import UtilParser from './util'
 
-export class Node {
-	+type: TreeItemType
-	+value: string
+export class Node implements NodeBase {
+	start: number;
+	end: number;
+	loc: SourceLocation;
 
-	constructor(type: TreeItemType, value: mixed) {
-		// $FlowIgnore
-		Object.assign(this, {
-			type,
-			value: String(value),
-		})
-	}
-
-	is(type: TreeItemType): bool {
-		return this.type === type
+	constructor(start: Position, pos: number) {
+		this.start = pos
+		this.end = 0
+		this.loc = new SourceLocation(start)
 	}
 }
 
-const searchParam = arr => arr.some(item => (
-	item instanceof Array
-	? searchParam(item)
-	: item instanceof ArgumentNode
-	? item.hasParams
-	: item.is(PARAM)
-))
-
-
-export class ArgumentNode extends Node {
-	+args: Tree[]
-	hasParamsVal: bool|null = null
-
-	constructor(type: TreeItemType, value: string, args: Tree[]) {
-		super(type, value)
-
-		// $FlowIgnore
-		Object.assign(this, {
-			args,
-		})
+export default class NodeUtils extends UtilParser {
+	startNode(): AnyNode {
+		return (new Node(this.state.startLoc, this.state.start): any)
 	}
 
-	hasParams(): bool {
-		if (this.hasParamsVal === null) {
-			this.hasParamsVal = this.args.some(searchParam)
-		}
-
-		return this.hasParamsVal
+	// eslint-disable-next-line class-methods-use-this
+	startNodeAtNode(node: Node | AnyNode): AnyNode {
+		return (new Node(node.loc.start, node.start): any)
 	}
-}
 
-export class OperatorNode extends Node {
-	orderPosition: number|null = null
-
-	getOrder(): number {
-		if (this.orderPosition === null) {
-			this.orderPosition = orderPosition(this.value)
-		}
-
-		return this.orderPosition
+	finishNode<T: NodeObject>(node: T, type: NodeType): T {
+		node.type = (type: any)
+		node.end = this.state.prevEnd
+		node.loc.end = this.state.prevEndLoc
+		return node
 	}
 }

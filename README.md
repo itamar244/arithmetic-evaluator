@@ -42,3 +42,21 @@ get `master` branch for better supports or get `ast-parser` for faster and revis
 - parameters can be used too. just use lower-cased chars and for each char the program will ask for its value.
 
 - also supports equations. just put one parameter in the equation and add `=` sign.
+
+### Language Features
+
+#### Import Statements
+
+this statement will add file'S progmam to the top of the file
+`import '<FILE_NAME>'`
+`FILE_NAME` - relative path to the current filename
+
+
+#### Function Statements
+
+this statements creates a function reusable code
+`func <NAME>(...PARAMS) <STATEMENT>`
+
+`NAME` - the name of the function
+`PARAMS` - list of parameters seperated by commas
+`STATEMENT` - the statement to evaluate and return from the function

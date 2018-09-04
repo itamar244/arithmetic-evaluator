@@ -1,108 +1,205 @@
 // @flow
-import type { Tree } from './types'
-import * as tt from './types'
-import { Node, OperatorNode } from './node'
-import { get } from '../utils'
+import * as N from '../types'
+import { types as tt, type TokenType } from '../tokenizer/types'
+import NodeUtils from './node'
 
-type ExprssionItem = Node|Expression
+export default class ExpressionParser extends NodeUtils {
+	// forward declarations:
+	// parser/statement.js
+	+parseFunction: (
+		node: N.FunctionDeclaration,
+		topLevel: bool,
+	) => N.FunctionDeclaration;
 
-type Options = {|
-	parent?: Expression,
-	params?: Set<string>,
-	children?: ExprssionItem[],
-|}
-
-export default class Expression {
-	// #private
-	operators: OperatorNode[] = []
-	lastWrap: Expression|null = null
-
-	// #public
-	items: ExprssionItem[] = []
-	hasError: bool = false
-	params: Set<string>
-	parent: Expression|null
-
-	constructor({
-		parent,
-		params = parent ? parent.params : new Set(),
-		children,
-	}: Options = {}) {
-		this.params = params
-		this.parent = parent || null
-
-		if (children) {
-			this.add(...children)
+	parseExpressionBody(topLevel: bool): N.Node {
+		const node = this.parseMaybeUnary(topLevel)
+		if (this.needMultiplierShortcut(node)) {
+			return this.parseBinary(node, -1, false, tt.star, '*')
 		}
+		if (this.state.type.binop !== null) {
+			return this.parseToken(topLevel, node)
+		}
+		return node
 	}
 
-	// #private
-	/* checks if operators need to be wrapped by brackets because order of operators
-	 * and wraps them out if needed */
-	wrapItemsIfNeeded() {
-		/* if there less than two operators this check is useless
-		 * or if last item is the last operator,
-		 * than needs the next item to see what will be need to move into a smaller scope */
-		if (this.operators.length < 2 || this.get(-1) instanceof OperatorNode) return
+	parseToken(topLevel: bool, body: ?N.Node): N.Node {
+		const node = this.startNode()
 
-		// if needs to be wrapped with brackets
-		if (this.getOperator(-1).getOrder() > this.getOperator(-2).getOrder()) {
-			/* if the last item which is not operator is the last wrap,
-			 * the new items will go to the last wrap.
-			 * this happend in the following scenarios: (num + num * num ^ num). */
-			if (this.lastWrap !== null && this.lastWrap === this.get(-3)) {
-				this.lastWrap.add(...this.remove(2))
-			} else {
-				const remove = this.remove(3)
-
-				this.lastWrap = new Expression({
-					parent: this,
-					children: remove,
-				})
-
-				this.items.push(this.lastWrap)
-			}
-		}
-	}
-
-	add(...vals: ExprssionItem[]) {
-		for (const val of vals) {
-			if (val instanceof Node) {
-				if (val instanceof OperatorNode) {
-					this.operators.push(val)
-				} else if (val.is(tt.PARAM)) {
-					this.params.add(val.value)
-				} else if (!this.hasError && val.is(tt.ERROR)) {
-					this.hasError = true
-					if (this.parent) this.parent.hasError = true
+		switch (this.state.type) {
+			case tt.plus:
+			case tt.minus:
+				if (body == null) return this.parseUnary(node)
+				// eslint-disable-next-line no-fallthrough
+			case tt.eq:
+			case tt.star:
+			case tt.slash:
+			case tt.modulo:
+			case tt.exponent:
+				if (this.match(tt.eq) && !topLevel) this.unexpected()
+				if (body == null) {
+					throw this.unexpected("can't be an unary operator")
 				}
-			}
 
-			this.items.push(val)
-
-			this.wrapItemsIfNeeded()
+				return this.parseBinary(body, -1)
+			case tt.num:
+				return this.parseNumeric(node)
+			case tt.parenL:
+				return this.parseParenthesized(node, tt.parenR)
+			case tt.bracketL:
+				return this.parseVector(node)
+			case tt.crotchet:
+				return this.parseParenthesized(node, tt.crotchet)
+			case tt.name:
+				return this.parseMaybeCallExpression(node)
+			case tt.null:
+			case tt.inf:
+				return this.parseConstLiteral(node)
+			case tt.func:
+				return this.parseFunction(node, false)
+			default:
+				throw this.unexpected()
 		}
 	}
 
-	remove(i: number = 1): ExprssionItem[] {
-		const ret = this.items.splice(-i)
-		// $FlowFixMe - flow can't tell that the filter method will return only OperatorNode[]
-		this.operators = (this.items.filter(item => item instanceof OperatorNode): OperatorNode[])
+	parseParenthesized(
+		node: N.Parenthesized,
+		end: TokenType,
+	): N.Parenthesized {
+		this.next()
+		node.body = this.parseExpressionBody(false)
+		node.abs = end === tt.crotchet
 
-		return ret
+		this.expect(end)
+
+		return this.finishNode(node, 'Parenthesized')
 	}
 
-	toArray(): Tree {
-		return this.items.map(item => (
-			item instanceof Expression ? item.toArray() : item
-		))
+	parseNumeric(node: N.NumericLiteral): N.NumericLiteral {
+		node.value = Number(this.state.value)
+		this.next()
+		return this.finishNode(node, 'NumericLiteral')
 	}
 
-	get(i: number): ExprssionItem {
-		return get(this.items, i)
+	parseMaybeUnary(topLevel: ?bool, body: ?N.Node) {
+		const maybeArgument = this.parseToken(!!topLevel, body)
+
+		if (this.state.type.postfix) {
+			const node: N.UnaryExpression = this.startNode()
+			node.argument = maybeArgument
+			return this.parseUnary(node)
+		}
+		return maybeArgument
 	}
 
-	getOperator(i: number): OperatorNode {
-		return get(this.operators, i)
+	parseUnary(node: N.UnaryExpression): N.UnaryExpression {
+		node.operator = this.state.value
+		node.prefix = this.state.type.prefix
+
+		this.next()
+		if (node.prefix) {
+			node.argument = this.parseToken(false)
+		}
+
+		return this.finishNode(node, 'UnaryExpression')
+	}
+
+	parseBinary(
+		left: N.AnyNode,
+		minPrec: number,
+		toMoveNext: bool = true,
+		type: TokenType = this.state.type,
+		operator: N.BinaryOperator = this.state.value,
+	): N.BinaryExpression {
+		const prec = type.binop
+		if (prec !== null && prec > minPrec) {
+			const node: N.BinaryExpression = this.startNodeAtNode(left)
+			node.left = left
+			node.operator = operator
+
+			if (toMoveNext) this.next()
+			const right = this.parseMaybeUnary()
+			node.right =
+				this.needMultiplierShortcut(right)
+				? this.parseBinary(right, minPrec, false, tt.star, '*')
+				: this.parseBinary(right, prec)
+
+			return this.parseBinary(
+				this.finishNode(node, type === tt.eq ? 'Equation' : 'BinaryExpression'),
+				minPrec,
+			)
+		}
+		return left
+	}
+
+	parseConstLiteral(node: N.ConstLiteral): N.ConstLiteral {
+		// the label is of type string but const literals match their label
+		node.name = (this.state.type.label: any)
+		this.next()
+		return this.finishNode(node, 'ConstLiteral')
+	}
+
+	parseCallExpression(callee: N.Identifier): N.CallExpression {
+		const node: N.CallExpression = this.startNodeAtNode(callee)
+		node.callee = callee
+
+		if (this.eat(tt.relationalL)) {
+			node.typeArgs = this.parseArgsList(
+				tt.relationalR,
+				() => this.parseIdentifier(this.startNode()),
+			)
+		} else {
+			node.typeArgs = null
+		}
+		this.expect(tt.parenL)
+		node.args = this.parseArgsList(tt.parenR)
+
+		return this.finishNode(node, 'CallExpression')
+	}
+
+	parseArgsList<T: N.Node>(
+		end: TokenType,
+		_getNode?: () => T,
+	): T[] {
+		const args = []
+		const getNode = _getNode || (() => (this.parseExpressionBody(false): any))
+
+		while (!this.eat(end)) {
+			args.push(getNode())
+			if (!this.eat(tt.comma) && !this.match(end)) {
+				this.unexpected()
+			}
+		}
+
+		return args
+	}
+
+	parseMaybeCallExpression(node: N.Identifier): N.Identifier | N.CallExpression {
+		this.parseIdentifier(node)
+
+		if (this.match(tt.parenL) || this.match(tt.relationalL)) {
+			return this.parseCallExpression(node)
+		}
+
+		return node
+	}
+
+	parseIdentifier(node: N.Identifier): N.Identifier {
+		node.name = this.state.value
+		this.next()
+		return this.finishNode(node, 'Identifier')
+	}
+
+	parseVector(node: N.VectorExpression): N.VectorExpression {
+		this.next();
+		const coordinates = this.parseArgsList(tt.bracketR)
+
+		if (coordinates.length !== 2) {
+			this.unexpected('vector should have two dimensions', false)
+		}
+
+		node.x = coordinates[0]
+		node.y = coordinates[1]
+
+		return this.finishNode(node, 'VectorExpression')
 	}
 }

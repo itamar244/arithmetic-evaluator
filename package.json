@@ -4,15 +4,19 @@
   "description": "receices string and evaluates it for numerical value",
   "main": "index.js",
   "scripts": {
-		"start": "babel-node cli/index",
-    "test": "jest --env=node",
+    "start": "babel-node cli/index.mjs",
+    "test": "ava --verbose",
+    "coverage": "nyc ava",
+    "report": "nyc report --reporter=html",
     "build": "babel src --out-dir=\"dist/src\" && babel cli --out-dir \"dist/cli\""
   },
   "author": "Itamar Yatom",
   "license": "MIT",
   "devDependencies": {
+    "ava": "^0.25.0",
+    "babel-cli": "^6.24.1",
+    "babel-core": "^6.25.0",
     "babel-eslint": "^7.2.3",
-    "babel-jest": "^20.0.3",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
@@ -21,7 +25,20 @@
     "eslint-config-airbnb-base": "^11.2.0",
     "eslint-plugin-flowtype": "^2.33.0",
     "eslint-plugin-import": "^2.2.0",
-    "flow-bin": "^0.46.0",
-    "jest-cli": "^20.0.3"
+    "flow-bin": "^0.77.0",
+    "nyc": "^11.2.1"
+  },
+  "ava": {
+    "files": [
+      "test/**/*.test.js",
+      "src/**/*.test.js"
+    ],
+    "require": [
+      "babel-register"
+    ],
+    "babel": "inherit"
+  },
+  "dependencies": {
+    "yargs": "^9.0.1"
   }
 }
