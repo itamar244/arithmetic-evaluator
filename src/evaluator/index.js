@@ -1,7 +1,6 @@
 // @flow
 import type { Program, Statement } from '../types'
 import type { Scope } from './scope'
-import link from './linker'
 import {
 	EvalNull,
 	EvalFunction,
@@ -45,7 +44,7 @@ export function evaluate(program: Program): EvalValue {
 	const topScope: Scope = new Map()
 	let value = CONST_LITERALS.null
 
-	for (const statement of link(program)) {
+	for (const statement of program) {
 		value = evaluateStatement(statement, topScope)
 	}
 
