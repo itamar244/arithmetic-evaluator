@@ -4,11 +4,11 @@
   "description": "receices string and evaluates it for numerical value",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node cli/index.mjs",
+    "start": "BABEL_ENV=development babel-node cli/index.js",
     "test": "ava --verbose",
     "coverage": "nyc ava",
     "report": "nyc report --reporter=html",
-    "build": "babel src --out-dir=\"dist/src\" && babel cli --out-dir \"dist/cli\""
+    "build": "BABEL_ENV=production_es babel src --out-dir=dist --ignore \\.test\\.js"
   },
   "author": "Itamar Yatom",
   "license": "MIT",

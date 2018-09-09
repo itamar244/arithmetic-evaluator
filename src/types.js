@@ -79,7 +79,7 @@ export type UnaryOperator =
 	| '-'
 	| '!'
 
-interface type = NodeBas & {
+type BinNode = NodeBase & {
 	left: Node;
 	right: Node;
 }
