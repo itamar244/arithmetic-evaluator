@@ -44,12 +44,12 @@ export function rulesOfExpression() {
 
 		     - parameters can be used too.
 	         just use lower-cased chars and for each char the program will ask for its value.
-					 
+
 		     - also supports equations. just put one parameter in the equation and add \`=\` sign.
 	`)
 }
 
-export function result(res: *) {
+export function result(res: mixed) {
 	log(String(res))
 }
 
