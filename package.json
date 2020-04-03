@@ -4,7 +4,7 @@
   "description": "receices string and evaluates it for numerical value",
   "main": "index.js",
   "scripts": {
-    "start": "BABEL_ENV=development babel-node cli/index.js",
+    "start": "babel-node cli/index.js",
     "test": "ava --verbose",
     "coverage": "nyc ava",
     "report": "nyc report --reporter=html",
@@ -17,6 +17,7 @@
     "babel-cli": "^6.24.1",
     "babel-core": "^6.25.0",
     "babel-eslint": "^7.2.3",
+    "babel-node": "0.0.1-security",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.24.1",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
